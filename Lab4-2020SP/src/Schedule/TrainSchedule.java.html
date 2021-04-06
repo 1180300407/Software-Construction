@@ -1,0 +1,400 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../jacoco-resources/report.gif" type="image/gif"/><title>TrainSchedule.java</title><link rel="stylesheet" href="../../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">Lab4-2020SP (2020-5-23 15:07:06)</a> &gt; <a href="../../index.html" class="el_group">Lab4-2020SP</a> &gt; <a href="../index.html" class="el_bundle">src</a> &gt; <a href="index.source.html" class="el_package">Schedule</a> &gt; <span class="el_source">TrainSchedule.java</span></div><h1>TrainSchedule.java</h1><pre class="source lang-java linenums"> package Schedule;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import API.PlanningEntryAPIs;
+import API.PlanningEntryAPIsFirstImpl;
+import Exceptions.LocationNotFoundException;
+import Exceptions.PlanEntryNotCreateException;
+import Exceptions.PlanEntryOccupyLocationException;
+import Exceptions.PlanEntryOccupyResourceException;
+import Exceptions.ResourceConflictException;
+import Exceptions.ResourceNotFoundException;
+import Exceptions.SameLabelException;
+import Location.Location;
+import Resources.Carriage;
+import Timeslot.Timeslot;
+import compositeinterface.TrainEntry;
+import compositeinterface.TrainPlanningEntry;
+
+/**
+ * 高铁车次管理，可对多个高铁站次，高铁车次，以及多个车厢进行管理，可变类
+ * @author 123
+ *
+ */
+
+<span class="pc bpc" id="L30" title="1 of 2 branches missed.">public class TrainSchedule {</span>
+<span class="fc" id="L31">	public List&lt;TrainEntry&lt;Carriage&gt;&gt; trains=new ArrayList&lt;&gt;();//高铁车次</span>
+<span class="fc" id="L32">	public List&lt;Carriage&gt; carriages=new ArrayList&lt;Carriage&gt;();//车厢</span>
+<span class="fc" id="L33">	public List&lt;Location&gt; locations=new ArrayList&lt;Location&gt;();//高铁站次</span>
+<span class="fc" id="L34">	public List&lt;String&gt; locationnames=new ArrayList&lt;String&gt;();//高铁站次的名称，每个名称的顺序与locations相同</span>
+	//Abstraction function:
+	//	AF(trains,carriages,locations,locationnames)=一个对高铁车次trains，所有车厢carriages，名称为locationnames的高铁站次locations进行管理的系统
+	//Representation invariant:
+	//	locationnames中高铁站次的名称，每个名称的顺序与locations相同
+	//	管理的课程、教师、教室中都不应含有重复元素
+	//Safety from rep exposure:
+	//	成员变量全是private的，对外返回时全部转为不可变类型，不存在表示泄露
+	private void checkRep() {
+<span class="pc bpc" id="L43" title="2 of 4 branches missed.">		assert locationnames.size()==locations.size();</span>
+<span class="fc bfc" id="L44" title="All 2 branches covered.">		for(int i=0;i&lt;locationnames.size();i++) {</span>
+<span class="pc bpc" id="L45" title="2 of 4 branches missed.">			assert locationnames.get(i).equals(locations.get(i).getName());</span>
+		}
+<span class="fc" id="L47">		Set&lt;String&gt; strings=new HashSet&lt;String&gt;(locationnames); </span>
+<span class="fc" id="L48">		Set&lt;Carriage&gt; carriageSet=new HashSet&lt;Carriage&gt;(carriages);</span>
+<span class="fc" id="L49">		Set&lt;TrainEntry&lt;Carriage&gt;&gt; trainEntrieSet=new HashSet&lt;&gt;(trains);</span>
+<span class="pc bpc" id="L50" title="2 of 4 branches missed.">		assert strings.size()==locationnames.size();</span>
+<span class="pc bpc" id="L51" title="2 of 4 branches missed.">		assert carriageSet.size()==carriages.size();</span>
+<span class="pc bpc" id="L52" title="2 of 4 branches missed.">		assert trainEntrieSet.size()==trains.size();</span>
+<span class="fc" id="L53">	}</span>
+	
+	/**
+	 * 增加一个可供管理的车厢，若车厢已存在不会重复添加
+	 * @param carriage 待增加的车厢
+	 */
+	public void addCarriage(Carriage carriage) {
+<span class="fc bfc" id="L60" title="All 2 branches covered.">		if(!carriages.contains(carriage)) {</span>
+<span class="fc" id="L61">			carriages.add(carriage);</span>
+<span class="fc" id="L62">			checkRep();</span>
+		}
+<span class="fc" id="L64">	}</span>
+	
+	/**
+	 * 删除具有指定ID的车厢，若车厢不存在并不会进行删除操作 ,若车厢已被分配则无法删除
+	 * @param ID 待删除车厢的编号
+	 * @throws ResourceNotFoundException 车厢尚未创建
+	 * @throws PlanEntryOccupyResourceException 车厢已被分配
+	 */
+	public void deleteCarriage(String ID) throws ResourceNotFoundException, PlanEntryOccupyResourceException {
+<span class="fc" id="L73">		int index=-1;</span>
+<span class="fc bfc" id="L74" title="All 2 branches covered.">		for(Carriage carriage:carriages) {</span>
+<span class="fc bfc" id="L75" title="All 2 branches covered.">			if(carriage.getId()==ID) {</span>
+<span class="fc" id="L76">				index=carriages.indexOf(carriage);</span>
+<span class="fc" id="L77">				break;</span>
+			}
+		}
+<span class="fc bfc" id="L80" title="All 2 branches covered.">		if(index==-1) {</span>
+<span class="fc" id="L81">			throw new ResourceNotFoundException(ID);</span>
+		}
+<span class="fc" id="L83">		boolean flag=false;</span>
+<span class="fc" id="L84">		TrainEntry&lt;Carriage&gt; trainEntry=null;</span>
+<span class="fc bfc" id="L85" title="All 2 branches covered.">		for(TrainEntry&lt;Carriage&gt; te:trains) {</span>
+<span class="pc bpc" id="L86" title="4 of 8 branches missed.">			if(te.getResource().contains(carriages.get(index))&amp;&amp;!te.getStateName().equals(&quot;Cancelled&quot;)&amp;&amp;!te.getStateName().equals(&quot;Ended&quot;)&amp;&amp;!te.getStateName().equals(&quot;Waiting&quot;)) {</span>
+<span class="fc" id="L87">				flag=true;</span>
+<span class="fc" id="L88">				trainEntry=te;</span>
+<span class="fc" id="L89">				break;</span>
+			}
+		}
+		
+<span class="fc bfc" id="L93" title="All 2 branches covered.">		if(!flag) {</span>
+<span class="fc" id="L94">			carriages.remove(index);</span>
+<span class="fc" id="L95">			return;</span>
+		}
+		
+<span class="fc" id="L98">		throw new PlanEntryOccupyResourceException(trainEntry.getName());</span>
+	}
+	
+	/**
+	 * 增加一个可供管理的位置，若位置已存在不会重复添加
+	 * @param location 待添加的位置
+	 */
+	public void addLocation(Location location) {
+<span class="fc bfc" id="L106" title="All 2 branches covered.">		if(!locations.contains(location)) {</span>
+<span class="fc" id="L107">			locations.add(location);</span>
+<span class="fc" id="L108">			locationnames.add(location.getName());</span>
+<span class="fc" id="L109">			checkRep();</span>
+		}	
+<span class="fc" id="L111">	}</span>
+	
+	/**
+	 * 删除具有指定名称的位置，若位置不存在并不会进行删除操作 ,若该位置已被某列车占用则无法分配
+	 * @param locationname 待删除位置的名称
+	 * @throws LocationNotFoundException 待删除位置尚未创建
+	 * @throws PlanEntryOccupyLocationException 待删除位置尚未创建
+	 */
+	public void deleteLocation(String locationname) throws LocationNotFoundException, PlanEntryOccupyLocationException {
+<span class="fc" id="L120">		int index=locationnames.indexOf(locationname);</span>
+<span class="fc bfc" id="L121" title="All 2 branches covered.">		if(index==-1) {</span>
+<span class="fc" id="L122">			throw new LocationNotFoundException(locationname);</span>
+		}
+<span class="fc" id="L124">		boolean flag=false;</span>
+<span class="fc" id="L125">		TrainEntry&lt;Carriage&gt; trainEntry=null;</span>
+<span class="fc bfc" id="L126" title="All 2 branches covered.">		for(TrainEntry&lt;Carriage&gt; te:trains) {	</span>
+<span class="pc bpc" id="L127" title="3 of 6 branches missed.">			if(te.getLocation().contains(locations.get(index))&amp;&amp;!te.getStateName().equals(&quot;Cancelled&quot;)&amp;&amp;!te.getStateName().equals(&quot;Ended&quot;)) {</span>
+<span class="fc" id="L128">				flag=true;</span>
+<span class="fc" id="L129">				trainEntry=te;</span>
+<span class="fc" id="L130">				break;</span>
+			}
+		}
+<span class="fc bfc" id="L133" title="All 2 branches covered.">		if(flag) {</span>
+<span class="fc" id="L134">			throw new PlanEntryOccupyLocationException(trainEntry.getName());</span>
+		}
+<span class="fc" id="L136">		locations.remove(index);</span>
+<span class="fc" id="L137">		locationnames.remove(index);</span>
+<span class="fc" id="L138">		checkRep();</span>
+<span class="fc" id="L139">	}</span>
+	
+	/**
+	 * 增加一个高铁车次对其进行管理，不允许重名车次,列车初始状态为Waiting
+	 * @param name 高铁车次的名称
+	 * @param locations 高铁车次经过的所有站点的名称，应该包含在所管理的位置locations之中,总个数应该≥2，站点应是有序的
+	 * @param timeslots 高铁车次中途所有经停时间点，不应为空,timeslots的顺序应该与各个location的顺序是对应的
+	 * @return 如果创建成功返回true，否则返回false
+	 * @throws LocationNotFoundException 位置中存在未创建位置
+	 * @throws SameLabelException 重名车次
+	 */
+	public boolean createTrain(String name,List&lt;String&gt; locationnames,List&lt;Timeslot&gt; timeslots) throws LocationNotFoundException, SameLabelException {
+<span class="pc bpc" id="L151" title="1 of 2 branches missed.">		if(timeslots.size()==0) {</span>
+<span class="nc" id="L152">			System.out.println(&quot;传入的时间对参数为空,请添加时间对后创建!&quot;);</span>
+<span class="nc" id="L153">			return false;</span>
+		}
+		
+<span class="fc bfc" id="L156" title="All 2 branches covered.">		if(locationnames.size()!=timeslots.size()+1) {//由于时间对是不空的，时间对个数≥1，同时也保证了位置数≥2</span>
+<span class="fc" id="L157">			System.out.println(&quot;经停站点数与起止时间对个数不匹配,不能正确创建&quot;);</span>
+<span class="fc" id="L158">			return false;</span>
+		}
+<span class="fc" id="L160">		List&lt;Location&gt; containlocations=new ArrayList&lt;Location&gt;();</span>
+<span class="fc bfc" id="L161" title="All 2 branches covered.">		for(int i=0;i&lt;locationnames.size();i++) {</span>
+<span class="fc" id="L162">			String locationname=locationnames.get(i);</span>
+<span class="fc" id="L163">			int index=this.locationnames.indexOf(locationname);</span>
+<span class="fc bfc" id="L164" title="All 2 branches covered.">			if(index==-1) {</span>
+<span class="fc" id="L165">				throw new LocationNotFoundException(locationname);</span>
+			}
+<span class="fc" id="L167">			Location location=this.locations.get(index);</span>
+<span class="fc" id="L168">			containlocations.add(location);</span>
+		}
+		
+<span class="fc" id="L171">		TrainEntry&lt;Carriage&gt; newTrain=TrainPlanningEntry.CreateTrain(name);</span>
+<span class="fc" id="L172">		newTrain.setLocations(containlocations);</span>
+<span class="fc" id="L173">		newTrain.setTime(timeslots);</span>
+<span class="fc bfc" id="L174" title="All 2 branches covered.">		for(TrainEntry&lt;Carriage&gt; tpe:trains) {</span>
+<span class="fc bfc" id="L175" title="All 2 branches covered.">			if(tpe.getName().equals(name)) {</span>
+<span class="fc" id="L176">				throw new SameLabelException(name);</span>
+			}
+		}
+		
+<span class="fc" id="L180">		trains.add(newTrain);</span>
+<span class="fc" id="L181">		checkRep();</span>
+<span class="fc" id="L182">		return true;</span>
+	}
+	
+	/**
+	 * 为高铁车次分配车厢，车厢应包含在管理的所有车厢之中
+	 * @param Trainname 指定高铁车次的列车名称
+	 * @param carriageResourse 分配的所有车厢的ID,已经确定其相对顺序
+	 * @throws ResourceNotFoundException 车厢中存在未创建车厢
+	 * @throws PlanEntryNotCreateException 车次未创建
+	 * @throws ResourceConflictException 车厢分配存在冲突
+	 */
+	public void allocateCarriage(String Trainname,List&lt;String&gt; carriageIDs) throws ResourceNotFoundException, PlanEntryNotCreateException, ResourceConflictException {
+		Carriage carriage;
+<span class="fc" id="L195">		List&lt;Carriage&gt; carriageResourse=new ArrayList&lt;Carriage&gt;();</span>
+<span class="fc bfc" id="L196" title="All 2 branches covered.">		for(int i=0;i&lt;carriageIDs.size();i++) {</span>
+<span class="fc" id="L197">			carriage=new Carriage(carriageIDs.get(i), &quot;type&quot;, 1, &quot;&quot;);//利用Carriage的equals中的唯一条件是ID相等</span>
+<span class="fc bfc" id="L198" title="All 2 branches covered.">			if(this.carriages.contains(carriage)) {//得到carriages中的对应车厢</span>
+<span class="fc" id="L199">				int index=carriages.indexOf(carriage);</span>
+<span class="fc" id="L200">				carriageResourse.add(carriages.get(index));</span>
+<span class="fc" id="L201">			}</span>
+			else {
+<span class="fc" id="L203">				throw new ResourceNotFoundException(carriage.getId());</span>
+			}
+		}
+		
+<span class="fc bfc" id="L207" title="All 2 branches covered.">		for(TrainEntry&lt;Carriage&gt; te:trains) {</span>
+<span class="fc bfc" id="L208" title="All 2 branches covered.">			if(te.getName().equals(Trainname)) {</span>
+<span class="fc" id="L209">				TrainEntry&lt;Carriage&gt; trainEntry=new TrainEntry&lt;Carriage&gt;(&quot;null&quot;);//新建一个列车，为其分配与搜索得到的列车一样的属性，观察是否会产生冲突</span>
+<span class="fc" id="L210">				trainEntry.setLocations(te.getLocation());</span>
+<span class="fc" id="L211">				trainEntry.setTime(te.getTime());</span>
+<span class="fc" id="L212">				trainEntry.allocateResource(carriageResourse);</span>
+<span class="fc" id="L213">				List&lt;TrainEntry&lt;Carriage&gt;&gt; trainEntries=new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L214">				trainEntries.add(trainEntry);//不加入trains中，只是一个替代品，检测是否会发生冲突，避免真正分配带来的冲突</span>
+<span class="fc" id="L215">				trainEntries.addAll(trains);</span>
+<span class="fc" id="L216">				PlanningEntryAPIs api=new PlanningEntryAPIsFirstImpl();</span>
+<span class="fc" id="L217">				boolean flag2=api.checkResourceExclusiveConflict(trainEntries);</span>
+<span class="pc bpc" id="L218" title="1 of 2 branches missed.">				if(flag2) {</span>
+<span class="nc" id="L219">					throw new ResourceConflictException();</span>
+				}
+<span class="fc" id="L221">				te.allocateResource(carriageResourse);</span>
+<span class="fc" id="L222">				return;</span>
+			}
+		}
+		
+<span class="fc" id="L226">		throw new PlanEntryNotCreateException(Trainname);</span>
+	}
+
+	/**
+	 * @return 得到所有已经纳入管理的高铁车次
+	 */
+	public List&lt;TrainEntry&lt;Carriage&gt;&gt; getTrains() {
+<span class="fc" id="L233">		return Collections.unmodifiableList(trains);</span>
+	}
+
+	/**
+	 * @return 得到所有已经纳入管理的车厢
+	 */
+	public List&lt;Carriage&gt; getCarriages() {
+<span class="fc" id="L240">		return Collections.unmodifiableList(carriages);</span>
+	}
+
+	/** 
+	 * @return 得到所有已经纳入管理的位置
+	 */
+	public List&lt;Location&gt; getLocations() {
+<span class="fc" id="L247">		return Collections.unmodifiableList(locations);</span>
+	}
+	
+	public List&lt;String&gt; getLocationNames(){
+<span class="fc" id="L251">		return Collections.unmodifiableList(locationnames);</span>
+	}
+	
+	/**
+	 * 启动指定的已经创建的高铁车次
+	 * @param Trainname 待启动的已经创建的高铁车次的名称
+	 * @throws PlanEntryNotCreateException 车次尚未创建
+	 */
+	public void startTrain(String Trainname) throws PlanEntryNotCreateException {
+<span class="fc bfc" id="L260" title="All 2 branches covered.">		for(TrainEntry&lt;Carriage&gt; te:trains) {</span>
+<span class="pc bpc" id="L261" title="1 of 2 branches missed.">			if(te.getName().equals(Trainname)) {</span>
+<span class="fc" id="L262">				te.start();</span>
+<span class="fc" id="L263">				return;</span>
+			}
+		}
+		
+<span class="fc" id="L267">		throw new PlanEntryNotCreateException(Trainname);</span>
+	}
+	
+	/**
+	 * 阻塞指定的已经创建的高铁车次
+	 * @param Trainname 待阻塞的已经创建的高铁车次
+	 * @throws PlanEntryNotCreateException 车次尚未创建
+	 */
+	public void blockTrain(String Trainname) throws PlanEntryNotCreateException {
+<span class="fc bfc" id="L276" title="All 2 branches covered.">		for(TrainEntry&lt;Carriage&gt; te:trains) {</span>
+<span class="pc bpc" id="L277" title="1 of 2 branches missed.">			if(te.getName().equals(Trainname)) {</span>
+<span class="fc" id="L278">				te.block(te);</span>
+<span class="fc" id="L279">				return;</span>
+			}
+		}
+		
+<span class="fc" id="L283">		throw new PlanEntryNotCreateException(Trainname);</span>
+	}
+	
+	/**
+	 * 取消指定的已经创建的高铁车次
+	 * @param Trainname 待取消的已经创建的高铁车次
+	 * @throws PlanEntryNotCreateException 车次尚未创建
+	 */
+	public void cancelTrain(String Trainname) throws PlanEntryNotCreateException {
+<span class="fc bfc" id="L292" title="All 2 branches covered.">		for(TrainEntry&lt;Carriage&gt; te:trains) {</span>
+<span class="pc bpc" id="L293" title="1 of 2 branches missed.">			if(te.getName().equals(Trainname)) {</span>
+<span class="fc" id="L294">				te.cancel();</span>
+<span class="fc" id="L295">				return;</span>
+			}
+		}
+		
+<span class="fc" id="L299">		throw new PlanEntryNotCreateException(Trainname);</span>
+	}
+	
+	/**
+	 * 结束指定的已经创建的高铁车次
+	 * @param Trainname 待结束的已经创建的高铁车次
+	 * @throws PlanEntryNotCreateException 车次尚未创建
+	 */
+	public void endTrain(String Trainname) throws PlanEntryNotCreateException {
+<span class="fc bfc" id="L308" title="All 2 branches covered.">		for(TrainEntry&lt;Carriage&gt; te:trains) {</span>
+<span class="pc bpc" id="L309" title="1 of 2 branches missed.">			if(te.getName().equals(Trainname)) {</span>
+<span class="fc" id="L310">				te.end();</span>
+<span class="fc" id="L311">				return;</span>
+			}
+		}
+		
+<span class="fc" id="L315">		throw new PlanEntryNotCreateException(Trainname);</span>
+	}
+	
+	/**
+	 * 输出某一高铁车次目前的状态
+	 * @param Trainname 指定的已创建的高铁车次
+	 */
+	public String getTrainState(String Trainname) {
+<span class="fc bfc" id="L323" title="All 2 branches covered.">		for(TrainEntry&lt;Carriage&gt; te:trains) {</span>
+<span class="fc bfc" id="L324" title="All 2 branches covered.">			if(te.getName().equals(Trainname)) {</span>
+<span class="fc" id="L325">				return te.getStateName();</span>
+			}
+		}
+		
+<span class="fc" id="L329">		return &quot;null&quot;;</span>
+	}
+	
+	/**
+	 * 获得占用指定车厢的所有列车
+	 * @param carriageID 指定车厢的ID 
+	 * @return 如果有占用指定车厢的列车,返回这样的所有列车；否则返回null
+	 */
+	public List&lt;TrainEntry&lt;Carriage&gt;&gt; getTrainsofassignCarriage(String carriageID){
+<span class="fc" id="L338">		int index=-1;</span>
+<span class="fc bfc" id="L339" title="All 2 branches covered.">		for(Carriage carriage:carriages) {//找到指定飞机</span>
+<span class="fc bfc" id="L340" title="All 2 branches covered.">			if(carriage.getId().equals(carriageID)) {</span>
+<span class="fc" id="L341">				index=carriages.indexOf(carriage);</span>
+			}
+		}
+<span class="pc bpc" id="L344" title="1 of 2 branches missed.">		if(index==-1) {</span>
+<span class="nc" id="L345">			System.out.println(&quot;目前管理的车厢中不存在该ID车厢!&quot;);</span>
+<span class="nc" id="L346">			return null;</span>
+		}
+			
+<span class="fc" id="L349">		Carriage assigncarriage=carriages.get(index);</span>
+<span class="fc" id="L350">		List&lt;TrainEntry&lt;Carriage&gt;&gt; tes=new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L351" title="All 2 branches covered.">		for(TrainEntry&lt;Carriage&gt; te:trains) {</span>
+<span class="fc bfc" id="L352" title="All 2 branches covered.">			if(te.getResource().contains(assigncarriage))</span>
+<span class="fc" id="L353">				tes.add(te);</span>
+		}
+<span class="pc bpc" id="L355" title="1 of 2 branches missed.">		if(tes.isEmpty())</span>
+<span class="nc" id="L356">			return null;</span>
+<span class="fc" id="L357">		return tes;</span>
+	}
+	
+	/**
+	 * 通过位置名称得到对应的位置
+	 * @param locationName 位置的名称
+	 * @return 对应的位置,未创建则返回null
+	 */
+	public Location getLocationbyName(String locationName) {
+<span class="pc bpc" id="L366" title="1 of 2 branches missed.">		for(Location location:locations) {</span>
+<span class="fc bfc" id="L367" title="All 2 branches covered.">			if(location.getName().equals(locationName))</span>
+<span class="fc" id="L368">				return location;</span>
+		}
+<span class="nc" id="L370">		return null;</span>
+	}
+	
+	/**
+	 * 通过车厢的ID获得对应的车厢
+	 * @param ID 车厢的ID
+	 * @return 对应的车厢，未创建则返回null
+	 */
+	public Carriage getCarriagebyID(String ID) {
+<span class="pc bpc" id="L379" title="1 of 2 branches missed.">		for(Carriage carriage:carriages) {</span>
+<span class="fc bfc" id="L380" title="All 2 branches covered.">			if(carriage.getId().equals(ID))</span>
+<span class="fc" id="L381">				return carriage;</span>
+		}
+<span class="nc" id="L383">		return null;</span>
+	}
+	
+	/**
+	 * 通过列车名称获得对应的列车车次
+	 * @param trainName 列车名称
+	 * @return 对应的列车车次，未创建则返回null
+	 */
+	public TrainEntry&lt;Carriage&gt; getTrainbyName(String trainName){
+<span class="pc bpc" id="L392" title="1 of 2 branches missed.">		for(TrainEntry&lt;Carriage&gt; te:trains) {</span>
+<span class="pc bpc" id="L393" title="1 of 2 branches missed.">			if(te.getName().equals(trainName))</span>
+<span class="fc" id="L394">				return te;</span>
+		}
+<span class="nc" id="L396">		return null;</span>
+	}
+	
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.3.201901230119</span>Lab4-2020SP (2020-5-23 15:07:06)</div></body></html>

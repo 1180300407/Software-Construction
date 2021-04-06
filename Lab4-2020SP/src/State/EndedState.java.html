@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../jacoco-resources/report.gif" type="image/gif"/><title>EndedState.java</title><link rel="stylesheet" href="../../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">Lab4-2020SP (2020-5-23 15:07:06)</a> &gt; <a href="../../index.html" class="el_group">Lab4-2020SP</a> &gt; <a href="../index.html" class="el_bundle">src</a> &gt; <a href="index.source.html" class="el_package">State</a> &gt; <span class="el_source">EndedState.java</span></div><h1>EndedState.java</h1><pre class="source lang-java linenums">package State;
+
+import Exceptions.PlanEntryStateNotMatchException;
+import common.CommonPlanningEntry;
+
+<span class="fc" id="L6">public class EndedState implements EntryState{</span>
+	@Override
+	public String getStateName() {
+<span class="fc" id="L9">		return &quot;Ended&quot;;</span>
+	}
+	
+	/**
+	 * 非法状态转换
+	 * @throws PlanEntryStateNotMatchException 非法状态转换
+	 */
+	@Override
+	public &lt;R&gt; void start(CommonPlanningEntry&lt;R&gt; cpe) throws PlanEntryStateNotMatchException {
+<span class="fc" id="L18">		throw new PlanEntryStateNotMatchException(getStateName());</span>
+	}
+	
+	/**
+	 * 非法状态转换
+	 * @throws PlanEntryStateNotMatchException 非法状态转换
+	 */
+	@Override
+	public &lt;R&gt; void allocate(CommonPlanningEntry&lt;R&gt; cpe) throws PlanEntryStateNotMatchException {
+<span class="fc" id="L27">		throw new PlanEntryStateNotMatchException(getStateName());</span>
+	}
+	
+	/**
+	 * 已结束
+	 */
+	@Override
+	public &lt;R&gt; void end(CommonPlanningEntry&lt;R&gt; cpe) {
+		
+<span class="fc" id="L36">	}</span>
+	
+	/**
+	 * 非法状态转换
+	 * @throws PlanEntryStateNotMatchException 非法状态转换
+	 */
+	@Override
+	public &lt;R&gt; void cancel(CommonPlanningEntry&lt;R&gt; cpe) throws PlanEntryStateNotMatchException {
+<span class="fc" id="L44">		throw new PlanEntryStateNotMatchException(getStateName());</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.3.201901230119</span>Lab4-2020SP (2020-5-23 15:07:06)</div></body></html>

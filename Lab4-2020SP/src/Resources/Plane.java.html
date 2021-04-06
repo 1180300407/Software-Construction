@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../jacoco-resources/report.gif" type="image/gif"/><title>Plane.java</title><link rel="stylesheet" href="../../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">Lab4-2020SP (2020-5-23 15:07:06)</a> &gt; <a href="../../index.html" class="el_group">Lab4-2020SP</a> &gt; <a href="../index.html" class="el_bundle">src</a> &gt; <a href="index.source.html" class="el_package">Resources</a> &gt; <span class="el_source">Plane.java</span></div><h1>Plane.java</h1><pre class="source lang-java linenums">package Resources;
+
+/**
+ * 表示&quot;飞机&quot;资源，不可变类
+ * @author 123
+ *
+ */
+
+public class Plane {
+	private final String id;//飞机编号
+	private final String type;//机型号
+	private final int seats;//座位数
+	private final double planeage;//机龄
+	
+	//Abstraction function:
+	//	AF(id,type,seats,planeage)=一架编号为id的飞机，机型号是type，有seats个座位，机龄为planeage
+	//Representation invariant:
+	//	true
+	//Safety from rep exposure:
+	//	成员变量全是private且final的，均为不可变类型，不存在表示泄露
+	
+	/**
+	 * 构造函数
+	 * @param id 指定飞机编号
+	 * @param type 指定飞机机型号
+	 * @param seats 指定飞机座位数
+	 * @param planeage 指定飞机机龄
+	 */
+<span class="fc" id="L29">	public Plane(String id, String type, int seats, double planeage) {</span>
+<span class="fc" id="L30">		this.id = id;</span>
+<span class="fc" id="L31">		this.type = type;</span>
+<span class="fc" id="L32">		this.seats = seats;</span>
+<span class="fc" id="L33">		this.planeage = planeage;</span>
+<span class="fc" id="L34">	}</span>
+
+	/**
+	 * @return 该飞机的飞机编号
+	 */
+	public String getId() {
+<span class="fc" id="L40">		return id;</span>
+	}
+
+	/**
+	 * @return 该飞机的机型号
+	 */
+	public String getType() {
+<span class="fc" id="L47">		return type;</span>
+	}
+
+	/**
+	 * @return 该飞机的座位数
+	 */
+	public int getSeats() {
+<span class="fc" id="L54">		return seats;</span>
+	}
+
+	/**
+	 * @return 该飞机的机龄
+	 */
+	public double getPlaneage() {
+<span class="fc" id="L61">		return planeage;</span>
+	}
+
+	
+	//重写hashCode和equals，只根据ID进行区分
+	@Override
+	public int hashCode() {
+<span class="fc" id="L68">		final int prime = 31;</span>
+<span class="fc" id="L69">		int result = 1;</span>
+<span class="pc bpc" id="L70" title="1 of 2 branches missed.">		result = prime * result + ((id == null) ? 0 : id.hashCode());</span>
+<span class="fc" id="L71">		return result;</span>
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+<span class="fc bfc" id="L76" title="All 2 branches covered.">		if (this == obj)</span>
+<span class="fc" id="L77">			return true;</span>
+<span class="pc bpc" id="L78" title="1 of 2 branches missed.">		if (obj == null)</span>
+<span class="nc" id="L79">			return false;</span>
+<span class="pc bpc" id="L80" title="1 of 2 branches missed.">		if (getClass() != obj.getClass())</span>
+<span class="nc" id="L81">			return false;</span>
+<span class="fc" id="L82">		Plane other = (Plane) obj;</span>
+<span class="pc bpc" id="L83" title="1 of 2 branches missed.">		if (id == null) {</span>
+<span class="nc bnc" id="L84" title="All 2 branches missed.">			if (other.id != null)</span>
+<span class="nc" id="L85">				return false;</span>
+<span class="fc bfc" id="L86" title="All 2 branches covered.">		} else if (!id.equals(other.id))</span>
+<span class="fc" id="L87">			return false;</span>
+<span class="fc" id="L88">		return true;</span>
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.3.201901230119</span>Lab4-2020SP (2020-5-23 15:07:06)</div></body></html>

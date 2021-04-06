@@ -1,0 +1,39 @@
+Flight:2020-01-02,CX388
+{
+DepartureAirport:Hefei
+ArrivalAirport:Shenyang
+DepatureTime:2020-01-02 14:13
+ArrivalTime:2020-01-02 20:12
+Plane:B6863
+{
+Type:A319
+Seats:140
+Age:8.5
+}
+}
+Flight:2020-01-01,cf325
+{
+DepartureAirport:Tianjin
+ArrivalAirport:Nanning
+DepatureTime:2020-01-01 16:47
+ArrivalTime:2020-01-01 20:35
+Plane:N3330
+{
+Type:B767
+Seats:289
+Age:3.1
+}
+}
+Flight:2020-01-02,CZ325
+{
+DepartureAirport:Tianjin
+ArrivalAirport:Nanning
+DepatureTime:2020-01-02 16:47
+ArrivalTime:2020-01-02 20:35
+Plane:N7984
+{
+Type:B757
+Seats:261
+Age:3.4
+}
+}

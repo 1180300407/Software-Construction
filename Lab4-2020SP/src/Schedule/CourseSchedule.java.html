@@ -1,0 +1,419 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../jacoco-resources/report.gif" type="image/gif"/><title>CourseSchedule.java</title><link rel="stylesheet" href="../../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">Lab4-2020SP (2020-5-23 15:07:06)</a> &gt; <a href="../../index.html" class="el_group">Lab4-2020SP</a> &gt; <a href="../index.html" class="el_bundle">src</a> &gt; <a href="index.source.html" class="el_package">Schedule</a> &gt; <span class="el_source">CourseSchedule.java</span></div><h1>CourseSchedule.java</h1><pre class="source lang-java linenums">package Schedule;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import API.PlanningEntryAPIs;
+import API.PlanningEntryAPIsFirstImpl;
+import Exceptions.LocationConflictException;
+import Exceptions.LocationNotFoundException;
+import Exceptions.PlanEntryNotCreateException;
+import Exceptions.PlanEntryOccupyLocationException;
+import Exceptions.PlanEntryOccupyResourceException;
+import Exceptions.PlanEntryStateNotMatchException;
+import Exceptions.ResourceConflictException;
+import Exceptions.ResourceNotFoundException;
+import Exceptions.SameLabelException;
+import Location.Location;
+import Resources.Teacher;
+import Timeslot.Timeslot;
+import compositeinterface.CourseEntry;
+import compositeinterface.CoursePlanningEntry;
+
+/**
+ * 课表管理，可对多个教师、教室、课程进行管理，可变类
+ * @author 123
+ *
+ */
+
+<span class="pc bpc" id="L32" title="1 of 2 branches missed.">public class CourseSchedule {</span>
+<span class="fc" id="L33">	public List&lt;CourseEntry&lt;Teacher&gt;&gt; courses=new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L34">	public List&lt;Teacher&gt; teachers=new ArrayList&lt;Teacher&gt;();</span>
+<span class="fc" id="L35">	public List&lt;Location&gt; locations=new ArrayList&lt;Location&gt;();</span>
+	//Abstraction function:
+	//	AF(courses,teachers,locations)=一个对课程courses，所有教师teachers，教室locations进行管理的系统
+	//Representation invariant:
+	//	管理的课程、教师、教室中都不应含有重复元素
+	//Safety from rep exposure:
+	//	成员变量全是private的，对外返回时全部转为不可变类型，不存在表示泄露
+	
+	private void checkRep() {
+<span class="fc" id="L44">		Set&lt;CourseEntry&lt;Teacher&gt;&gt; courseSet=new HashSet&lt;&gt;(courses);</span>
+<span class="fc" id="L45">		Set&lt;Teacher&gt; teacherSet=new HashSet&lt;Teacher&gt;(teachers);</span>
+<span class="fc" id="L46">		Set&lt;Location&gt; locationSet=new HashSet&lt;Location&gt;(locations);</span>
+<span class="pc bpc" id="L47" title="2 of 4 branches missed.">		assert locationSet.size()==locations.size();</span>
+<span class="pc bpc" id="L48" title="2 of 4 branches missed.">		assert teacherSet.size()==teachers.size();</span>
+<span class="pc bpc" id="L49" title="2 of 4 branches missed.">		assert courseSet.size()==courses.size();</span>
+<span class="fc" id="L50">	}</span>
+	
+	/**
+	 * 增加一个可供管理的教师，若教师已存在不会重复添加
+	 * @param teacher 待添加的教师
+	 */
+	public void addTeacher(Teacher teacher) {
+<span class="fc bfc" id="L57" title="All 2 branches covered.">		if(!teachers.contains(teacher))</span>
+<span class="fc" id="L58">			teachers.add(teacher); //Teacher为不可变类，不存在表示泄露</span>
+<span class="fc" id="L59">		checkRep();</span>
+<span class="fc" id="L60">	}</span>
+	
+	/**
+	 * 删除具有指定ID的教师，若教师不存在并不会进行删除操作,教师若已分配课程则无法删除
+	 * @param ID 待删除的教师的ID
+	 * @throws ResourceNotFoundException 要删除的教师不存在 
+	 * @throws PlanEntryOccupyResourceException 要删除的教师已分配课程
+	 */
+	public void deleteTeacher(String ID) throws ResourceNotFoundException, PlanEntryOccupyResourceException {
+<span class="fc" id="L69">		int index=-1;</span>
+<span class="fc bfc" id="L70" title="All 2 branches covered.">		for(Teacher teacher:teachers) {</span>
+<span class="pc bpc" id="L71" title="1 of 2 branches missed.">			if(teacher.getId().equals(ID)) {</span>
+<span class="fc" id="L72">				index=teachers.indexOf(teacher);</span>
+<span class="fc" id="L73">				break;</span>
+			}
+		}
+<span class="fc bfc" id="L76" title="All 2 branches covered.">		if(index==-1) {</span>
+<span class="fc" id="L77">			throw new ResourceNotFoundException(ID);</span>
+		}
+		
+<span class="fc" id="L80">		boolean flag=false;</span>
+<span class="fc" id="L81">		CourseEntry&lt;Teacher&gt; courseEntry=null;</span>
+<span class="fc bfc" id="L82" title="All 2 branches covered.">		for(CourseEntry&lt;Teacher&gt; ce:courses) {</span>
+<span class="pc bpc" id="L83" title="4 of 6 branches missed.">			if(ce.getResource().contains(teachers.get(index))&amp;&amp;(ce.getStateName().equals(&quot;Allocated&quot;)||ce.getStateName().equals(&quot;Running&quot;))) {</span>
+<span class="fc" id="L84">				flag=true;</span>
+<span class="fc" id="L85">				courseEntry=ce;</span>
+<span class="fc" id="L86">				break;</span>
+			}
+		}
+<span class="fc bfc" id="L89" title="All 2 branches covered.">		if(!flag) {</span>
+<span class="fc" id="L90">			teachers.remove(index);</span>
+<span class="fc" id="L91">			return;</span>
+		}
+		else
+<span class="fc" id="L94">		 throw new PlanEntryOccupyResourceException(courseEntry.getName());</span>
+	}
+	
+	/**
+	 * 增加一个可供管理的教室，若教室已存在不会重复添加
+	 * @param location 待添加的教室
+	 */
+	public void addLocation(Location location) {
+<span class="fc bfc" id="L102" title="All 2 branches covered.">		if(!locations.contains(location))</span>
+<span class="fc" id="L103">			locations.add(location);</span>
+<span class="fc" id="L104">		checkRep();</span>
+<span class="fc" id="L105">	}</span>
+	
+	/**
+	 * 删除具有指定名称的教室，若教室不存在并不会进行删除操作,若该位置已被分配给某课程则无法删除
+	 * @param locationname 待删除的教室名称
+	 * @throws LocationNotFoundException 要删除的教室不存在
+	 * @throws PlanEntryOccupyLocationException 教室被占用
+	 */
+	public void deleteLocation(String locationname) throws LocationNotFoundException, PlanEntryOccupyLocationException {
+<span class="fc" id="L114">		int index=-1;</span>
+<span class="fc bfc" id="L115" title="All 2 branches covered.">		for(Location location:locations) {</span>
+<span class="pc bpc" id="L116" title="1 of 2 branches missed.">			if(location.getName().equals(locationname)) {</span>
+<span class="fc" id="L117">				index=locations.indexOf(location);</span>
+<span class="fc" id="L118">				break;</span>
+			}
+		}
+<span class="fc bfc" id="L121" title="All 2 branches covered.">		if(index==-1) {</span>
+<span class="fc" id="L122">			throw new LocationNotFoundException(locationname);</span>
+		}
+		
+<span class="fc" id="L125">		boolean flag=false;</span>
+<span class="fc" id="L126">		CourseEntry&lt;Teacher&gt; courseEntry=null;</span>
+<span class="fc bfc" id="L127" title="All 2 branches covered.">		for(CourseEntry&lt;Teacher&gt; ce:courses) {</span>
+<span class="pc bpc" id="L128" title="3 of 6 branches missed.">			if(ce.getLocation().contains(locations.get(index))&amp;&amp;!ce.getStateName().equals(&quot;Cancelled&quot;)&amp;&amp;!ce.getStateName().equals(&quot;Ended&quot;)) {</span>
+<span class="fc" id="L129">				flag=true;</span>
+<span class="fc" id="L130">				courseEntry=ce;</span>
+<span class="fc" id="L131">				break;</span>
+			}
+		}
+<span class="fc bfc" id="L134" title="All 2 branches covered.">		if(!flag) {</span>
+<span class="fc" id="L135">			locations.remove(index);</span>
+<span class="fc" id="L136">			return;</span>
+		}
+		else 
+<span class="fc" id="L139">		 throw new PlanEntryOccupyLocationException(courseEntry.getName());</span>
+	}
+	
+	/**
+	 * @return 得到所有管理下的课程
+	 */
+	public List&lt;CourseEntry&lt;Teacher&gt;&gt; getCourses() {
+<span class="fc" id="L146">		return Collections.unmodifiableList(courses);</span>
+	}
+
+	/**
+	 * @return 得到所有管理下的教师
+	 */
+	public List&lt;Teacher&gt; getTeachers() {
+<span class="fc" id="L153">		return Collections.unmodifiableList(teachers);</span>
+	}
+
+	/**
+	 * @return 得到所有管理下的教室
+	 */
+	public List&lt;Location&gt; getLocations() {
+<span class="fc" id="L160">		return Collections.unmodifiableList(locations);</span>
+	}
+
+	/**
+	 * 增加一个课程对其进行管理，不允许重名课程出现
+	 * @param name 新增课程名
+	 * @param location 课程占用的教室名称
+	 * @param timeslot 课程的上课时间和下课时间构成的时间对
+	 * @return 如果创建成功返回true，否则返回false
+	 * @throws LocationNotFoundException 教室未创建
+	 * @throws SameLabelException 重名课程
+	 * @throws LocationConflictException 创建课程会产生位置冲突
+	 */
+	public boolean createCourse(String name,String location,Timeslot timeslot) throws LocationNotFoundException, SameLabelException, LocationConflictException {
+<span class="fc" id="L174">		int flag=-1;</span>
+<span class="fc bfc" id="L175" title="All 2 branches covered.">		for(Location location2:locations) {//得到该名称位置</span>
+<span class="pc bpc" id="L176" title="1 of 2 branches missed.">			if(location2.getName().equals(location)) {</span>
+<span class="fc" id="L177">				flag=locations.indexOf(location2);</span>
+<span class="fc" id="L178">				break;</span>
+			}
+		}
+<span class="fc bfc" id="L181" title="All 2 branches covered.">		if(flag==-1) {</span>
+<span class="fc" id="L182">			throw new LocationNotFoundException(location);</span>
+		}
+<span class="fc" id="L184">		CourseEntry&lt;Teacher&gt; newcourse=CoursePlanningEntry.CreateCourse(name);</span>
+<span class="fc" id="L185">		List&lt;Timeslot&gt; onetimeslot=new ArrayList&lt;Timeslot&gt;();</span>
+<span class="fc" id="L186">		onetimeslot.add(timeslot);</span>
+<span class="fc" id="L187">		newcourse.setTime(onetimeslot);</span>
+<span class="fc" id="L188">		List&lt;Location&gt; oneLocation=new ArrayList&lt;Location&gt;();</span>
+<span class="fc" id="L189">		oneLocation.add(locations.get(flag));</span>
+<span class="fc" id="L190">		newcourse.setLocation(oneLocation);</span>
+<span class="fc bfc" id="L191" title="All 2 branches covered.">		for(CourseEntry&lt;Teacher&gt; cpe:courses) {</span>
+<span class="fc bfc" id="L192" title="All 2 branches covered.">			if(cpe.getName().contentEquals(name)) {</span>
+<span class="fc" id="L193">				throw new SameLabelException(name);</span>
+			}
+		}
+<span class="fc" id="L196">		CourseEntry&lt;Teacher&gt; courseEntry=new CourseEntry&lt;Teacher&gt;(&quot;&quot;);</span>
+<span class="fc" id="L197">		courseEntry.setLocation(oneLocation);</span>
+<span class="fc" id="L198">		List&lt;CourseEntry&lt;Teacher&gt;&gt; courseEntries=new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L199">		courseEntries.add(courseEntry);</span>
+<span class="fc" id="L200">		courseEntries.addAll(courses);</span>
+<span class="fc" id="L201">		PlanningEntryAPIs api=new PlanningEntryAPIsFirstImpl();</span>
+<span class="fc" id="L202">		boolean flag2=api.checkLocationConflict(courseEntries);</span>
+<span class="pc bpc" id="L203" title="1 of 2 branches missed.">		if(flag2) {</span>
+<span class="nc" id="L204">			throw new LocationConflictException();</span>
+		}
+<span class="fc" id="L206">		courses.add(newcourse);</span>
+<span class="fc" id="L207">		checkRep();</span>
+<span class="fc" id="L208">		return true;</span>
+	}
+	
+	/**
+	 * 为课程分配教师，教师应包含在管理的所有教师之中
+	 * @param coursename 指定的课程名称
+	 * @param teacher 分配的教师的身份证号
+	 * @throws ResourceNotFoundException 教师还未纳入管理
+	 * @throws PlanEntryNotCreateException 课程尚未创建
+	 * @throws ResourceConflictException 分配教师会产生冲突
+	 */
+	public void allocateTeacher(String coursename,String teacherID) throws ResourceNotFoundException, PlanEntryNotCreateException, ResourceConflictException {
+<span class="fc" id="L220">		int index=-1;</span>
+<span class="fc bfc" id="L221" title="All 2 branches covered.">		for(Teacher teacher:teachers) {</span>
+<span class="fc bfc" id="L222" title="All 2 branches covered.">			if(teacher.getId().equals(teacherID))</span>
+			{
+<span class="fc" id="L224">				index=teachers.indexOf(teacher);</span>
+			}
+		}
+<span class="fc bfc" id="L227" title="All 2 branches covered.">		if(index==-1) {</span>
+<span class="fc" id="L228">			throw new ResourceNotFoundException(teacherID);</span>
+		}
+<span class="fc" id="L230">		Teacher teacher=teachers.get(index);</span>
+<span class="pc bpc" id="L231" title="1 of 2 branches missed.">		for(CourseEntry&lt;Teacher&gt; ce:courses) {</span>
+<span class="fc bfc" id="L232" title="All 2 branches covered.">			if(ce.getName().equals(coursename)) {</span>
+<span class="fc" id="L233">				List&lt;Teacher&gt; oneTeacher=new ArrayList&lt;Teacher&gt;();</span>
+<span class="fc" id="L234">				oneTeacher.add(teacher);</span>
+<span class="fc" id="L235">				CourseEntry&lt;Teacher&gt; courseEntry=new CourseEntry&lt;Teacher&gt;(&quot;null&quot;);//新建一个课程，为其分配与搜索得到的课程一样的属性，观察是否会产生冲突</span>
+<span class="fc" id="L236">				courseEntry.setLocation(ce.getLocation());</span>
+<span class="fc" id="L237">				courseEntry.setTime(ce.getTime());</span>
+<span class="fc" id="L238">				courseEntry.allocateResource(oneTeacher);</span>
+<span class="fc" id="L239">				List&lt;CourseEntry&lt;Teacher&gt;&gt; courseEntries=new ArrayList&lt;&gt;();//不加入courses中，只是一个替代品，检测是否会发生冲突，避免真正分配带来的冲突</span>
+<span class="fc" id="L240">				courseEntries.add(courseEntry);</span>
+<span class="fc" id="L241">				courseEntries.addAll(courses);</span>
+<span class="fc" id="L242">				PlanningEntryAPIs api=new PlanningEntryAPIsFirstImpl();</span>
+<span class="fc" id="L243">				boolean flag2=api.checkResourceExclusiveConflict(courseEntries);</span>
+<span class="pc bpc" id="L244" title="1 of 2 branches missed.">				if(flag2) {</span>
+<span class="nc" id="L245">					throw new ResourceConflictException(teacherID);</span>
+				}
+<span class="fc" id="L247">				ce.allocateResource(oneTeacher);</span>
+<span class="fc" id="L248">				return;</span>
+			}
+		}
+		
+<span class="nc" id="L252">		throw new PlanEntryNotCreateException(coursename);</span>
+	}
+	
+	/**
+	 * 指定某一课程上课，课程应存在
+	 * @param coursename 指定课程名
+	 * @throws PlanEntryNotCreateException 课程尚未创建
+	 */
+	public void startCourse(String coursename) throws PlanEntryNotCreateException {
+<span class="fc bfc" id="L261" title="All 2 branches covered.">		for(CourseEntry&lt;Teacher&gt; ce:courses) {</span>
+<span class="fc bfc" id="L262" title="All 2 branches covered.">			if(ce.getName().equals(coursename)) {</span>
+<span class="fc" id="L263">				ce.start();</span>
+<span class="fc" id="L264">				return;</span>
+			}
+		}
+		
+<span class="fc" id="L268">		throw new PlanEntryNotCreateException(coursename);</span>
+	}
+	
+	/**
+	 * 课前取消课程，课程应存在
+	 * @param coursename 指定课程名称
+	 * @throws PlanEntryNotCreateException 课程尚未创建
+	 */
+	public void cancelCourse(String coursename) throws PlanEntryNotCreateException {
+<span class="fc bfc" id="L277" title="All 2 branches covered.">		for(CourseEntry&lt;Teacher&gt; ce:courses) {</span>
+<span class="fc bfc" id="L278" title="All 2 branches covered.">			if(ce.getName().equals(coursename)) {</span>
+<span class="fc" id="L279">				ce.cancel();</span>
+<span class="fc" id="L280">				return;</span>
+			}
+		}
+		
+<span class="fc" id="L284">		throw new PlanEntryNotCreateException(coursename);</span>
+	}
+	
+	/**
+	 * 输出目前课程的状态，课程应已经创建过
+	 * @param coursename 要查看的课程
+	 */
+	public String getCourseState(String coursename) {
+<span class="fc bfc" id="L292" title="All 2 branches covered.">		for(CourseEntry&lt;Teacher&gt; ce:courses) {</span>
+<span class="fc bfc" id="L293" title="All 2 branches covered.">			if(ce.getName().equals(coursename)) { </span>
+<span class="fc" id="L294">				return ce.getStateName();</span>
+			}
+		}
+		
+<span class="fc" id="L298">		return &quot;null&quot;;</span>
+	}
+	
+	/**
+	 * 指定某课程下课，课程应存在
+	 * @param coursename 指定课程名
+	 * @throws PlanEntryNotCreateException 课程尚未创建
+	 */
+	public void endCourse(String coursename) throws PlanEntryNotCreateException {
+<span class="fc bfc" id="L307" title="All 2 branches covered.">		for(CourseEntry&lt;Teacher&gt; ce:courses) {</span>
+<span class="fc bfc" id="L308" title="All 2 branches covered.">			if(ce.getName().equals(coursename)) {</span>
+<span class="fc" id="L309">				ce.end();</span>
+<span class="fc" id="L310">				return;</span>
+			}
+		}
+		
+<span class="fc" id="L314">		throw new PlanEntryNotCreateException(coursename);</span>
+	}
+	
+	/**
+	 * 更换课程地点,地点应该是已经被纳入管理的，课程应该已经创建，未结束
+	 * @param coursename 指定课程名称
+	 * @param newlocation 新的教室
+	 * @throws LocationNotFoundException 位置尚未创建
+	 * @throws PlanEntryNotCreateException 课程尚未创建
+	 * @throws PlanEntryStateNotMatchException 课程已取消或结束，无法更改位置s
+	 */
+	public void changeLocation(String coursename,String newlocation) throws LocationNotFoundException, PlanEntryNotCreateException, PlanEntryStateNotMatchException {
+<span class="fc" id="L326">		int flag=-1;</span>
+<span class="fc bfc" id="L327" title="All 2 branches covered.">		for(Location location2:locations) {//得到该名称位置</span>
+<span class="fc bfc" id="L328" title="All 2 branches covered.">			if(location2.getName().equals(newlocation)) {</span>
+<span class="fc" id="L329">				flag=locations.indexOf(location2);</span>
+<span class="fc" id="L330">				break;</span>
+			}
+		}
+<span class="fc bfc" id="L333" title="All 2 branches covered.">		if(flag==-1) {</span>
+<span class="fc" id="L334">			throw new LocationNotFoundException(newlocation);</span>
+		}
+<span class="fc" id="L336">		Location location=locations.get(flag);</span>
+<span class="fc bfc" id="L337" title="All 2 branches covered.">		for(CourseEntry&lt;Teacher&gt; ce:courses) {</span>
+<span class="pc bpc" id="L338" title="1 of 2 branches missed.">			if(ce.getName().equals(coursename)) {</span>
+<span class="pc bpc" id="L339" title="1 of 4 branches missed.">				if(!ce.getStateName().equals(&quot;Ended&quot;)&amp;&amp;!ce.getStateName().equals(&quot;Cancelled&quot;)) {//上课前、上课中都可更换教室</span>
+<span class="fc" id="L340">					List&lt;Location&gt; newLocation=new ArrayList&lt;Location&gt;();</span>
+<span class="fc" id="L341">					newLocation.add(location);</span>
+<span class="fc" id="L342">					ce.setLocation(newLocation);</span>
+<span class="fc" id="L343">					return;</span>
+				}
+<span class="fc" id="L345">				throw new PlanEntryStateNotMatchException(coursename);</span>
+			}
+		}
+<span class="fc" id="L348">		throw new PlanEntryNotCreateException(coursename);</span>
+	}
+	
+	/**
+	 * 获得指定教师教授的所有课程
+	 * @param teacherID 指定教师的ID 
+	 * @return 如果有指定教师教授的课程,返回这样的所有课程；否则返回null
+	 */
+	public List&lt;CourseEntry&lt;Teacher&gt;&gt; getCoursesofassignTeacher(String teacherID){
+<span class="fc" id="L357">		int index=-1;</span>
+<span class="fc bfc" id="L358" title="All 2 branches covered.">		for(Teacher teacher:teachers) {//找到指定教师</span>
+<span class="fc bfc" id="L359" title="All 2 branches covered.">			if(teacher.getId().equals(teacherID)) {</span>
+<span class="fc" id="L360">				index=teachers.indexOf(teacher);</span>
+			}
+		}
+<span class="pc bpc" id="L363" title="1 of 2 branches missed.">		if(index==-1) {</span>
+<span class="nc" id="L364">			System.out.println(&quot;目前管理的教师中不存在该ID的教师!&quot;);</span>
+<span class="nc" id="L365">			return null;</span>
+		}
+<span class="fc" id="L367">		Teacher assignteacher=teachers.get(index);</span>
+<span class="fc" id="L368">		List&lt;CourseEntry&lt;Teacher&gt;&gt; ces=new ArrayList&lt;CourseEntry&lt;Teacher&gt;&gt;();</span>
+<span class="fc bfc" id="L369" title="All 2 branches covered.">		for(CourseEntry&lt;Teacher&gt; ce:courses) {</span>
+<span class="fc bfc" id="L370" title="All 2 branches covered.">			if(ce.getResource().contains(assignteacher))</span>
+<span class="fc" id="L371">				ces.add(ce);</span>
+		}
+<span class="pc bpc" id="L373" title="1 of 2 branches missed.">		if(ces.isEmpty())</span>
+<span class="nc" id="L374">			return null;</span>
+<span class="fc" id="L375">		return ces;</span>
+	}
+	
+	/**
+	 * 通过课程名称得到课程
+	 * @param coursename 课程名称
+	 * @return 以coursename为名称的课程,未创建则返回null
+	 */
+	public CourseEntry&lt;Teacher&gt; getCoursebyName(String coursename){
+<span class="pc bpc" id="L384" title="1 of 2 branches missed.">		for(CourseEntry&lt;Teacher&gt; ce:courses) {</span>
+<span class="pc bpc" id="L385" title="1 of 2 branches missed.">			if(ce.getName().contentEquals(coursename)) {</span>
+<span class="fc" id="L386">				return ce;</span>
+			}
+		}
+<span class="nc" id="L389">		return null;</span>
+	}
+	
+	/**
+	 * 通过教师身份证号得到指定教师
+	 * @param teacherID 教师身份证号
+	 * @return 以teacherID为身份证号的指定教师,未创建则返回null
+	 */
+	public Teacher getTeacherbyID(String teacherID) {
+<span class="pc bpc" id="L398" title="1 of 2 branches missed.">		for(Teacher teacher:teachers) {</span>
+<span class="pc bpc" id="L399" title="1 of 2 branches missed.">			if(teacher.getId().equals(teacherID))</span>
+<span class="fc" id="L400">				return teacher;</span>
+		}
+<span class="nc" id="L402">		return null;</span>
+	}
+	
+	/**
+	 * 通过位置名称得到该位置
+	 * @param locationName 位置名称
+	 * @return 以locationName为名称的位置                            
+	 */
+	public Location getLocationbyName(String locationName) {
+<span class="pc bpc" id="L411" title="1 of 2 branches missed.">		for(Location location:locations) {</span>
+<span class="pc bpc" id="L412" title="1 of 2 branches missed.">			if(location.getName().contentEquals(locationName))</span>
+<span class="fc" id="L413">				return location;</span>
+		}
+		
+<span class="nc" id="L416">		return null;</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.3.201901230119</span>Lab4-2020SP (2020-5-23 15:07:06)</div></body></html>

@@ -1,0 +1,26 @@
+Flight:2020-01-01,HO98
+{
+DepartureAirport:Kunming
+ArrivalAirport:Urumuqi
+DepatureTime:2020-01-01 11:14
+ArrivalTime:2020-01-01 13:27
+Plane:B8639
+{
+Type:B757
+Seats:261
+Age:19.2
+}
+}
+Flight:2020-01-02,HO98
+{
+DepartureAirport:Kunming
+ArrivalAirport:Urumuqi
+DepatureTime:2020-01-03 11:14
+ArrivalTime:2020-01-03 13:27
+Plane:N1705
+{
+Type:A380
+Seats:468
+Age:1.5
+}
+}

@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../jacoco-resources/report.gif" type="image/gif"/><title>CourseBoardTest.java</title><link rel="stylesheet" href="../../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">Lab4-2020SP (2020-5-23 15:07:06)</a> &gt; <a href="../../index.html" class="el_group">Lab4-2020SP</a> &gt; <a href="../index.html" class="el_bundle">test</a> &gt; <a href="index.source.html" class="el_package">Board</a> &gt; <span class="el_source">CourseBoardTest.java</span></div><h1>CourseBoardTest.java</h1><pre class="source lang-java linenums">package Board;
+
+import static org.junit.Assert.*;
+
+
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Iterator;
+import java.util.List;
+import org.junit.Test;
+
+import Location.Location;
+import Resources.Teacher;
+import Timeslot.Timeslot;
+import compositeinterface.CourseEntry;
+
+/**
+ * 测试CourseBoard中的private辅助函数
+ */
+
+<span class="fc" id="L22">public class CourseBoardTest {</span>
+	//测试CourseBoard中的函数，需要将其中private属性改为public
+	//*
+	//测试策略:既有是当天的课程，又有不是当天的课程
+	@Test
+	public void setRequestCoursestest() throws ParseException {
+<span class="fc" id="L28">		Teacher teacher=new Teacher(&quot;130283xxx&quot;, &quot;name&quot;, true, &quot;professtionalTitle&quot;);</span>
+<span class="fc" id="L29">		List&lt;Teacher&gt; teachers=new ArrayList&lt;Teacher&gt;();</span>
+<span class="fc" id="L30">		teachers.add(teacher);</span>
+<span class="fc" id="L31">		Location location=new Location(&quot;130E&quot;,&quot;45S&quot; , &quot;test&quot;, true);</span>
+<span class="fc" id="L32">		CourseEntry&lt;Teacher&gt; course1=new CourseEntry&lt;Teacher&gt;(&quot;rr&quot;);</span>
+<span class="fc" id="L33">		Timeslot timeslot=new Timeslot(&quot;2020-04-05 10:14&quot;, &quot;2020-04-05 12:15&quot;);</span>
+<span class="fc" id="L34">		Timeslot timeslot2=new Timeslot(&quot;2020-04-05 01:14&quot;, &quot;2020-04-05 02:15&quot;);</span>
+<span class="fc" id="L35">		Timeslot timeslot3=new Timeslot(&quot;2020-04-07 10:14&quot;, &quot;2020-04-07 14:15&quot;);//不是当天的课程</span>
+<span class="fc" id="L36">		List&lt;Timeslot&gt; timeslots1=new ArrayList&lt;Timeslot&gt;();</span>
+<span class="fc" id="L37">		timeslots1.add(timeslot);</span>
+<span class="fc" id="L38">		List&lt;Timeslot&gt; timeslots2=new ArrayList&lt;Timeslot&gt;();</span>
+<span class="fc" id="L39">		timeslots2.add(timeslot2);</span>
+<span class="fc" id="L40">		List&lt;Timeslot&gt; timeslots3=new ArrayList&lt;Timeslot&gt;();</span>
+<span class="fc" id="L41">		timeslots3.add(timeslot3);</span>
+<span class="fc" id="L42">		List&lt;Location&gt; onelocation=new ArrayList&lt;Location&gt;();</span>
+<span class="fc" id="L43">		onelocation.add(location);</span>
+<span class="fc" id="L44">		course1.setLocation(onelocation);</span>
+<span class="fc" id="L45">		course1.setTime(timeslots1);</span>
+<span class="fc" id="L46">		course1.allocateResource(teachers);</span>
+<span class="fc" id="L47">		CourseEntry&lt;Teacher&gt; course2=new CourseEntry&lt;Teacher&gt;(&quot;aa&quot;);</span>
+<span class="fc" id="L48">		CourseEntry&lt;Teacher&gt; course3=new CourseEntry&lt;Teacher&gt;(&quot;pp&quot;);</span>
+<span class="fc" id="L49">		course2.setLocation(onelocation);</span>
+<span class="fc" id="L50">		course2.setTime(timeslots2);</span>
+<span class="fc" id="L51">		course2.allocateResource(teachers);</span>
+<span class="fc" id="L52">		course3.setLocation(onelocation);</span>
+<span class="fc" id="L53">		course3.setTime(timeslots3);</span>
+<span class="fc" id="L54">		course3.allocateResource(teachers);</span>
+<span class="fc" id="L55">		List&lt;CourseEntry&lt;Teacher&gt;&gt; ces=new ArrayList&lt;CourseEntry&lt;Teacher&gt;&gt;();</span>
+<span class="fc" id="L56">		ces.add(course1);</span>
+<span class="fc" id="L57">		ces.add(course2);</span>
+<span class="fc" id="L58">		ces.add(course3);//课程中既有是当天的课程，又有不是当天的课程，看其是否正确划分并保存</span>
+<span class="fc" id="L59">		Calendar calendar=Calendar.getInstance();</span>
+<span class="fc" id="L60">		calendar.set(2020, 4-1, 5);</span>
+<span class="fc" id="L61">		CourseBoard cb=new CourseBoard(location, ces,calendar);</span>
+<span class="fc" id="L62">		cb.setRequestCourses(calendar);</span>
+<span class="fc" id="L63">		assertEquals(2, cb.courses.size());//应该只保存两个当天课程</span>
+<span class="fc" id="L64">	}</span>
+	
+	//测试策略:初始顺序相反，观察是否排序成功
+	@Test
+	public void sortCoursesTest() throws ParseException {
+<span class="fc" id="L69">		Teacher teacher=new Teacher(&quot;130283xxx&quot;, &quot;name&quot;, true, &quot;professtionalTitle&quot;);</span>
+<span class="fc" id="L70">		List&lt;Teacher&gt; teachers=new ArrayList&lt;Teacher&gt;();</span>
+<span class="fc" id="L71">		teachers.add(teacher);</span>
+<span class="fc" id="L72">		Location location=new Location(&quot;130E&quot;,&quot;45S&quot; , &quot;test&quot;, true);</span>
+<span class="fc" id="L73">		CourseEntry&lt;Teacher&gt; course1=new CourseEntry&lt;Teacher&gt;(&quot;rr&quot;);</span>
+<span class="fc" id="L74">		Timeslot timeslot=new Timeslot(&quot;2020-04-05 10:14&quot;, &quot;2020-04-05 12:15&quot;);</span>
+<span class="fc" id="L75">		Timeslot timeslot2=new Timeslot(&quot;2020-04-05 01:14&quot;, &quot;2020-04-05 02:15&quot;);</span>
+<span class="fc" id="L76">		List&lt;Timeslot&gt; timeslots1=new ArrayList&lt;Timeslot&gt;();</span>
+<span class="fc" id="L77">		timeslots1.add(timeslot);</span>
+<span class="fc" id="L78">		List&lt;Timeslot&gt; timeslots2=new ArrayList&lt;Timeslot&gt;();</span>
+<span class="fc" id="L79">		timeslots2.add(timeslot2);</span>
+<span class="fc" id="L80">		List&lt;Location&gt; onelocation=new ArrayList&lt;Location&gt;();</span>
+<span class="fc" id="L81">		onelocation.add(location);</span>
+<span class="fc" id="L82">		course1.setLocation(onelocation);</span>
+<span class="fc" id="L83">		course1.setTime(timeslots1);</span>
+<span class="fc" id="L84">		course1.allocateResource(teachers);</span>
+<span class="fc" id="L85">		CourseEntry&lt;Teacher&gt; course2=new CourseEntry&lt;Teacher&gt;(&quot;aa&quot;);</span>
+<span class="fc" id="L86">		course2.setLocation(onelocation);</span>
+<span class="fc" id="L87">		course2.setTime(timeslots2);</span>
+<span class="fc" id="L88">		course2.allocateResource(teachers);</span>
+<span class="fc" id="L89">		List&lt;CourseEntry&lt;Teacher&gt;&gt; ces=new ArrayList&lt;CourseEntry&lt;Teacher&gt;&gt;();</span>
+<span class="fc" id="L90">		ces.add(course1);</span>
+<span class="fc" id="L91">		ces.add(course2);</span>
+<span class="fc" id="L92">		Calendar calendar=Calendar.getInstance();</span>
+<span class="fc" id="L93">		calendar.set(2020, 4-1, 5);</span>
+<span class="fc" id="L94">		CourseBoard cb=new CourseBoard(location, ces,calendar);</span>
+<span class="fc" id="L95">		cb.setRequestCourses(calendar);</span>
+<span class="fc" id="L96">		cb.sortCourses();</span>
+<span class="fc" id="L97">		assertEquals(course2.getName(), cb.courses.get(0).getName());</span>
+<span class="fc" id="L98">	}</span>
+	
+	@Test
+	public void iteratorTest() throws ParseException{
+<span class="fc" id="L102">		Teacher teacher=new Teacher(&quot;130283xxx&quot;, &quot;name&quot;, true, &quot;professtionalTitle&quot;);</span>
+<span class="fc" id="L103">		List&lt;Teacher&gt; teachers=new ArrayList&lt;Teacher&gt;();</span>
+<span class="fc" id="L104">		teachers.add(teacher);</span>
+<span class="fc" id="L105">		Location location=new Location(&quot;130E&quot;,&quot;45S&quot; , &quot;test&quot;, true);</span>
+<span class="fc" id="L106">		CourseEntry&lt;Teacher&gt; course1=new CourseEntry&lt;Teacher&gt;(&quot;rr&quot;);</span>
+<span class="fc" id="L107">		Timeslot timeslot=new Timeslot(&quot;2020-04-05 10:14&quot;, &quot;2020-04-05 12:15&quot;);</span>
+<span class="fc" id="L108">		Timeslot timeslot2=new Timeslot(&quot;2020-04-05 01:14&quot;, &quot;2020-04-05 02:15&quot;);</span>
+<span class="fc" id="L109">		List&lt;Timeslot&gt; timeslots1=new ArrayList&lt;Timeslot&gt;();</span>
+<span class="fc" id="L110">		timeslots1.add(timeslot);</span>
+<span class="fc" id="L111">		List&lt;Timeslot&gt; timeslots2=new ArrayList&lt;Timeslot&gt;();</span>
+<span class="fc" id="L112">		timeslots2.add(timeslot2);</span>
+<span class="fc" id="L113">		List&lt;Location&gt; onelocation=new ArrayList&lt;Location&gt;();</span>
+<span class="fc" id="L114">		onelocation.add(location);</span>
+<span class="fc" id="L115">		course1.setLocation(onelocation);</span>
+<span class="fc" id="L116">		course1.setTime(timeslots1);</span>
+<span class="fc" id="L117">		course1.allocateResource(teachers);</span>
+<span class="fc" id="L118">		CourseEntry&lt;Teacher&gt; course2=new CourseEntry&lt;Teacher&gt;(&quot;aa&quot;);</span>
+<span class="fc" id="L119">		course2.setLocation(onelocation);</span>
+<span class="fc" id="L120">		course2.setTime(timeslots2);</span>
+<span class="fc" id="L121">		course2.allocateResource(teachers);</span>
+<span class="fc" id="L122">		List&lt;CourseEntry&lt;Teacher&gt;&gt; ces=new ArrayList&lt;CourseEntry&lt;Teacher&gt;&gt;();</span>
+<span class="fc" id="L123">		ces.add(course1);</span>
+<span class="fc" id="L124">		ces.add(course2);</span>
+<span class="fc" id="L125">		Calendar calendar=Calendar.getInstance();</span>
+<span class="fc" id="L126">		calendar.set(2020, 4-1, 5);</span>
+<span class="fc" id="L127">		CourseBoard cb=new CourseBoard(location, ces,calendar);</span>
+<span class="fc" id="L128">		List&lt;CourseEntry&lt;Teacher&gt;&gt; cEntries=new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L129" title="All 2 branches covered.">		for(Iterator&lt;CourseEntry&lt;Teacher&gt;&gt; iterator=cb.iterator();iterator.hasNext();) {</span>
+<span class="fc" id="L130">			cEntries.add(iterator.next());</span>
+		}
+		
+<span class="fc" id="L133">		assertEquals(2, cEntries.size());</span>
+<span class="fc" id="L134">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.3.201901230119</span>Lab4-2020SP (2020-5-23 15:07:06)</div></body></html>

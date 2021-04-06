@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../jacoco-resources/report.gif" type="image/gif"/><title>PlanningEntryAPIs.java</title><link rel="stylesheet" href="../../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">Lab4-2020SP (2020-5-23 15:07:06)</a> &gt; <a href="../../index.html" class="el_group">Lab4-2020SP</a> &gt; <a href="../index.html" class="el_bundle">src</a> &gt; <a href="index.source.html" class="el_package">API</a> &gt; <span class="el_source">PlanningEntryAPIs.java</span></div><h1>PlanningEntryAPIs.java</h1><pre class="source lang-java linenums">package API;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+
+import Location.Location;
+import Timeslot.Timeslot;
+import common.PlanningEntry;
+/**
+ * 针对PlanningEntry实现的一组API,仅包括一组方法
+ * @author 123
+ *
+ */
+
+<span class="fc" id="L23">public abstract class PlanningEntryAPIs {</span>
+	//AF=一组API
+	
+	/**
+	 * 检测一组计划项之间是否存在位置独占冲突
+	 * @param &lt;R&gt; 计划项占用的资源类型
+	 * @param entries 一组待检测计划项
+	 * @return 如果存在冲突返回true，否则返回false
+	 */
+	public &lt;R&gt; boolean checkLocationConflict(List&lt;? extends PlanningEntry&lt;R&gt;&gt; entries) {
+<span class="pc bpc" id="L33" title="1 of 2 branches missed.">		if(entries.isEmpty())</span>
+<span class="nc" id="L34">			return false;</span>
+<span class="fc" id="L35">		Map&lt;Location, List&lt;Timeslot&gt;&gt; hashlocation=new HashMap&lt;&gt;();//非共享位置的哈希表，每个位置对应一个列表，存储着占用该位置的所有时间节点</span>
+<span class="fc" id="L36">		Set&lt;Location&gt; unshareableLocations=new HashSet&lt;Location&gt;();//非共享位置集合</span>
+<span class="fc bfc" id="L37" title="All 2 branches covered.">		for(PlanningEntry&lt;R&gt; pe:entries) {//遍历计划项</span>
+<span class="pc bpc" id="L38" title="1 of 2 branches missed.">			if(pe.getLocation().size()!=1)//机场和车站是共享的</span>
+<span class="nc" id="L39">				break;</span>
+<span class="fc" id="L40">			Location location=pe.getLocation().get(0);</span>
+<span class="fc bfc" id="L41" title="All 2 branches covered.">			if(location.isshareable())//跳过共享位置</span>
+<span class="fc" id="L42">				continue;</span>
+<span class="fc bfc" id="L43" title="All 2 branches covered.">			if(unshareableLocations.contains(location)) {//之前已经遍历过该集合</span>
+<span class="fc" id="L44">				hashlocation.get(location).addAll(pe.getTime());</span>
+<span class="fc" id="L45">				boolean flag=false;</span>
+				try {
+<span class="fc" id="L47">					flag = checkTimeConflict(hashlocation.get(location));</span>
+<span class="pc" id="L48">				} catch (ParseException e) {</span>
+<span class="nc" id="L49">					e.printStackTrace();</span>
+				}
+<span class="fc bfc" id="L51" title="All 2 branches covered.">				if(flag)</span>
+<span class="fc" id="L52">					return true;</span>
+			}
+			else {
+<span class="fc" id="L55">				unshareableLocations.add(location);</span>
+<span class="fc" id="L56">				List&lt;Timeslot&gt; ces=new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L57">				ces.addAll(pe.getTime());</span>
+<span class="fc" id="L58">				hashlocation.put(location, ces);</span>
+			}
+		}
+<span class="fc" id="L61">		return false;</span>
+	}
+	
+	public &lt;R&gt; boolean checkResourceExclusiveConflict(List&lt;? extends PlanningEntry&lt;R&gt;&gt; entries) { 
+<span class="pc bpc" id="L65" title="1 of 2 branches missed.">		if(entries.isEmpty())</span>
+<span class="nc" id="L66">			return false;</span>
+<span class="fc" id="L67">		Map&lt;R, List&lt;Timeslot&gt;&gt; hashtable=new HashMap&lt;&gt;();</span>
+<span class="fc" id="L68">		Set&lt;R&gt; resources=new HashSet&lt;R&gt;();</span>
+<span class="fc bfc" id="L69" title="All 2 branches covered.">		for(PlanningEntry&lt;R&gt; pe:entries) {//遍历计划项占用的所有资源</span>
+<span class="fc bfc" id="L70" title="All 2 branches covered.">			if(pe.getResource().isEmpty())</span>
+<span class="fc" id="L71">				continue;</span>
+<span class="fc bfc" id="L72" title="All 2 branches covered.">			for(R r:pe.getResource()) {</span>
+<span class="pc bpc" id="L73" title="1 of 2 branches missed.">				if(resources.contains(r)) {//资源之前遍历过，哈希表中对应值更新</span>
+<span class="nc" id="L74">					String starttime=pe.getTime().get(0).getStarttime();//起始时间</span>
+<span class="nc" id="L75">					String endtime=pe.getTime().get(pe.getTime().size()-1).getEndtime();//终止时间</span>
+<span class="nc" id="L76">					Timeslot timeslot=new Timeslot(starttime, endtime);</span>
+<span class="nc" id="L77">					hashtable.get(r).add(timeslot);</span>
+<span class="nc" id="L78">					boolean flag=false;</span>
+					try {
+<span class="nc" id="L80">						flag = checkTimeConflict(hashtable.get(r));</span>
+<span class="nc" id="L81">					} catch (ParseException e) {</span>
+<span class="nc" id="L82">						e.printStackTrace();</span>
+					}
+<span class="nc bnc" id="L84" title="All 2 branches missed.">					if(flag)</span>
+<span class="nc" id="L85">						return true;</span>
+				}
+				else {
+<span class="fc" id="L88">					resources.add(r);</span>
+<span class="fc" id="L89">					List&lt;Timeslot&gt; timeslots=new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L90">					String starttime=pe.getTime().get(0).getStarttime();//起始时间</span>
+<span class="fc" id="L91">					String endtime=pe.getTime().get(pe.getTime().size()-1).getEndtime();//终止时间</span>
+<span class="fc" id="L92">					Timeslot timeslot=new Timeslot(starttime, endtime);</span>
+<span class="fc" id="L93">					timeslots.add(timeslot);</span>
+<span class="fc" id="L94">					hashtable.put(r,timeslots);</span>
+				}
+			}
+		}
+<span class="fc" id="L98">		return false;</span>
+	}
+	
+	/**
+	 * 找到一组计划项entries中与e占用同一资源r的前置计划项
+	 * @param &lt;R&gt; 占用资源的类型
+	 * @param r 共同占用的资源
+	 * @param e 指定计划项
+	 * @param entries 一组计划项
+	 * @return 前置计划项,如果没有这样的计划项，返回null
+	 * @throws ParseException 未能将时间转化为标准格式
+	 */
+	public abstract &lt;R&gt; PlanningEntry&lt;R&gt; findPreEntryPerResource(R r,PlanningEntry&lt;R&gt; e,List&lt;? extends PlanningEntry&lt;R&gt;&gt; entries) throws ParseException;
+	
+	/**
+	 * 检测一组时间对之间是否会产生冲突
+	 * @param timeslots 一组待检测时间对
+	 * @return 如果产生冲突返回true，否则返回false
+	 * @throws ParseException 未能将时间转化为标准格式
+	 */
+	private boolean checkTimeConflict(List&lt;Timeslot&gt; timeslots) throws ParseException {
+<span class="fc" id="L119">		SimpleDateFormat sdf=new SimpleDateFormat(&quot;yyyy-MM-dd HH:mm&quot;,Locale.CHINA);</span>
+<span class="fc bfc" id="L120" title="All 2 branches covered.">		for(int i=1;i&lt;timeslots.size();i++) {</span>
+<span class="fc" id="L121">			Timeslot timei=timeslots.get(i);</span>
+<span class="fc" id="L122">			Date dateistart=sdf.parse(timei.getStarttime());</span>
+<span class="fc" id="L123">			Date dateiend=sdf.parse(timei.getEndtime());</span>
+<span class="fc bfc" id="L124" title="All 2 branches covered.">			for(int j=i-1;j&gt;=0;j--) {</span>
+<span class="fc" id="L125">				Timeslot timej=timeslots.get(j);</span>
+<span class="fc" id="L126">				Date datejstart=sdf.parse(timej.getStarttime());</span>
+<span class="fc" id="L127">				Date datejend=sdf.parse(timej.getEndtime());</span>
+<span class="pc bpc" id="L128" title="1 of 4 branches missed.">				if(dateiend.before(datejstart)||dateistart.after(datejend))</span>
+<span class="fc" id="L129">					continue;</span>
+				else
+<span class="fc" id="L131">					return true;</span>
+			}
+		}
+<span class="fc" id="L134">		return false;</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.3.201901230119</span>Lab4-2020SP (2020-5-23 15:07:06)</div></body></html>

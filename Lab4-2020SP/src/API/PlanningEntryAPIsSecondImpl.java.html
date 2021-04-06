@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../jacoco-resources/report.gif" type="image/gif"/><title>PlanningEntryAPIsSecondImpl.java</title><link rel="stylesheet" href="../../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">Lab4-2020SP (2020-5-23 15:07:06)</a> &gt; <a href="../../index.html" class="el_group">Lab4-2020SP</a> &gt; <a href="../index.html" class="el_bundle">src</a> &gt; <a href="index.source.html" class="el_package">API</a> &gt; <span class="el_source">PlanningEntryAPIsSecondImpl.java</span></div><h1>PlanningEntryAPIsSecondImpl.java</h1><pre class="source lang-java linenums">package API;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
+
+import common.PlanningEntry;
+
+/**
+ * PlanningEntryAPIs的第二种实现方式(指findPreEntryPerResource函数)
+ * @author 123
+ *
+ */
+<span class="fc" id="L17">public class PlanningEntryAPIsSecondImpl extends PlanningEntryAPIs{</span>
+	@Override
+	public &lt;R&gt; PlanningEntry&lt;R&gt; findPreEntryPerResource(R r,PlanningEntry&lt;R&gt; e,List&lt;? extends PlanningEntry&lt;R&gt;&gt; entries) throws ParseException{
+<span class="pc bpc" id="L20" title="1 of 2 branches missed.">		if(entries.isEmpty())</span>
+<span class="nc" id="L21">			return null;</span>
+<span class="fc" id="L22">		List&lt;PlanningEntry&lt;R&gt;&gt; pes=new ArrayList&lt;PlanningEntry&lt;R&gt;&gt;();</span>
+<span class="fc" id="L23">		SimpleDateFormat sdf=new SimpleDateFormat(&quot;yyyy-MM-dd HH:mm&quot;,Locale.CHINA);</span>
+<span class="fc" id="L24">		String objectstarttime=e.getTime().get(0).getStarttime();//目标计划项的起始时间</span>
+<span class="fc" id="L25">		Date startDate=sdf.parse(objectstarttime);</span>
+<span class="fc bfc" id="L26" title="All 2 branches covered.">		for(PlanningEntry&lt;R&gt; entry:entries) {//把所有结束时间在e开始之前的计划项都加入到pes中</span>
+<span class="pc bpc" id="L27" title="1 of 2 branches missed.">			if(entry.getResource()==null) {</span>
+<span class="nc" id="L28">				continue;</span>
+			}
+<span class="pc bpc" id="L30" title="1 of 2 branches missed.">			if(!entry.getResource().contains(r)) {</span>
+<span class="nc" id="L31">				continue;</span>
+			}
+<span class="fc" id="L33">			String endtime=entry.getTime().get(entry.getTime().size()-1).getEndtime();//计划项entry的终止时间</span>
+<span class="fc" id="L34">			Date date=sdf.parse(endtime);</span>
+<span class="fc bfc" id="L35" title="All 2 branches covered.">			if(date.before(startDate))</span>
+<span class="fc" id="L36">				pes.add(entry);</span>
+		}
+<span class="pc bpc" id="L38" title="1 of 2 branches missed.">		if(pes.isEmpty())</span>
+<span class="nc" id="L39">			return null;</span>
+<span class="pc bpc" id="L40" title="1 of 2 branches missed.">			for(int j=0;j&lt;pes.size()-1;j++) {//根据结束时间进行冒泡排序的第一轮</span>
+<span class="nc" id="L41">				String endtime1=pes.get(j).getTime().get(pes.get(j).getTime().size()-1).getEndtime();</span>
+<span class="nc" id="L42">				String endtime2=pes.get(j+1).getTime().get(pes.get(j+1).getTime().size()-1).getEndtime();</span>
+<span class="nc" id="L43">				Date date1=sdf.parse(endtime1);</span>
+<span class="nc" id="L44">				Date date2=sdf.parse(endtime2);</span>
+<span class="nc bnc" id="L45" title="All 2 branches missed.">				if(date1.after(date2)) {//最大元素不断后移，一直到最后一个元素</span>
+<span class="nc" id="L46">					PlanningEntry&lt;R&gt; p=pes.get(j);</span>
+<span class="nc" id="L47">					pes.set(j, pes.get(j+1));</span>
+<span class="nc" id="L48">					pes.set(j+1, p);</span>
+				}
+			
+			}
+<span class="fc" id="L52">		return pes.get(pes.size()-1);//最大的在末尾</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.3.201901230119</span>Lab4-2020SP (2020-5-23 15:07:06)</div></body></html>

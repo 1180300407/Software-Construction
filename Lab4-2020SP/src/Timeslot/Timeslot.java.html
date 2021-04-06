@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../jacoco-resources/report.gif" type="image/gif"/><title>Timeslot.java</title><link rel="stylesheet" href="../../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">Lab4-2020SP (2020-5-23 15:07:06)</a> &gt; <a href="../../index.html" class="el_group">Lab4-2020SP</a> &gt; <a href="../index.html" class="el_bundle">src</a> &gt; <a href="index.source.html" class="el_package">Timeslot</a> &gt; <span class="el_source">Timeslot.java</span></div><h1>Timeslot.java</h1><pre class="source lang-java linenums">package Timeslot;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+/**
+ * 一组起始时间对,不可变类
+ * @author 123
+ *
+ */
+
+<span class="pc bpc" id="L15" title="1 of 2 branches missed.">public class Timeslot {</span>
+	private final String starttime;
+	private final String endtime;
+	
+	//Abstraction function:
+	//	AF(starttime,endtime)=以starttime为起始时间，endtime为终止时间的时间对
+	//Representation invariant:
+	//	starttime和endtime都是 yyyy-MM-dd HH:mm 形式
+	//	endtime晚于starttime(结束时间晚于开始时间)
+	//Safety from rep exposure:
+	//	成员变量全是private且final的，均为不可变类型，不存在表示泄露
+	private void checkRep() {
+<span class="fc" id="L27">		String pattern=&quot;yyyy-MM-dd HH:mm&quot;;</span>
+<span class="fc" id="L28">		SimpleDateFormat dateFormat=new SimpleDateFormat(pattern);</span>
+		try {
+<span class="fc" id="L30">			Date date1=dateFormat.parse(starttime);</span>
+<span class="fc" id="L31">			Date date2=dateFormat.parse(endtime);</span>
+<span class="pc bpc" id="L32" title="2 of 4 branches missed.">			assert date2.after(date1);</span>
+<span class="nc" id="L33">		} catch (ParseException e) {</span>
+<span class="nc" id="L34">			e.printStackTrace();</span>
+		}
+<span class="fc" id="L36">	}</span>
+	
+	/**
+	 * 构造函数
+	 * @param starttime 开始时间
+	 * @param endtime 终止时间
+	 */
+<span class="fc" id="L43">	public Timeslot(String starttime,String endtime) {</span>
+<span class="fc" id="L44">		String pathString=&quot;\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}&quot;;</span>
+<span class="fc" id="L45">		Pattern pattern=Pattern.compile(pathString);</span>
+<span class="fc" id="L46">		Matcher matcher1=pattern.matcher(starttime);</span>
+<span class="fc" id="L47">		Matcher matcher2=pattern.matcher(endtime);</span>
+<span class="pc bpc" id="L48" title="2 of 4 branches missed.">		if(matcher1.matches()&amp;&amp;matcher2.matches()) {</span>
+<span class="fc" id="L49">			this.starttime=starttime;</span>
+<span class="fc" id="L50">			this.endtime=endtime;</span>
+<span class="fc" id="L51">			checkRep();</span>
+<span class="fc" id="L52">		}</span>
+		else {
+<span class="nc" id="L54">			throw new RuntimeException(&quot;时间格式不合法!&quot;);</span>
+		}
+<span class="fc" id="L56">	}</span>
+
+	/**
+	 * @return 返回时间对的起始时间
+	 */
+	public String getStarttime() {
+<span class="fc" id="L62">		return starttime;</span>
+	}
+
+	/**
+	 * @return 返回时间对的终止时间
+	 */
+	public String getEndtime() {
+<span class="fc" id="L69">		return endtime;</span>
+	}
+
+	//不可变类重写equals与hashcode
+	@Override
+	public int hashCode() {
+<span class="nc" id="L75">		final int prime = 31;</span>
+<span class="nc" id="L76">		int result = 1;</span>
+<span class="nc bnc" id="L77" title="All 2 branches missed.">		result = prime * result + ((endtime == null) ? 0 : endtime.hashCode());</span>
+<span class="nc bnc" id="L78" title="All 2 branches missed.">		result = prime * result + ((starttime == null) ? 0 : starttime.hashCode());</span>
+<span class="nc" id="L79">		return result;</span>
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+<span class="pc bpc" id="L84" title="1 of 2 branches missed.">		if (this == obj)</span>
+<span class="fc" id="L85">			return true;</span>
+<span class="nc bnc" id="L86" title="All 2 branches missed.">		if (obj == null)</span>
+<span class="nc" id="L87">			return false;</span>
+<span class="nc bnc" id="L88" title="All 2 branches missed.">		if (getClass() != obj.getClass())</span>
+<span class="nc" id="L89">			return false;</span>
+<span class="nc" id="L90">		Timeslot other = (Timeslot) obj;</span>
+<span class="nc bnc" id="L91" title="All 2 branches missed.">		if (endtime == null) {</span>
+<span class="nc bnc" id="L92" title="All 2 branches missed.">			if (other.endtime != null)</span>
+<span class="nc" id="L93">				return false;</span>
+<span class="nc bnc" id="L94" title="All 2 branches missed.">		} else if (!endtime.equals(other.endtime))</span>
+<span class="nc" id="L95">			return false;</span>
+<span class="nc bnc" id="L96" title="All 2 branches missed.">		if (starttime == null) {</span>
+<span class="nc bnc" id="L97" title="All 2 branches missed.">			if (other.starttime != null)</span>
+<span class="nc" id="L98">				return false;</span>
+<span class="nc bnc" id="L99" title="All 2 branches missed.">		} else if (!starttime.equals(other.starttime))</span>
+<span class="nc" id="L100">			return false;</span>
+<span class="nc" id="L101">		return true;</span>
+	}
+	
+	
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.3.201901230119</span>Lab4-2020SP (2020-5-23 15:07:06)</div></body></html>

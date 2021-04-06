@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../jacoco-resources/report.gif" type="image/gif"/><title>MultipleSortedResourceEntryImplTest.java</title><link rel="stylesheet" href="../../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">Lab4-2020SP (2020-5-23 15:07:06)</a> &gt; <a href="../../index.html" class="el_group">Lab4-2020SP</a> &gt; <a href="../index.html" class="el_bundle">test</a> &gt; <a href="index.source.html" class="el_package">multiimplement</a> &gt; <span class="el_source">MultipleSortedResourceEntryImplTest.java</span></div><h1>MultipleSortedResourceEntryImplTest.java</h1><pre class="source lang-java linenums">package multiimplement;
+
+import static org.junit.Assert.*;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.junit.Test;
+
+import Resources.Carriage;
+
+<span class="fc" id="L12">public class MultipleSortedResourceEntryImplTest {</span>
+	
+	//测试策略:设置一次；设置多次
+	//为了解开allocateResource函数与get函数之间的耦合,将类中的resources属性设置为public进行测试
+	//*
+	@Test
+	public void allocateReourcetest() {
+<span class="fc" id="L19">		Carriage carriage1=new Carriage(&quot;1&quot;, &quot;t&quot;, 10, &quot;manufactureyear&quot;);</span>
+<span class="fc" id="L20">		Carriage carriage2=new Carriage(&quot;5&quot;, &quot;t&quot;, 10, &quot;manufactureyear&quot;);</span>
+<span class="fc" id="L21">		Carriage carriage3=new Carriage(&quot;9&quot;, &quot;t&quot;, 10, &quot;manufactureyear&quot;);</span>
+<span class="fc" id="L22">		List&lt;Carriage&gt; carriages=new ArrayList&lt;Carriage&gt;();</span>
+<span class="fc" id="L23">		carriages.add(carriage3);</span>
+<span class="fc" id="L24">		carriages.add(carriage2);</span>
+<span class="fc" id="L25">		carriages.add(carriage1);</span>
+<span class="fc" id="L26">		MultipleSortedResourceEntryImpl&lt;Carriage&gt; msr=new MultipleSortedResourceEntryImpl&lt;Carriage&gt;();</span>
+<span class="fc" id="L27">		msr.allocateResource(carriages);</span>
+<span class="fc" id="L28">		assertEquals(carriages, msr.resources);</span>
+<span class="fc" id="L29">		carriages.remove(carriage2);</span>
+<span class="fc" id="L30">		msr.allocateResource(carriages);</span>
+<span class="fc" id="L31">		assertNotEquals(carriages, msr.resources);</span>
+<span class="fc" id="L32">	}</span>
+	
+	
+	@Test
+	public void getResource() {
+<span class="fc" id="L37">		Carriage carriage1=new Carriage(&quot;1&quot;, &quot;t&quot;, 10, &quot;manufactureyear&quot;);</span>
+<span class="fc" id="L38">		Carriage carriage2=new Carriage(&quot;5&quot;, &quot;t&quot;, 10, &quot;manufactureyear&quot;);</span>
+<span class="fc" id="L39">		Carriage carriage3=new Carriage(&quot;9&quot;, &quot;t&quot;, 10, &quot;manufactureyear&quot;);</span>
+<span class="fc" id="L40">		List&lt;Carriage&gt; carriages=new ArrayList&lt;Carriage&gt;();</span>
+<span class="fc" id="L41">		carriages.add(carriage3);</span>
+<span class="fc" id="L42">		carriages.add(carriage2);</span>
+<span class="fc" id="L43">		carriages.add(carriage1);</span>
+<span class="fc" id="L44">		MultipleSortedResourceEntryImpl&lt;Carriage&gt; msr=new MultipleSortedResourceEntryImpl&lt;Carriage&gt;();</span>
+<span class="fc" id="L45">		msr.allocateResource(carriages);</span>
+<span class="fc" id="L46">		assertEquals(carriages, msr.getResource());</span>
+<span class="fc" id="L47">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.3.201901230119</span>Lab4-2020SP (2020-5-23 15:07:06)</div></body></html>

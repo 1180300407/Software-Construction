@@ -1,0 +1,26 @@
+Flight:2020-06-09,AA0055
+{
+DepartureAirport:Ningbo
+ArrivalAirport:Nanchang
+DepatureTime:2020-06-09 18:08
+ArrivalTime:2020-06-09 19:37
+Plane:B0243
+{
+Type:A380
+Seats:468
+Age:2.3
+}
+}
+Flight:2020-06-09,AA0055
+{
+DepartureAirport:Ningbo
+ArrivalAirport:Nanchang
+DepatureTime:2020-06-09 18:08
+ArrivalTime:2020-06-09 19:37
+Plane:B0243
+{
+Type:A380
+Seats:468
+Age:2.3
+}
+}

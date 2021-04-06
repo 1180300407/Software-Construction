@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../jacoco-resources/report.gif" type="image/gif"/><title>PlaneTest.java</title><link rel="stylesheet" href="../../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">Lab4-2020SP (2020-5-23 15:07:06)</a> &gt; <a href="../../index.html" class="el_group">Lab4-2020SP</a> &gt; <a href="../index.html" class="el_bundle">test</a> &gt; <a href="index.source.html" class="el_package">Resources</a> &gt; <span class="el_source">PlaneTest.java</span></div><h1>PlaneTest.java</h1><pre class="source lang-java linenums">package Resources;
+
+import static org.junit.Assert.*;
+
+import java.util.HashSet;
+import java.util.Set;
+
+import org.junit.Test;
+
+<span class="fc" id="L10">public class PlaneTest {</span>
+
+	@Test
+	public void getIdtest() {
+<span class="fc" id="L14">		Plane plane=new Plane(&quot;N3025&quot;, &quot;type&quot;, 50, 2.5);</span>
+<span class="fc" id="L15">		assertEquals(&quot;N3025&quot;, plane.getId());</span>
+<span class="fc" id="L16">	}</span>
+	
+	@Test
+	public void getTypeTest() {
+<span class="fc" id="L20">		Plane plane=new Plane(&quot;B9999&quot;, &quot;type&quot;, 50, 2.1);</span>
+<span class="fc" id="L21">		assertEquals(&quot;type&quot;, plane.getType());</span>
+<span class="fc" id="L22">	}</span>
+	
+	@Test
+	public void getSeatsTest() {
+<span class="fc" id="L26">		Plane plane=new Plane(&quot;N1552&quot;, &quot;type&quot;, 50, 2.5);</span>
+<span class="fc" id="L27">		assertEquals(50, plane.getSeats());</span>
+<span class="fc" id="L28">	}</span>
+	
+	@Test
+	public void getPlaneageTest() {
+<span class="fc" id="L32">		Plane plane=new Plane(&quot;N0001&quot;, &quot;type&quot;, 50, 11.5);</span>
+<span class="fc" id="L33">		assertEquals(11,(int)plane.getPlaneage());</span>
+<span class="fc" id="L34">		assertEquals(12, (int)(plane.getPlaneage()+0.5));</span>
+<span class="fc" id="L35">	}</span>
+	
+	@Test
+	public void hashCodeTest() {
+<span class="fc" id="L39">		Plane plane1=new Plane(&quot;B9210&quot;, &quot;type&quot;, 50, 2.5);</span>
+<span class="fc" id="L40">		Set&lt;Plane&gt; planes=new HashSet&lt;Plane&gt;();</span>
+<span class="fc" id="L41">		planes.add(plane1);</span>
+<span class="fc" id="L42">		Plane plane2=new Plane(&quot;B9210&quot;, &quot;typ&quot;, 5, 2.5);</span>
+<span class="fc" id="L43">		assertTrue(planes.contains(plane2));</span>
+<span class="fc" id="L44">	}</span>
+	
+	@Test
+	public void equalsTest() {
+<span class="fc" id="L48">		Plane plane1=new Plane(&quot;B8521&quot;, &quot;type&quot;, 50, 2.5);</span>
+<span class="fc" id="L49">		Plane plane2=new Plane(&quot;N6901&quot;, &quot;type&quot;, 50, 2.7);</span>
+<span class="fc" id="L50">		Plane plane3=new Plane(&quot;B8521&quot;, &quot;t&quot;, 10, 2.5);</span>
+<span class="fc" id="L51">		assertEquals(plane1,plane3);</span>
+<span class="fc" id="L52">		assertNotEquals(plane1, plane2);</span>
+<span class="fc" id="L53">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.3.201901230119</span>Lab4-2020SP (2020-5-23 15:07:06)</div></body></html>

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../jacoco-resources/report.gif" type="image/gif"/><title>LocationTest.java</title><link rel="stylesheet" href="../../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">Lab4-2020SP (2020-5-23 15:07:06)</a> &gt; <a href="../../index.html" class="el_group">Lab4-2020SP</a> &gt; <a href="../index.html" class="el_bundle">test</a> &gt; <a href="index.source.html" class="el_package">Location</a> &gt; <span class="el_source">LocationTest.java</span></div><h1>LocationTest.java</h1><pre class="source lang-java linenums">package Location;
+
+import static org.junit.Assert.*;
+
+import org.junit.Test;
+
+<span class="fc" id="L7">public class LocationTest {</span>
+	@Test
+	public void getLongitudetest() {
+<span class="fc" id="L10">		Location location=new Location(&quot;130E&quot;,&quot;45S&quot; , &quot;test&quot;, true);</span>
+<span class="fc" id="L11">		assertEquals(&quot;130E&quot;, location.getLongitude());</span>
+<span class="fc" id="L12">	}</span>
+	
+	@Test
+	public void getLatitudetest() {
+<span class="fc" id="L16">		Location location=new Location(&quot;10E&quot;,&quot;30S&quot; , &quot;test&quot;, false);</span>
+<span class="fc" id="L17">		assertEquals(&quot;30S&quot;, location.getLatitude());</span>
+<span class="fc" id="L18">	}</span>
+	
+	@Test
+	public void getNametest() {
+<span class="fc" id="L22">		Location location=new Location(&quot;99W&quot;,&quot;4N&quot; , &quot;tWt&quot;, true);</span>
+<span class="fc" id="L23">		assertEquals(&quot;tWt&quot;, location.getName());</span>
+<span class="fc" id="L24">	}</span>
+	
+	@Test
+	public void isshareabletest() {
+<span class="fc" id="L28">		Location location=new Location(&quot;4W&quot;,&quot;30N&quot; , &quot;test&quot;, false);</span>
+<span class="fc" id="L29">		assertFalse(location.isshareable());</span>
+<span class="fc" id="L30">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.3.201901230119</span>Lab4-2020SP (2020-5-23 15:07:06)</div></body></html>

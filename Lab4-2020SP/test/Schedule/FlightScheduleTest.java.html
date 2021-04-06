@@ -1,0 +1,601 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../jacoco-resources/report.gif" type="image/gif"/><title>FlightScheduleTest.java</title><link rel="stylesheet" href="../../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">Lab4-2020SP (2020-5-23 15:07:06)</a> &gt; <a href="../../index.html" class="el_group">Lab4-2020SP</a> &gt; <a href="../index.html" class="el_bundle">test</a> &gt; <a href="index.source.html" class="el_package">Schedule</a> &gt; <span class="el_source">FlightScheduleTest.java</span></div><h1>FlightScheduleTest.java</h1><pre class="source lang-java linenums">package Schedule;
+
+import static org.junit.Assert.*;
+
+import java.io.FileNotFoundException;
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
+
+import Exceptions.*;
+import Location.Location;
+import Resources.Plane;
+import Timeslot.Timeslot;
+import compositeinterface.FlightEntry;
+
+<span class="fc" id="L21">public class FlightScheduleTest {</span>
+	FlightSchedule fs;
+<span class="fc" id="L23">	Plane plane=new Plane(&quot;N3025&quot;, &quot;type&quot;, 50, 2.5);</span>
+<span class="fc" id="L24">	Location start=new Location(&quot;130E&quot;,&quot;45S&quot; , &quot;test&quot;, true);</span>
+<span class="fc" id="L25">	Location end=new Location(&quot;10E&quot;,&quot;47n&quot; , &quot;tet&quot;, true);</span>
+	
+	@Before
+	public void prepare() {
+<span class="fc" id="L29">		fs=new FlightSchedule();</span>
+<span class="fc" id="L30">	}</span>
+	@Rule
+<span class="fc" id="L32">	public ExpectedException expectedEx = ExpectedException.none();</span>
+	
+	//为了避免get函数与该函数之间的联系，先将属性改为public进行测试
+	//测试策略：单次添加飞机；重复添加飞机
+	//			添加一个飞机；添加多个飞机
+	@Test
+	public void addPlanetest() throws IllegalPlaneContentException {
+<span class="fc" id="L39">		fs.addPlane(plane);</span>
+<span class="fc" id="L40">		assertEquals(1,fs.planes.size());</span>
+<span class="fc" id="L41">		assertTrue(fs.planes.contains(plane));</span>
+<span class="fc" id="L42">		Plane plane2=new Plane(&quot;N3074&quot;, &quot;type&quot;, 50, 2.5);</span>
+<span class="fc" id="L43">		fs.addPlane(plane2);</span>
+<span class="fc" id="L44">		assertEquals(2,fs.planes.size());</span>
+<span class="fc" id="L45">		assertTrue(fs.planes.contains(plane2));</span>
+<span class="fc" id="L46">		fs.addPlane(plane);</span>
+<span class="fc" id="L47">		assertEquals(2,fs.planes.size());</span>
+<span class="fc" id="L48">	}</span>
+
+	//为了避免get函数与该函数之间的联系，先将属性改为public进行函数的测试
+	//测试策略：单次添加位置；重复添加位置
+	//			添加一个位置；添加多个位置
+	@Test
+	public void addLocationTest() {
+<span class="fc" id="L55">		fs.addLocation(start);</span>
+<span class="fc" id="L56">		assertEquals(1, fs.locations.size());</span>
+<span class="fc" id="L57">		assertTrue(fs.locations.contains(start));</span>
+<span class="fc" id="L58">		fs.addLocation(end);</span>
+<span class="fc" id="L59">		assertTrue(fs.locations.contains(end));</span>
+<span class="fc" id="L60">		assertEquals(2, fs.locations.size());</span>
+<span class="fc" id="L61">		fs.addLocation(end);</span>
+<span class="fc" id="L62">		assertEquals(2, fs.locations.size());</span>
+<span class="fc" id="L63">	}</span>
+	
+	@Test
+	public void getPlanesTest() throws IllegalPlaneContentException {
+<span class="fc" id="L67">		fs.addPlane(plane);</span>
+<span class="fc" id="L68">		Plane plane2=new Plane(&quot;N3074&quot;, &quot;type&quot;, 50, 2.5);</span>
+<span class="fc" id="L69">		assertEquals(1, fs.getPlanes().size());</span>
+<span class="fc" id="L70">		assertTrue(fs.getPlanes().contains(plane));</span>
+<span class="fc" id="L71">		fs.addPlane(plane2);</span>
+<span class="fc" id="L72">		assertTrue(fs.getPlanes().contains(plane2));</span>
+<span class="fc" id="L73">		assertEquals(2, fs.getPlanes().size());</span>
+<span class="fc" id="L74">	}</span>
+	
+	@Test
+	public void getLocationsTest() {
+<span class="fc" id="L78">		fs.addLocation(start);</span>
+<span class="fc" id="L79">		assertEquals(1, fs.getLocations().size());</span>
+<span class="fc" id="L80">		assertTrue(fs.getLocations().contains(start));</span>
+<span class="fc" id="L81">		fs.addLocation(end);</span>
+<span class="fc" id="L82">		assertEquals(2, fs.getLocations().size());</span>
+<span class="fc" id="L83">		assertTrue(fs.getLocations().contains(end));</span>
+<span class="fc" id="L84">	}</span>
+	
+	//为了避免get函数与该函数之间的联系，先将属性改为public进行函数的测试
+	//测试策略:位置尚未纳入管理；位置已经纳入管理
+	//		   航班之前从未创建过；航班已经创建但位置改变；航班已创建,有相同日期但时间点改变;
+	//		  航班已创建，完全重复地二次创建;航班已创建，日期不同时间点不同；航班已创建，日期不同时间点相同(这种情形应该是成立的)；
+	//异常情况：位置尚未纳入管理
+	@Test
+	public void createFlightTest() throws InconsistentStartOrEndException, LocationNotFoundException, SameLabelException {
+<span class="fc" id="L93">		Timeslot timeslot=new Timeslot(&quot;2020-04-05 10:14&quot;, &quot;2020-04-07 14:15&quot;);</span>
+<span class="fc" id="L94">		expectedEx.expect(LocationNotFoundException.class);</span>
+<span class="nc" id="L95">		fs.createFlight(&quot;NR7412&quot;, &quot;test&quot;, &quot;tet&quot;, timeslot);</span>
+<span class="nc" id="L96">	}</span>
+	
+	//位置已经纳入管理、航班之前从未创建过
+	@Test
+	public void createFlightTest2() throws InconsistentStartOrEndException, LocationNotFoundException, SameLabelException {
+<span class="fc" id="L101">		Timeslot timeslot=new Timeslot(&quot;2020-04-05 10:14&quot;, &quot;2020-04-07 14:15&quot;);</span>
+<span class="fc" id="L102">		fs.addLocation(start);</span>
+<span class="fc" id="L103">		fs.addLocation(end);</span>
+<span class="fc" id="L104">		fs.createFlight(&quot;NR7412&quot;, &quot;test&quot;, &quot;tet&quot;, timeslot);</span>
+<span class="fc" id="L105">		assertEquals(1, fs.flights.size());</span>
+<span class="fc" id="L106">	}</span>
+	
+	//异常情况：航班已创建，完全重复地二次创建
+	@Test
+	public void createFlightTest3() throws InconsistentStartOrEndException, LocationNotFoundException, SameLabelException {
+<span class="fc" id="L111">		Timeslot timeslot=new Timeslot(&quot;2020-04-05 10:14&quot;, &quot;2020-04-07 14:15&quot;);</span>
+<span class="fc" id="L112">		fs.addLocation(start);</span>
+<span class="fc" id="L113">		fs.addLocation(end);</span>
+<span class="fc" id="L114">		fs.createFlight(&quot;NR7412&quot;, &quot;test&quot;, &quot;tet&quot;, timeslot);</span>
+<span class="fc" id="L115">		assertEquals(1, fs.flights.size());</span>
+<span class="fc" id="L116">		expectedEx.expect(SameLabelException.class);</span>
+<span class="nc" id="L117">		fs.createFlight(&quot;NR7412&quot;, &quot;test&quot;, &quot;tet&quot;, timeslot);</span>
+<span class="nc" id="L118">	}</span>
+	
+	//异常情况：航班已经创建但位置改变
+	@Test
+	public void createFlightTest4() throws InconsistentStartOrEndException, LocationNotFoundException, SameLabelException {
+<span class="fc" id="L123">		Timeslot timeslot=new Timeslot(&quot;2020-04-05 10:14&quot;, &quot;2020-04-07 14:15&quot;);</span>
+<span class="fc" id="L124">		fs.addLocation(start);</span>
+<span class="fc" id="L125">		fs.addLocation(end);</span>
+<span class="fc" id="L126">		fs.createFlight(&quot;NR7412&quot;, &quot;test&quot;, &quot;tet&quot;, timeslot);</span>
+<span class="fc" id="L127">		assertEquals(1, fs.flights.size());</span>
+<span class="fc" id="L128">		expectedEx.expect(InconsistentStartOrEndException.class);</span>
+<span class="nc" id="L129">		fs.createFlight(&quot;NR7412&quot;, &quot;tet&quot;, &quot;test&quot;, timeslot);</span>
+<span class="nc" id="L130">	}</span>
+	
+	//异常情况：航班已创建,有相同日期但时间点改变;
+	@Test
+	public void createFlightTest5() throws InconsistentStartOrEndException, LocationNotFoundException, SameLabelException {
+<span class="fc" id="L135">		Timeslot timeslot=new Timeslot(&quot;2020-04-05 10:14&quot;, &quot;2020-04-07 14:15&quot;);</span>
+<span class="fc" id="L136">		fs.addLocation(start);</span>
+<span class="fc" id="L137">		fs.addLocation(end);</span>
+<span class="fc" id="L138">		fs.createFlight(&quot;NR7412&quot;, &quot;test&quot;, &quot;tet&quot;, timeslot);</span>
+<span class="fc" id="L139">		assertEquals(1, fs.flights.size());</span>
+<span class="fc" id="L140">		Timeslot timeslot2=new Timeslot(&quot;2020-04-06 10:14&quot;, &quot;2020-04-07 14:15&quot;);</span>
+<span class="fc" id="L141">		expectedEx.expect(InconsistentStartOrEndException.class);</span>
+<span class="nc" id="L142">		fs.createFlight(&quot;NR7412&quot;, &quot;test&quot;, &quot;tet&quot;, timeslot2);</span>
+<span class="nc" id="L143">	}</span>
+	
+	//异常情况：航班已创建，日期不同时间点不同
+	@Test
+	public void createFlightTest6() throws InconsistentStartOrEndException, LocationNotFoundException, SameLabelException {
+<span class="fc" id="L148">		Timeslot timeslot=new Timeslot(&quot;2020-04-05 10:14&quot;, &quot;2020-04-07 14:15&quot;);</span>
+<span class="fc" id="L149">		fs.addLocation(start);</span>
+<span class="fc" id="L150">		fs.addLocation(end);</span>
+<span class="fc" id="L151">		fs.createFlight(&quot;NR7412&quot;, &quot;test&quot;, &quot;tet&quot;, timeslot);</span>
+<span class="fc" id="L152">		assertEquals(1, fs.flights.size());</span>
+<span class="fc" id="L153">		Timeslot timeslot3=new Timeslot(&quot;2020-04-03 12:14&quot;, &quot;2020-04-04 14:15&quot;);</span>
+<span class="fc" id="L154">		expectedEx.expect(InconsistentStartOrEndException.class);</span>
+<span class="nc" id="L155">		fs.createFlight(&quot;NR7412&quot;, &quot;test&quot;, &quot;tet&quot;, timeslot3);</span>
+<span class="nc" id="L156">	}</span>
+	
+	//航班已创建，日期不同时间点相同
+	@Test
+	public void createFlightTest7() throws InconsistentStartOrEndException, LocationNotFoundException, SameLabelException {
+<span class="fc" id="L161">		Timeslot timeslot=new Timeslot(&quot;2020-04-05 10:14&quot;, &quot;2020-04-07 14:15&quot;);</span>
+<span class="fc" id="L162">		fs.addLocation(start);</span>
+<span class="fc" id="L163">		fs.addLocation(end);</span>
+<span class="fc" id="L164">		fs.createFlight(&quot;NR7412&quot;, &quot;test&quot;, &quot;tet&quot;, timeslot);</span>
+<span class="fc" id="L165">		assertEquals(1, fs.flights.size());</span>
+<span class="fc" id="L166">		Timeslot timeslot4=new Timeslot(&quot;2020-04-03 10:14&quot;, &quot;2020-04-04 14:15&quot;);</span>
+<span class="fc" id="L167">		fs.createFlight(&quot;NR7412&quot;, &quot;test&quot;, &quot;tet&quot;, timeslot4);</span>
+<span class="fc" id="L168">		assertEquals(2, fs.flights.size());</span>
+<span class="fc" id="L169">	}</span>
+	
+	//测试策略: 位置纳入管理 ；位置尚未纳入管理
+	//			航班之前从未创建过；航班已经创建过
+	//异常情况:位置尚未纳入管理；
+	@Test
+	public void getFlightsTest() throws ParseException, InconsistentStartOrEndException, LocationNotFoundException, SameLabelException {
+<span class="fc" id="L176">		Timeslot timeslot=new Timeslot(&quot;2020-04-05 10:14&quot;, &quot;2020-04-07 14:15&quot;);</span>
+<span class="fc" id="L177">		expectedEx.expect(LocationNotFoundException.class);</span>
+<span class="nc" id="L178">		fs.createFlight(&quot;NR7412&quot;,&quot;test&quot;, &quot;tet&quot;, timeslot);</span>
+<span class="nc" id="L179">	}</span>
+	
+	// 位置纳入管理、  航班之前从未创建过；
+	@Test
+	public void getFlightsTest2() throws ParseException, InconsistentStartOrEndException, LocationNotFoundException, SameLabelException {
+<span class="fc" id="L184">		Timeslot timeslot=new Timeslot(&quot;2020-04-05 10:14&quot;, &quot;2020-04-07 14:15&quot;);</span>
+<span class="fc" id="L185">		fs.addLocation(start);</span>
+<span class="fc" id="L186">		fs.addLocation(end);</span>
+<span class="fc" id="L187">		fs.createFlight(&quot;NR7412&quot;, &quot;test&quot;, &quot;tet&quot;, timeslot);</span>
+<span class="fc" id="L188">		assertEquals(1, fs.getFlights().size());</span>
+<span class="fc" id="L189">	}</span>
+	
+	//异常情况：航班之前已创建；
+	@Test
+	public void getFlightsTest3() throws ParseException, InconsistentStartOrEndException, LocationNotFoundException, SameLabelException {
+<span class="fc" id="L194">		Timeslot timeslot=new Timeslot(&quot;2020-04-05 10:14&quot;, &quot;2020-04-07 14:15&quot;);</span>
+<span class="fc" id="L195">		fs.addLocation(start);</span>
+<span class="fc" id="L196">		fs.addLocation(end);</span>
+<span class="fc" id="L197">		fs.createFlight(&quot;NR7412&quot;, &quot;test&quot;, &quot;tet&quot;, timeslot);</span>
+<span class="fc" id="L198">		assertEquals(1, fs.getFlights().size());</span>
+<span class="fc" id="L199">		expectedEx.expect(SameLabelException.class);</span>
+<span class="nc" id="L200">		fs.createFlight(&quot;NR7412&quot;, &quot;test&quot;, &quot;tet&quot;, timeslot);</span>
+<span class="nc" id="L201">	}</span>
+	
+	//测试策略：指定航班已创建；指定航班未创建
+	@Test
+	public void getFlightStateTest() throws InconsistentStartOrEndException, LocationNotFoundException, SameLabelException {
+<span class="fc" id="L206">		Timeslot timeslot=new Timeslot(&quot;2020-04-05 10:14&quot;, &quot;2020-04-07 14:15&quot;);</span>
+<span class="fc" id="L207">		fs.addLocation(end);</span>
+<span class="fc" id="L208">		fs.addLocation(start);</span>
+<span class="fc" id="L209">		fs.createFlight(&quot;NR7412&quot;, &quot;test&quot;, &quot;tet&quot;, timeslot);</span>
+<span class="fc" id="L210">		List&lt;Timeslot&gt; timeslots=new ArrayList&lt;Timeslot&gt;();</span>
+<span class="fc" id="L211">		timeslots.add(timeslot);</span>
+<span class="fc" id="L212">		assertEquals(&quot;null&quot;, fs.getFlightState(&quot;&quot;,timeslots));</span>
+<span class="fc" id="L213">		assertEquals(&quot;Waiting&quot;, fs.getFlightState(&quot;NR7412&quot;,timeslots));</span>
+<span class="fc" id="L214">	}</span>
+	
+	//测试策略:删除的飞机还未创建；删除的飞机已创建
+	//	   	     删除的飞机被占用；删除的飞机未被占用
+	//异常情况：删除的飞机还未创建
+	@Test
+	public void deletePlaneTest() throws IllegalPlaneContentException, InconsistentStartOrEndException, LocationNotFoundException, SameLabelException, ResourceNotFoundException, PlanEntryOccupyResourceException, ResourceConflictException, PlanEntryNotCreateException {
+<span class="fc" id="L221">		expectedEx.expect(ResourceNotFoundException.class);</span>
+<span class="nc" id="L222">		fs.deletePlane(&quot;N3025&quot;);</span>
+<span class="nc" id="L223">	}</span>
+	
+	//删除的飞机已创建、未被占用
+	@Test
+	public void deletePlaneTest2() throws IllegalPlaneContentException, InconsistentStartOrEndException, LocationNotFoundException, SameLabelException, ResourceNotFoundException, PlanEntryOccupyResourceException, ResourceConflictException, PlanEntryNotCreateException {
+<span class="fc" id="L228">		fs.addPlane(plane);</span>
+<span class="fc" id="L229">		Plane plane2=new Plane(&quot;N3074&quot;, &quot;type&quot;, 50, 2.5);</span>
+<span class="fc" id="L230">		assertEquals(1, fs.getPlanes().size());</span>
+<span class="fc" id="L231">		fs.addPlane(plane2);</span>
+<span class="fc" id="L232">		fs.deletePlane(&quot;N3074&quot;);</span>
+<span class="fc" id="L233">		assertEquals(1, fs.getPlanes().size());</span>
+<span class="fc" id="L234">	}</span>
+	
+	//异常情况：删除的飞机被占用
+	@Test
+	public void deletePlaneTest3() throws IllegalPlaneContentException, InconsistentStartOrEndException, LocationNotFoundException, SameLabelException, ResourceNotFoundException, PlanEntryOccupyResourceException, ResourceConflictException, PlanEntryNotCreateException {
+<span class="fc" id="L239">		fs.addPlane(plane);</span>
+<span class="fc" id="L240">		Timeslot timeslot=new Timeslot(&quot;2020-04-05 10:14&quot;, &quot;2020-04-07 14:15&quot;);</span>
+<span class="fc" id="L241">		fs.addLocation(start);</span>
+<span class="fc" id="L242">		fs.addLocation(end);</span>
+<span class="fc" id="L243">		fs.createFlight(&quot;NQ7851&quot;, start.getName(), end.getName(), timeslot);</span>
+<span class="fc" id="L244">		List&lt;Timeslot&gt; timeslots=new ArrayList&lt;Timeslot&gt;();</span>
+<span class="fc" id="L245">		timeslots.add(timeslot);</span>
+<span class="fc" id="L246">		fs.allocatePlane(&quot;NQ7851&quot;, &quot;N3025&quot;,timeslots);</span>
+<span class="fc" id="L247">		expectedEx.expect(PlanEntryOccupyResourceException.class);</span>
+<span class="nc" id="L248">		fs.deletePlane(&quot;N3025&quot;);</span>
+<span class="nc" id="L249">	}</span>
+	
+	//测试策略:删除的位置还未创建；删除的位置已创建
+	//		   删除的位置被占用；删除的位置未被占用
+	//异常情况:删除的位置未创建
+	@Test
+	public void deleteLocationTest() throws InconsistentStartOrEndException, LocationNotFoundException, SameLabelException, PlanEntryOccupyLocationException {
+<span class="fc" id="L256">		expectedEx.expect(LocationNotFoundException.class);</span>
+<span class="nc" id="L257">		fs.deleteLocation(&quot;tet&quot;);</span>
+<span class="nc" id="L258">	}</span>
+	
+	//删除的位置已创建、删除的位置未被占用
+	@Test
+	public void deleteLocationTest2() throws InconsistentStartOrEndException, LocationNotFoundException, SameLabelException, PlanEntryOccupyLocationException {
+<span class="fc" id="L263">		fs.addLocation(start);</span>
+<span class="fc" id="L264">		fs.addLocation(end);</span>
+<span class="fc" id="L265">		assertEquals(2, fs.getLocations().size());</span>
+<span class="fc" id="L266">		fs.deleteLocation(&quot;tet&quot;);</span>
+<span class="fc" id="L267">		assertEquals(1, fs.getLocations().size());</span>
+<span class="fc" id="L268">	}</span>
+	
+	//异常情况:删除的位置被占用
+	@Test
+	public void deleteLocationTest3() throws InconsistentStartOrEndException, LocationNotFoundException, SameLabelException, PlanEntryOccupyLocationException {
+<span class="fc" id="L273">		fs.addLocation(start);</span>
+<span class="fc" id="L274">		fs.addLocation(end);</span>
+<span class="fc" id="L275">		assertEquals(2, fs.getLocations().size());</span>
+<span class="fc" id="L276">		Timeslot timeslot=new Timeslot(&quot;2020-04-05 10:14&quot;, &quot;2020-04-07 14:15&quot;);</span>
+<span class="fc" id="L277">		fs.createFlight(&quot;NQ7851&quot;, start.getName(), end.getName(), timeslot);</span>
+<span class="fc" id="L278">		expectedEx.expect(PlanEntryOccupyLocationException.class);</span>
+<span class="nc" id="L279">		fs.deleteLocation(&quot;tet&quot;);</span>
+<span class="nc" id="L280">	}</span>
+	
+	//测试策略：分配的飞机已经纳入管理；分配的飞机还未纳入管理
+	//			航班未创建；航班已创建
+	//异常情况:分配的飞机还未纳入管理
+	@Test
+	public void allocatePlaneTest() throws ResourceNotFoundException, ResourceConflictException, PlanEntryNotCreateException, InconsistentStartOrEndException, LocationNotFoundException, SameLabelException, IllegalPlaneContentException {
+<span class="fc" id="L287">		Timeslot timeslot=new Timeslot(&quot;2020-04-05 10:14&quot;, &quot;2020-04-07 14:15&quot;);</span>
+<span class="fc" id="L288">		fs.addLocation(start);</span>
+<span class="fc" id="L289">		fs.addLocation(end);</span>
+<span class="fc" id="L290">		fs.createFlight(&quot;NR7412&quot;, &quot;test&quot;, &quot;tet&quot;, timeslot);</span>
+<span class="fc" id="L291">		List&lt;Timeslot&gt; timeslots=new ArrayList&lt;Timeslot&gt;();</span>
+<span class="fc" id="L292">		timeslots.add(timeslot);</span>
+<span class="fc" id="L293">		expectedEx.expect(ResourceNotFoundException.class);</span>
+<span class="nc" id="L294">		fs.allocatePlane(&quot;NR7412&quot;, &quot;N3025&quot;,timeslots);</span>
+<span class="nc" id="L295">	}</span>
+	
+	//分配的飞机已经纳入管理、航班已创建
+	@Test
+	public void allocatePlaneTest2() throws ResourceNotFoundException, ResourceConflictException, PlanEntryNotCreateException, InconsistentStartOrEndException, LocationNotFoundException, SameLabelException, IllegalPlaneContentException {
+<span class="fc" id="L300">		Timeslot timeslot=new Timeslot(&quot;2020-04-05 10:14&quot;, &quot;2020-04-07 14:15&quot;);</span>
+<span class="fc" id="L301">		fs.addLocation(start);</span>
+<span class="fc" id="L302">		fs.addLocation(end);</span>
+<span class="fc" id="L303">		fs.createFlight(&quot;NR7412&quot;, &quot;test&quot;, &quot;tet&quot;, timeslot);</span>
+<span class="fc" id="L304">		List&lt;Timeslot&gt; timeslots=new ArrayList&lt;Timeslot&gt;();</span>
+<span class="fc" id="L305">		timeslots.add(timeslot);</span>
+<span class="fc" id="L306">		fs.addPlane(plane);</span>
+<span class="fc" id="L307">		fs.allocatePlane(&quot;NR7412&quot;, &quot;N3025&quot;,timeslots);</span>
+<span class="fc" id="L308">		assertEquals(&quot;Allocated&quot;, fs.getFlightState(&quot;NR7412&quot;,timeslots));</span>
+<span class="fc" id="L309">	}</span>
+
+	//异常情况：	航班未创建；
+	@Test
+	public void allocatePlaneTest3() throws ResourceNotFoundException, ResourceConflictException, PlanEntryNotCreateException, InconsistentStartOrEndException, LocationNotFoundException, SameLabelException, IllegalPlaneContentException {
+<span class="fc" id="L314">		Timeslot timeslot=new Timeslot(&quot;2020-04-05 10:14&quot;, &quot;2020-04-07 14:15&quot;);</span>
+<span class="fc" id="L315">		fs.addLocation(start);</span>
+<span class="fc" id="L316">		fs.addLocation(end);</span>
+<span class="fc" id="L317">		List&lt;Timeslot&gt; timeslots=new ArrayList&lt;Timeslot&gt;();</span>
+<span class="fc" id="L318">		timeslots.add(timeslot);</span>
+<span class="fc" id="L319">		fs.addPlane(plane);</span>
+<span class="fc" id="L320">		expectedEx.expect(PlanEntryNotCreateException.class);</span>
+<span class="nc" id="L321">		fs.allocatePlane(&quot;NULL&quot;, &quot;N3025&quot;,timeslots);</span>
+<span class="nc" id="L322">	}</span>
+	
+	//测试策略：航班已创建；航班未创建
+	//			航班已分配飞机；航班未分配飞机
+	//异常情况：航班未创建
+	@Test
+	public void depatureTest() throws ResourceNotFoundException, ResourceConflictException, PlanEntryNotCreateException, InconsistentStartOrEndException, LocationNotFoundException, SameLabelException, IllegalPlaneContentException {
+<span class="fc" id="L329">		Timeslot timeslot=new Timeslot(&quot;2020-04-05 10:14&quot;, &quot;2020-04-07 14:15&quot;);</span>
+<span class="fc" id="L330">		List&lt;Timeslot&gt; timeslots=new ArrayList&lt;Timeslot&gt;();</span>
+<span class="fc" id="L331">		timeslots.add(timeslot);</span>
+<span class="fc" id="L332">		expectedEx.expect(PlanEntryNotCreateException.class);</span>
+<span class="nc" id="L333">		fs.departure(&quot;null&quot;,timeslots);</span>
+<span class="nc" id="L334">	}</span>
+	
+	//航班已创建、航班已分配飞机；航班已创建、航班未分配飞机
+	@Test
+	public void depatureTest2() throws ResourceNotFoundException, ResourceConflictException, PlanEntryNotCreateException, InconsistentStartOrEndException, LocationNotFoundException, SameLabelException, IllegalPlaneContentException {
+<span class="fc" id="L339">		Timeslot timeslot=new Timeslot(&quot;2020-04-05 10:14&quot;, &quot;2020-04-07 14:15&quot;);</span>
+<span class="fc" id="L340">		fs.addLocation(start);</span>
+<span class="fc" id="L341">		fs.addLocation(end);</span>
+<span class="fc" id="L342">		fs.addPlane(plane);</span>
+<span class="fc" id="L343">		List&lt;Timeslot&gt; timeslots=new ArrayList&lt;Timeslot&gt;();</span>
+<span class="fc" id="L344">		timeslots.add(timeslot);</span>
+<span class="fc" id="L345">		fs.createFlight(&quot;NR7412&quot;, &quot;test&quot;, &quot;tet&quot;, timeslot);</span>
+<span class="fc" id="L346">		Timeslot timeslot2=new Timeslot(&quot;2020-04-01 10:14&quot;, &quot;2020-04-03 14:15&quot;);</span>
+<span class="fc" id="L347">		List&lt;Timeslot&gt; timeslots2=new ArrayList&lt;Timeslot&gt;();</span>
+<span class="fc" id="L348">		timeslots2.add(timeslot2);</span>
+<span class="fc" id="L349">		fs.createFlight(&quot;NR7417&quot;, &quot;test&quot;, &quot;tet&quot;, timeslot2);</span>
+<span class="fc" id="L350">		fs.allocatePlane(&quot;NR7417&quot;, &quot;N3025&quot;,timeslots2);</span>
+<span class="fc" id="L351">		fs.departure(&quot;NR7412&quot;,timeslots);</span>
+<span class="fc" id="L352">		assertNotEquals(&quot;Running&quot;, fs.getFlightState(&quot;NR7412&quot;,timeslots));</span>
+<span class="fc" id="L353">		fs.departure(&quot;NR7417&quot;,timeslots2);</span>
+<span class="fc" id="L354">		assertEquals(&quot;Running&quot;, fs.getFlightState(&quot;NR7417&quot;,timeslots2));</span>
+<span class="fc" id="L355">	}</span>
+	
+	//测试策略：航班已创建；航班未创建
+	//			航班未起飞；航班已起飞
+	//异常情况：航班未创建
+	@Test
+	public void cancelFlightTest() throws InconsistentStartOrEndException, LocationNotFoundException, SameLabelException, ResourceNotFoundException, ResourceConflictException, PlanEntryNotCreateException, IllegalPlaneContentException {
+<span class="fc" id="L362">		Timeslot timeslot=new Timeslot(&quot;2020-04-05 10:14&quot;, &quot;2020-04-07 14:15&quot;);</span>
+<span class="fc" id="L363">		List&lt;Timeslot&gt; timeslots=new ArrayList&lt;Timeslot&gt;();</span>
+<span class="fc" id="L364">		timeslots.add(timeslot);</span>
+<span class="fc" id="L365">		expectedEx.expect(PlanEntryNotCreateException.class);</span>
+<span class="nc" id="L366">		fs.cancelFlight(&quot;null&quot;,timeslots);</span>
+<span class="nc" id="L367">	}</span>
+	
+	//航班已创建、航班未起飞；航班已创建、航班已起飞
+	@Test
+	public void cancelFlightTest2() throws InconsistentStartOrEndException, LocationNotFoundException, SameLabelException, ResourceNotFoundException, ResourceConflictException, PlanEntryNotCreateException, IllegalPlaneContentException {
+<span class="fc" id="L372">		Timeslot timeslot=new Timeslot(&quot;2020-04-05 10:14&quot;, &quot;2020-04-07 14:15&quot;);</span>
+<span class="fc" id="L373">		fs.addLocation(start);</span>
+<span class="fc" id="L374">		fs.addLocation(end);</span>
+<span class="fc" id="L375">		fs.addPlane(plane);</span>
+<span class="fc" id="L376">		fs.createFlight(&quot;NR7412&quot;, &quot;test&quot;, &quot;tet&quot;, timeslot);</span>
+<span class="fc" id="L377">		List&lt;Timeslot&gt; timeslots=new ArrayList&lt;Timeslot&gt;();</span>
+<span class="fc" id="L378">		timeslots.add(timeslot);</span>
+<span class="fc" id="L379">		Timeslot timeslot2=new Timeslot(&quot;2020-04-01 10:14&quot;, &quot;2020-04-03 14:15&quot;);</span>
+<span class="fc" id="L380">		fs.createFlight(&quot;NR7417&quot;, &quot;test&quot;, &quot;tet&quot;, timeslot2);</span>
+<span class="fc" id="L381">		List&lt;Timeslot&gt; timeslots2=new ArrayList&lt;Timeslot&gt;();</span>
+<span class="fc" id="L382">		timeslots2.add(timeslot2);</span>
+<span class="fc" id="L383">		fs.allocatePlane(&quot;NR7412&quot;, &quot;N3025&quot;,timeslots);</span>
+<span class="fc" id="L384">		fs.departure(&quot;NR7412&quot;,timeslots);</span>
+<span class="fc" id="L385">		fs.cancelFlight(&quot;NR7412&quot;,timeslots);</span>
+<span class="fc" id="L386">		fs.cancelFlight(&quot;NR7417&quot;,timeslots2);</span>
+<span class="fc" id="L387">		assertNotEquals(&quot;Cancelled&quot;, fs.getFlightState(&quot;NR7412&quot;,timeslots));</span>
+<span class="fc" id="L388">		assertEquals(&quot;Cancelled&quot;, fs.getFlightState(&quot;NR7417&quot;,timeslots2));</span>
+<span class="fc" id="L389">	}</span>
+	
+	//测试策略：航班已创建；航班未创建
+	//			航班未起飞；航班已起飞
+	//异常情况：航班未创建
+	@Test
+	public void endFlightTest() throws ResourceNotFoundException, ResourceConflictException, PlanEntryNotCreateException, InconsistentStartOrEndException, LocationNotFoundException, SameLabelException, IllegalPlaneContentException {
+<span class="fc" id="L396">		Timeslot timeslot=new Timeslot(&quot;2020-04-05 10:14&quot;, &quot;2020-04-07 14:15&quot;);</span>
+<span class="fc" id="L397">		List&lt;Timeslot&gt; timeslots=new ArrayList&lt;Timeslot&gt;();</span>
+<span class="fc" id="L398">		timeslots.add(timeslot);</span>
+<span class="fc" id="L399">		expectedEx.expect(PlanEntryNotCreateException.class);</span>
+<span class="nc" id="L400">		fs.endFlight(&quot;null&quot;,timeslots);</span>
+<span class="nc" id="L401">	}</span>
+	
+	//航班已创建、航班未起飞；航班已创建、航班已起飞
+	@Test
+	public void endFlightTest2() throws ResourceNotFoundException, ResourceConflictException, PlanEntryNotCreateException, InconsistentStartOrEndException, LocationNotFoundException, SameLabelException, IllegalPlaneContentException {
+<span class="fc" id="L406">		Timeslot timeslot=new Timeslot(&quot;2020-04-05 10:14&quot;, &quot;2020-04-07 14:15&quot;);</span>
+<span class="fc" id="L407">		fs.addLocation(start);</span>
+<span class="fc" id="L408">		fs.addLocation(end);</span>
+<span class="fc" id="L409">		fs.addPlane(plane);</span>
+<span class="fc" id="L410">		fs.createFlight(&quot;NR7412&quot;, &quot;test&quot;, &quot;tet&quot;, timeslot);</span>
+<span class="fc" id="L411">		List&lt;Timeslot&gt; timeslots=new ArrayList&lt;Timeslot&gt;();</span>
+<span class="fc" id="L412">		timeslots.add(timeslot);</span>
+<span class="fc" id="L413">		Timeslot timeslot2=new Timeslot(&quot;2020-04-01 10:14&quot;, &quot;2020-04-03 14:15&quot;);</span>
+<span class="fc" id="L414">		fs.createFlight(&quot;NR7417&quot;, &quot;test&quot;, &quot;tet&quot;, timeslot2);</span>
+<span class="fc" id="L415">		List&lt;Timeslot&gt; timeslots2=new ArrayList&lt;Timeslot&gt;();</span>
+<span class="fc" id="L416">		timeslots2.add(timeslot2);</span>
+<span class="fc" id="L417">		fs.allocatePlane(&quot;NR7412&quot;, &quot;N3025&quot;,timeslots);</span>
+<span class="fc" id="L418">		fs.departure(&quot;NR7412&quot;,timeslots);</span>
+<span class="fc" id="L419">		fs.endFlight(&quot;NR7412&quot;,timeslots);</span>
+<span class="fc" id="L420">		fs.endFlight(&quot;NR7417&quot;,timeslots2);</span>
+<span class="fc" id="L421">		assertNotEquals(&quot;Ended&quot;, fs.getFlightState(&quot;NR7417&quot;,timeslots2));</span>
+<span class="fc" id="L422">		assertEquals(&quot;Ended&quot;, fs.getFlightState(&quot;NR7412&quot;,timeslots));</span>
+<span class="fc" id="L423">	}</span>
+	
+	@Test
+	public void getFlightsofassignPlanetest() throws InconsistentStartOrEndException, LocationNotFoundException, SameLabelException, IllegalPlaneContentException, ResourceNotFoundException, ResourceConflictException, PlanEntryNotCreateException {
+<span class="fc" id="L427">		Timeslot timeslot=new Timeslot(&quot;2020-04-05 10:14&quot;, &quot;2020-04-05 14:15&quot;);</span>
+<span class="fc" id="L428">		fs.addPlane(plane);</span>
+<span class="fc" id="L429">		Plane plane2=new Plane(&quot;N3125&quot;, &quot;type&quot;, 50, 2.5);</span>
+<span class="fc" id="L430">		fs.addPlane(plane2);</span>
+<span class="fc" id="L431">		fs.addLocation(start);</span>
+<span class="fc" id="L432">		fs.addLocation(end);</span>
+<span class="fc" id="L433">		List&lt;Timeslot&gt; timeslots=new ArrayList&lt;Timeslot&gt;();</span>
+<span class="fc" id="L434">		timeslots.add(timeslot);</span>
+<span class="fc" id="L435">		Timeslot timeslot2=new Timeslot(&quot;2020-04-04 10:14&quot;, &quot;2020-04-04 14:15&quot;);</span>
+<span class="fc" id="L436">		List&lt;Timeslot&gt; timeslots2=new ArrayList&lt;Timeslot&gt;();</span>
+<span class="fc" id="L437">		timeslots2.add(timeslot2);</span>
+<span class="fc" id="L438">		fs.createFlight(&quot;NA5874&quot;, &quot;test&quot;, &quot;tet&quot;, timeslot2);</span>
+<span class="fc" id="L439">		fs.createFlight(&quot;WR7412&quot;, &quot;test&quot;, &quot;tet&quot;, timeslot);</span>
+<span class="fc" id="L440">		fs.allocatePlane(&quot;NA5874&quot;, &quot;N3125&quot;,timeslots2);</span>
+<span class="fc" id="L441">		fs.allocatePlane(&quot;WR7412&quot;, &quot;N3025&quot;,timeslots);</span>
+<span class="fc" id="L442">		List&lt;FlightEntry&lt;Plane&gt;&gt; fes=fs.getFlightssofassignPlane(&quot;N3025&quot;);</span>
+<span class="fc" id="L443">		assertEquals(1, fes.size());</span>
+<span class="fc" id="L444">		assertEquals(&quot;WR7412&quot;, fes.get(0).getName());</span>
+<span class="fc" id="L445">		fes=fs.getFlightssofassignPlane(&quot;N3125&quot;);</span>
+<span class="fc" id="L446">		assertEquals(1, fes.size());</span>
+<span class="fc" id="L447">		assertEquals(&quot;NA5874&quot;, fes.get(0).getName());</span>
+<span class="fc" id="L448">	}</span>
+	
+	
+	@Test
+	public void getPlanebyIDTest() throws IllegalPlaneContentException {
+<span class="fc" id="L453">		fs.addPlane(plane);</span>
+<span class="fc" id="L454">		assertEquals(&quot;N3025&quot;, fs.getPlanebyID(&quot;N3025&quot;).getId());</span>
+<span class="fc" id="L455">		assertEquals(&quot;type&quot;, fs.getPlanebyID(&quot;N3025&quot;).getType());</span>
+<span class="fc" id="L456">	}</span>
+	
+	@Test
+	public void getLocationbyNameTest() {
+<span class="fc" id="L460">		fs.addLocation(start);</span>
+<span class="fc" id="L461">		fs.addLocation(end);</span>
+<span class="fc" id="L462">		assertEquals(&quot;test&quot;, fs.getLocationbyName(&quot;test&quot;).getName());</span>
+<span class="fc" id="L463">		assertEquals(&quot;tet&quot;, fs.getLocationbyName(&quot;tet&quot;).getName());</span>
+<span class="fc" id="L464">		assertEquals(&quot;10E&quot;, fs.getLocationbyName(&quot;tet&quot;).getLongitude());</span>
+<span class="fc" id="L465">		assertEquals(&quot;45S&quot;, fs.getLocationbyName(&quot;test&quot;).getLatitude());</span>
+<span class="fc" id="L466">	}</span>
+	
+	@Test
+	public void getFlightbyNameTest() throws InconsistentStartOrEndException, LocationNotFoundException, SameLabelException {
+<span class="fc" id="L470">		fs.addLocation(start);</span>
+<span class="fc" id="L471">		fs.addLocation(end);</span>
+<span class="fc" id="L472">		Timeslot timeslot=new Timeslot(&quot;2020-04-05 10:14&quot;, &quot;2020-04-05 14:15&quot;);</span>
+<span class="fc" id="L473">		fs.createFlight(&quot;NH7412&quot;, &quot;test&quot;, &quot;tet&quot;, timeslot);</span>
+<span class="fc" id="L474">		List&lt;Timeslot&gt; timeslots=new ArrayList&lt;Timeslot&gt;();</span>
+<span class="fc" id="L475">		timeslots.add(timeslot);</span>
+<span class="fc" id="L476">		assertEquals(&quot;NH7412&quot;, fs.getFlightbyName(&quot;NH7412&quot;,timeslots).getName());</span>
+<span class="fc" id="L477">		assertEquals(2, fs.getFlightbyName(&quot;NH7412&quot;,timeslots).getLocation().size());</span>
+<span class="fc" id="L478">		assertEquals(1, fs.getFlightbyName(&quot;NH7412&quot;,timeslots).getTime().size());</span>
+<span class="fc" id="L479">	}</span>
+	
+	//测试策略:两个航班名称完全相同；两个航班名称如CA0001和CA01是否能正确判别为相同
+	//			字符部分不相同的航班名称；数字部分值不同的航班名称
+	@Test
+	public void ifTwoSameFlightNameTest() {
+<span class="fc" id="L485">		String name1=&quot;equals&quot;;</span>
+<span class="fc" id="L486">		String name2=&quot;equals&quot;;//完全相同</span>
+<span class="fc" id="L487">		assertTrue(fs.ifTwoSameFlightName(name1, name2));</span>
+<span class="fc" id="L488">		String name3=&quot;FA0007&quot;;</span>
+<span class="fc" id="L489">		String name4=&quot;FG0007&quot;;//字符部分不同</span>
+<span class="fc" id="L490">		assertFalse(fs.ifTwoSameFlightName(name3, name4));</span>
+<span class="fc" id="L491">		String name5=&quot;FA07&quot;;//数字部分值相同</span>
+<span class="fc" id="L492">		assertTrue(fs.ifTwoSameFlightName(name5, name3));</span>
+<span class="fc" id="L493">		String name6=&quot;FG0004&quot;;//数字部分值不同</span>
+<span class="fc" id="L494">		assertFalse(fs.ifTwoSameFlightName(name6, name4));</span>
+<span class="fc" id="L495">	}</span>
+	
+	//异常测试：飞机机龄超出范围
+	@Test
+	public void AgeOutofBoundException() throws FileNotFoundException, LocationNotFoundException, IncorrectElementDependencyException, SameLabelException, UnGrammaticalWordException {
+<span class="fc" id="L500">		String path=&quot;test\\ExceptionTXT\\AgeOutofBoundException.txt&quot;;</span>
+<span class="fc" id="L501">		expectedEx.expect(Exceptions.AgeOutofBoundException.class);</span>
+<span class="nc" id="L502">		fs.createFlightByFile(path);</span>
+<span class="nc" id="L503">	}</span>
+	
+	//异常测试：起飞日期与降落日期超过一天
+	@Test
+	public void DateDifferMuchException() throws FileNotFoundException, LocationNotFoundException, IncorrectElementDependencyException, SameLabelException, UnGrammaticalWordException {			
+<span class="fc" id="L508">		String path=&quot;test\\ExceptionTXT\\DateDifferMuchException.txt&quot;;</span>
+<span class="fc" id="L509">		expectedEx.expect(DateDifferMuchException.class);</span>
+<span class="nc" id="L510">		fs.createFlightByFile(path);</span>
+<span class="nc" id="L511">	}</span>
+	
+	//异常测试：日期格式错误
+	@Test
+	public void DateFormatException() throws FileNotFoundException, LocationNotFoundException, IncorrectElementDependencyException, SameLabelException, UnGrammaticalWordException {			
+<span class="fc" id="L516">		String path=&quot;test\\ExceptionTXT\\DateFormatException.txt&quot;;</span>
+<span class="fc" id="L517">		expectedEx.expect(DateFormatException.class);</span>
+<span class="nc" id="L518">		fs.createFlightByFile(path);</span>
+<span class="nc" id="L519">	}</span>
+	
+	//异常测试：航班名称格式错误
+	@Test
+	public void FlightNameFormatException() throws FileNotFoundException, LocationNotFoundException, IncorrectElementDependencyException, SameLabelException, UnGrammaticalWordException {			
+<span class="fc" id="L524">		String path=&quot;test\\ExceptionTXT\\FlightNameFormatException.txt&quot;;</span>
+<span class="fc" id="L525">		expectedEx.expect(FlightNameFormatException.class);</span>
+<span class="nc" id="L526">		fs.createFlightByFile(path);</span>
+<span class="nc" id="L527">	}</span>
+	
+	//异常测试：机场名称出现非法字符
+	@Test
+	public void IllegalCharacterForAirportNameException() throws FileNotFoundException, LocationNotFoundException, IncorrectElementDependencyException, SameLabelException, UnGrammaticalWordException {			
+<span class="fc" id="L532">		String path=&quot;test\\ExceptionTXT\\IllegalCharacterForAirportNameException.txt&quot;;</span>
+<span class="fc" id="L533">		expectedEx.expect(IllegalCharacterForAirportNameException.class);</span>
+<span class="nc" id="L534">		fs.createFlightByFile(path);</span>
+<span class="nc" id="L535">	}</span>
+	
+	//异常测试：相同编号的飞机，其他内容不一致
+	@Test
+	public void IllegalPlaneContentException() throws FileNotFoundException, LocationNotFoundException, IncorrectElementDependencyException, SameLabelException, UnGrammaticalWordException {			
+<span class="fc" id="L540">		String path=&quot;test\\ExceptionTXT\\IllegalPlaneContentException.txt&quot;;</span>
+<span class="fc" id="L541">		expectedEx.expect(IllegalPlaneContentException.class);</span>
+<span class="nc" id="L542">		fs.createFlightByFile(path);</span>
+<span class="nc" id="L543">	}</span>
+	
+	//异常测试：出现航班信息不完整
+	@Test
+	public void IncompleteFlightInformationException() throws FileNotFoundException, LocationNotFoundException, IncorrectElementDependencyException, SameLabelException, UnGrammaticalWordException {			
+<span class="fc" id="L548">		String path=&quot;test\\ExceptionTXT\\IncompleteFlightInformationException.txt&quot;;</span>
+<span class="fc" id="L549">		expectedEx.expect(IncompleteFlightInformationException.class);</span>
+<span class="nc" id="L550">		fs.createFlightByFile(path);</span>
+<span class="nc" id="L551">	}</span>
+	
+	//异常测试：航班第一行指定日期与起飞日期不一致
+	@Test
+	public void InconsistentDateException() throws FileNotFoundException, LocationNotFoundException, IncorrectElementDependencyException, SameLabelException, UnGrammaticalWordException {			
+<span class="fc" id="L556">		String path=&quot;test\\ExceptionTXT\\InconsistentDateException.txt&quot;;</span>
+<span class="fc" id="L557">		expectedEx.expect(InconsistentDateException.class);</span>
+<span class="nc" id="L558">		fs.createFlightByFile(path);</span>
+<span class="nc" id="L559">	}</span>
+	
+	//异常测试：应该只能是数字的地方出现了非数字
+	@Test
+	public void NonNumberException() throws FileNotFoundException, LocationNotFoundException, IncorrectElementDependencyException, SameLabelException, UnGrammaticalWordException {			
+<span class="fc" id="L564">		String path=&quot;test\\ExceptionTXT\\NonNumberException.txt&quot;;</span>
+<span class="fc" id="L565">		expectedEx.expect(NonNumberException.class);</span>
+<span class="nc" id="L566">		fs.createFlightByFile(path);</span>
+<span class="nc" id="L567">	}</span>
+	
+	//异常测试：飞机ID格式错误
+	@Test
+	public void PlaneIDFormatException() throws FileNotFoundException, LocationNotFoundException, IncorrectElementDependencyException, SameLabelException, UnGrammaticalWordException {			
+<span class="fc" id="L572">		String path=&quot;test\\ExceptionTXT\\PlaneIDFormatException.txt&quot;;</span>
+<span class="fc" id="L573">		expectedEx.expect(PlaneIDFormatException.class);</span>
+<span class="nc" id="L574">		fs.createFlightByFile(path);</span>
+<span class="nc" id="L575">	}</span>
+	
+	//异常测试：飞机座位数超出范围
+	@Test
+	public void SeatsSizeOutofBoundException() throws FileNotFoundException, LocationNotFoundException, IncorrectElementDependencyException, SameLabelException, UnGrammaticalWordException {			
+<span class="fc" id="L580">		String path=&quot;test\\ExceptionTXT\\SeatsSizeOutofBoundException.txt&quot;;</span>
+<span class="fc" id="L581">		expectedEx.expect(SeatsSizeOutofBoundException.class);</span>
+<span class="nc" id="L582">		fs.createFlightByFile(path);</span>
+<span class="nc" id="L583">	}</span>
+	
+	//异常测试：机型出现非法字符
+	@Test
+	public void TypeContainsOtherSymbolException() throws FileNotFoundException, LocationNotFoundException, IncorrectElementDependencyException, SameLabelException, UnGrammaticalWordException {			
+<span class="fc" id="L588">		String path=&quot;test\\ExceptionTXT\\TypeContainsOtherSymbolException.txt&quot;;</span>
+<span class="fc" id="L589">		expectedEx.expect(TypeContainsOtherSymbolException.class);</span>
+<span class="nc" id="L590">		fs.createFlightByFile(path);</span>
+<span class="nc" id="L591">	}</span>
+	
+	//异常测试：文件不存在
+	@Test
+	public void FileNotFoundException() throws FileNotFoundException, LocationNotFoundException, IncorrectElementDependencyException, SameLabelException, UnGrammaticalWordException {			
+<span class="fc" id="L596">		String path=&quot;test\\ExceptionTXT\\null.txt&quot;;</span>
+<span class="fc" id="L597">		expectedEx.expect(FileNotFoundException.class);</span>
+<span class="nc" id="L598">		fs.createFlightByFile(path);</span>
+<span class="nc" id="L599">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.3.201901230119</span>Lab4-2020SP (2020-5-23 15:07:06)</div></body></html>

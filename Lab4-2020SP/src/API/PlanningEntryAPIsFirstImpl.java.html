@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../jacoco-resources/report.gif" type="image/gif"/><title>PlanningEntryAPIsFirstImpl.java</title><link rel="stylesheet" href="../../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">Lab4-2020SP (2020-5-23 15:07:06)</a> &gt; <a href="../../index.html" class="el_group">Lab4-2020SP</a> &gt; <a href="../index.html" class="el_bundle">src</a> &gt; <a href="index.source.html" class="el_package">API</a> &gt; <span class="el_source">PlanningEntryAPIsFirstImpl.java</span></div><h1>PlanningEntryAPIsFirstImpl.java</h1><pre class="source lang-java linenums">package API;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
+
+import Timeslot.Timeslot;
+import common.PlanningEntry;
+/**
+ * PlanningEntryAPIs的第一种实现方式(指findPreEntryPerResource函数)
+ * @author 123
+ *
+ */
+
+<span class="fc" id="L18">public class PlanningEntryAPIsFirstImpl extends PlanningEntryAPIs{</span>
+	@Override
+	public &lt;R&gt; PlanningEntry&lt;R&gt; findPreEntryPerResource(R r,PlanningEntry&lt;R&gt; e,List&lt;? extends PlanningEntry&lt;R&gt;&gt; entries) throws ParseException{
+<span class="pc bpc" id="L21" title="1 of 2 branches missed.">		if(entries.isEmpty())</span>
+<span class="nc" id="L22">			return null;</span>
+<span class="fc" id="L23">		int index=findFirstPreEntry(r, e, entries);</span>
+<span class="pc bpc" id="L24" title="1 of 2 branches missed.">		if(index==-1)</span>
+<span class="nc" id="L25">			return null;</span>
+<span class="fc" id="L26">		int min=index;</span>
+<span class="fc" id="L27">		SimpleDateFormat sdf=new SimpleDateFormat(&quot;yyyy-MM-dd HH:mm&quot;,Locale.CHINA);</span>
+<span class="fc" id="L28">		String endtime=entries.get(min).getTime().get(entries.get(min).getTime().size()-1).getEndtime();//终止时间</span>
+<span class="fc" id="L29">		Date minDate=sdf.parse(endtime);</span>
+<span class="fc" id="L30">		List&lt;Timeslot&gt; timeslots=new ArrayList&lt;Timeslot&gt;();</span>
+<span class="fc" id="L31">		String starttime=entries.get(min).getTime().get(0).getStarttime();</span>
+<span class="fc" id="L32">		Timeslot timeslot=new Timeslot(starttime, endtime);</span>
+<span class="fc" id="L33">		timeslots.add(timeslot);</span>
+<span class="fc" id="L34">		String objectstarttime=e.getTime().get(0).getStarttime();</span>
+<span class="fc" id="L35">		Date startDate=sdf.parse(objectstarttime);</span>
+<span class="pc bpc" id="L36" title="1 of 2 branches missed.">		for(int i=index+1;i&lt;entries.size();i++) {//找到结束时间最晚的但是在指定计划项开始之前就结束的计划项</span>
+<span class="nc bnc" id="L37" title="All 2 branches missed.">			if(entries.get(i).getResource()==null) {</span>
+<span class="nc" id="L38">				continue;</span>
+			}
+<span class="nc bnc" id="L40" title="All 2 branches missed.">			if(!entries.get(i).getResource().contains(r)) {</span>
+<span class="nc" id="L41">				continue;</span>
+			}
+<span class="nc" id="L43">			String endtimei=entries.get(i).getTime().get(entries.get(i).getTime().size()-1).getEndtime();//终止时间</span>
+<span class="nc" id="L44">			Date date=sdf.parse(endtime);</span>
+<span class="nc bnc" id="L45" title="All 2 branches missed.">			if(date.before(startDate)) {</span>
+<span class="nc" id="L46">				String starttimei=entries.get(i).getTime().get(0).getStarttime();</span>
+<span class="nc" id="L47">				Timeslot timeslot2=new Timeslot(starttimei, endtimei);</span>
+<span class="nc" id="L48">				timeslots.add(timeslot2);</span>
+<span class="nc bnc" id="L49" title="All 2 branches missed.">				if(date.after(minDate)) {</span>
+<span class="nc" id="L50">					minDate=date;</span>
+<span class="nc" id="L51">					min=i;</span>
+				}
+			}
+		}
+<span class="fc" id="L55">		PlanningEntry&lt;R&gt; pEntry=entries.get(min);</span>
+<span class="fc" id="L56">		return pEntry;</span>
+	}
+	
+	/**
+	 * 找到一组计划项entries中第一个与e占用同一资源r并在e开始之前结束的计划项
+	 * @param &lt;R&gt; 占用资源类型
+	 * @param r 共同占用的资源
+	 * @param e 指定计划项
+	 * @param entries 一组计划项
+	 * @return entries中的位置；如果没有这样的计划项，返回-1
+	 * @throws ParseException 未能将时间转化为标准格式
+	 */
+	public &lt;R&gt; int findFirstPreEntry(R r,PlanningEntry&lt;R&gt; e,List&lt;? extends PlanningEntry&lt;R&gt;&gt; entries) throws ParseException{
+<span class="pc bpc" id="L69" title="1 of 2 branches missed.">		for(int i=0;i&lt;entries.size();i++) {</span>
+<span class="pc bpc" id="L70" title="1 of 2 branches missed.">			if(entries.get(i).getResource().isEmpty()) {</span>
+<span class="nc" id="L71">				continue;</span>
+			}
+<span class="pc bpc" id="L73" title="1 of 2 branches missed.">			if(entries.get(i).getResource().contains(r)) {</span>
+<span class="fc" id="L74">				String endtime=entries.get(i).getTime().get(entries.get(i).getTime().size()-1).getEndtime();//计划项的终止时间</span>
+<span class="fc" id="L75">				SimpleDateFormat sdf=new SimpleDateFormat(&quot;yyyy-MM-dd HH:mm&quot;,Locale.CHINA);</span>
+<span class="fc" id="L76">				Date date=sdf.parse(endtime);</span>
+<span class="fc" id="L77">				String objectstarttime=e.getTime().get(0).getStarttime();</span>
+<span class="fc" id="L78">				Date startDate=sdf.parse(objectstarttime);</span>
+<span class="fc bfc" id="L79" title="All 2 branches covered.">				if(date.before(startDate))</span>
+<span class="fc" id="L80">					return i;</span>
+			}
+		}
+<span class="nc" id="L83">		return -1;</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.3.201901230119</span>Lab4-2020SP (2020-5-23 15:07:06)</div></body></html>

@@ -1,0 +1,8 @@
+<Wed May 27 15:07:16 CST 2020> <MainApp.TrainScheduleApp> <main> <INFO>: <进入TrainScheduleApp> 
+<Wed May 27 15:07:20 CST 2020> <MainApp.TrainScheduleApp> <main> <INFO>: <添加车厢> 
+<Wed May 27 15:07:30 CST 2020> <MainApp.TrainScheduleApp> <main> <INFO>: <增加高铁站点> 
+<Wed May 27 15:07:34 CST 2020> <MainApp.TrainScheduleApp> <main> <INFO>: <取消列车> 
+<Wed May 27 15:07:34 CST 2020> <MainApp.TrainScheduleApp> <main> <WARNING>: <计划项:U 还未创建!无法进行操作!> 
+<Wed May 27 15:07:40 CST 2020> <MainApp.TrainScheduleApp> <main> <INFO>: <查看日志> 
+<Wed May 27 15:07:49 CST 2020> <MainApp.TrainScheduleApp> <main> <INFO>: <查看日志> 
+<Wed May 27 15:07:53 CST 2020> <MainApp.TrainScheduleApp> <main> <INFO>: <退出TrainScheduleApp> 

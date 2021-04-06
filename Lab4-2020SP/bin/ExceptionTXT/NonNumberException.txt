@@ -1,0 +1,26 @@
+Flight:2020-01-11,AA0296
+{
+DepartureAirport:Chengdu
+ArrivalAirport:Tianjin
+DepatureTime:2020-01-11 06:58
+ArrivalTime:2020-01-11 12:20
+Plane:B6170
+{
+Type:B777
+Seats:330
+Age:5.9
+}
+}
+Flight:2020-04-12,AA0296
+{
+DepartureAirport:Chengdu
+ArrivalAirport:Tianjin
+DepatureTime:2020-04-12 06:58
+ArrivalTime:2020-04-12 12:20
+Plane:N3120
+{
+Type:B767
+Seats:2&9
+Age:28.3
+}
+}

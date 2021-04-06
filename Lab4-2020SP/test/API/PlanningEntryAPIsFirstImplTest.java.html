@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../jacoco-resources/report.gif" type="image/gif"/><title>PlanningEntryAPIsFirstImplTest.java</title><link rel="stylesheet" href="../../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">Lab4-2020SP (2020-5-23 15:07:06)</a> &gt; <a href="../../index.html" class="el_group">Lab4-2020SP</a> &gt; <a href="../index.html" class="el_bundle">test</a> &gt; <a href="index.source.html" class="el_package">API</a> &gt; <span class="el_source">PlanningEntryAPIsFirstImplTest.java</span></div><h1>PlanningEntryAPIsFirstImplTest.java</h1><pre class="source lang-java linenums">package API;
+
+import static org.junit.Assert.*;
+
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.junit.Test;
+
+import Resources.Teacher;
+import Timeslot.Timeslot;
+import compositeinterface.CourseEntry;
+
+<span class="fc" id="L15">public class PlanningEntryAPIsFirstImplTest extends PlanningEntryAPIsTest{</span>
+	@Override
+	public PlanningEntryAPIs getAPI() {
+<span class="fc" id="L18">		return new PlanningEntryAPIsFirstImpl();</span>
+	}
+	
+	//*测试其中的private辅助方法，测试时将其改为public
+	@Test
+	public void findFirstPreEntrytest() throws ParseException {
+<span class="fc" id="L24">		PlanningEntryAPIsFirstImpl pApIsFirstImpl=new PlanningEntryAPIsFirstImpl();</span>
+<span class="fc" id="L25">		CourseEntry&lt;Teacher&gt; ce=new CourseEntry&lt;Teacher&gt;(&quot;soft&quot;);</span>
+<span class="fc" id="L26">		Teacher teacher=new Teacher(&quot;130283xxx&quot;, &quot;name&quot;, true, &quot;professtionalTitle&quot;);</span>
+<span class="fc" id="L27">		List&lt;Teacher&gt; teachers=new ArrayList&lt;Teacher&gt;();</span>
+<span class="fc" id="L28">		teachers.add(teacher);</span>
+<span class="fc" id="L29">		Timeslot timeslot=new Timeslot(&quot;2020-05-07 10:08&quot;, &quot;2020-05-08 15:17&quot;);</span>
+<span class="fc" id="L30">		List&lt;Timeslot&gt; timeslots=new ArrayList&lt;Timeslot&gt;();</span>
+<span class="fc" id="L31">		timeslots.add(timeslot);</span>
+<span class="fc" id="L32">		ce.setTime(timeslots);</span>
+<span class="fc" id="L33">		ce.allocateResource(teachers);</span>
+<span class="fc" id="L34">		Timeslot timeslot2=new Timeslot(&quot;2020-05-06 10:08&quot;, &quot;2020-05-06 15:17&quot;);</span>
+<span class="fc" id="L35">		Timeslot timeslot3=new Timeslot(&quot;2020-05-05 10:08&quot;, &quot;2020-05-05 15:17&quot;);//两个都是ce前序计划项</span>
+<span class="fc" id="L36">		List&lt;Timeslot&gt; timeslots2=new ArrayList&lt;Timeslot&gt;();</span>
+<span class="fc" id="L37">		List&lt;Timeslot&gt; timeslots3=new ArrayList&lt;Timeslot&gt;();</span>
+<span class="fc" id="L38">		timeslots2.add(timeslot2);</span>
+<span class="fc" id="L39">		timeslots3.add(timeslot3);</span>
+<span class="fc" id="L40">		CourseEntry&lt;Teacher&gt; ce2=new CourseEntry&lt;Teacher&gt;(&quot;sos&quot;);</span>
+<span class="fc" id="L41">		ce2.setTime(timeslots2);</span>
+<span class="fc" id="L42">		ce2.allocateResource(teachers);</span>
+<span class="fc" id="L43">		List&lt;CourseEntry&lt;Teacher&gt;&gt; ces=new ArrayList&lt;CourseEntry&lt;Teacher&gt;&gt;();</span>
+<span class="fc" id="L44">		ces.add(ce2);//ce2先加入list，下标为0</span>
+<span class="fc" id="L45">		CourseEntry&lt;Teacher&gt; ce3=new CourseEntry&lt;Teacher&gt;(&quot;sosr&quot;);</span>
+<span class="fc" id="L46">		ce3.setTime(timeslots3);</span>
+<span class="fc" id="L47">		ce3.allocateResource(teachers);</span>
+<span class="fc" id="L48">		ces.add(ce3);</span>
+<span class="fc" id="L49">		assertEquals(0, pApIsFirstImpl.findFirstPreEntry(teacher, ce, ces));</span>
+<span class="fc" id="L50">		Timeslot timeslot4=new Timeslot(&quot;2020-05-09 10:08&quot;, &quot;2020-05-09 15:17&quot;);</span>
+<span class="fc" id="L51">		List&lt;Timeslot&gt; timeslots4=new ArrayList&lt;Timeslot&gt;();</span>
+<span class="fc" id="L52">		timeslots4.add(timeslot4);</span>
+<span class="fc" id="L53">		CourseEntry&lt;Teacher&gt; ce4=new CourseEntry&lt;Teacher&gt;(&quot;sttt&quot;);</span>
+<span class="fc" id="L54">		ce4.setTime(timeslots4);</span>
+<span class="fc" id="L55">		ce4.allocateResource(teachers);//更改list中顺序，其第0个元素更改为不是前序计划项</span>
+<span class="fc" id="L56">		ces.removeAll(ces);</span>
+<span class="fc" id="L57">		ces.add(ce4);</span>
+<span class="fc" id="L58">		ces.add(ce3);</span>
+<span class="fc" id="L59">		ces.add(ce2);</span>
+<span class="fc" id="L60">		assertEquals(1, pApIsFirstImpl.findFirstPreEntry(teacher, ce, ces));</span>
+<span class="fc" id="L61">	}</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.3.201901230119</span>Lab4-2020SP (2020-5-23 15:07:06)</div></body></html>

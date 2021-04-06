@@ -1,0 +1,26 @@
+Flight:2020-01-02,MU819
+{
+DepartureAirport:Beijing
+ArrivalAirport:Hongkong
+DepatureTime:2020-01-02 16:10
+ArrivalTime:2020-01-02 21:26
+Plane:N4804
+{
+Type:B757
+Seats:261
+Age:15.4
+}
+}
+Flight:2020-01-02,NX259
+{
+DepartureAirport:Yantai
+ArrivalAirport:Jinan
+DepatureTime:2020-01-02 17:09
+ArrivalTime:2020-01-02 18:48
+Plane:T7984
+{
+Type:B757
+Seats:261
+Age:3.4
+}
+}

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../jacoco-resources/report.gif" type="image/gif"/><title>UnBlockableEntryImpl.java</title><link rel="stylesheet" href="../../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">Lab4-2020SP (2020-5-23 15:07:06)</a> &gt; <a href="../../index.html" class="el_group">Lab4-2020SP</a> &gt; <a href="../index.html" class="el_bundle">src</a> &gt; <a href="index.source.html" class="el_package">multiimplement</a> &gt; <span class="el_source">UnBlockableEntryImpl.java</span></div><h1>UnBlockableEntryImpl.java</h1><pre class="source lang-java linenums">package multiimplement;
+
+import multidimension.UnBlockableEntry;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import Timeslot.Timeslot;;
+
+/**
+ * UnBlockableEntry接口的实现，可变类
+ * @author 123
+ *
+ */
+<span class="pc bpc" id="L16" title="1 of 2 branches missed.">public class UnBlockableEntryImpl implements UnBlockableEntry{</span>
+<span class="fc" id="L17">	public List&lt;Timeslot&gt; timeslot=new ArrayList&lt;Timeslot&gt;();</span>
+<span class="fc" id="L18">	public boolean setbefore=false;</span>
+	//	AF(timeslot,sebefore)=设定时间为timeslot的计划项，若setbefore为false，证明未曾设定时间
+	//	若setbefore为true，则时间已经设定，不可再修改
+	//Representation invariant:
+	//	在setbefore为true时不可再改变时间,timeslot个数为1
+	//Safety from rep exposure:
+	//	成员变量是private的，为不可变类型，不存在表示泄露
+	private void checkRep() {
+<span class="pc bpc" id="L26" title="2 of 4 branches missed.">		assert timeslot.size()==1;</span>
+<span class="fc" id="L27">	}</span>
+	
+	@Override
+	public List&lt;Timeslot&gt; getTime() {
+<span class="fc" id="L31">		return Collections.unmodifiableList(timeslot);</span>
+	}
+	
+	@Override
+	public void setTime(List&lt;Timeslot&gt; timeslot) {
+<span class="fc bfc" id="L36" title="All 2 branches covered.">		if(setbefore)</span>
+<span class="fc" id="L37">			return;</span>
+<span class="fc bfc" id="L38" title="All 2 branches covered.">		if(timeslot.size()!=1)</span>
+<span class="fc" id="L39">			return;</span>
+<span class="fc" id="L40">		this.timeslot.add(timeslot.get(0));</span>
+<span class="fc" id="L41">		checkRep();</span>
+<span class="fc" id="L42">		setbefore=true;</span>
+<span class="fc" id="L43">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.3.201901230119</span>Lab4-2020SP (2020-5-23 15:07:06)</div></body></html>

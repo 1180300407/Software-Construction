@@ -1,0 +1,296 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../jacoco-resources/report.gif" type="image/gif"/><title>CourseCalendarApp.java</title><link rel="stylesheet" href="../../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">Lab4-2020SP (2020-5-23 15:07:06)</a> &gt; <a href="../../index.html" class="el_group">Lab4-2020SP</a> &gt; <a href="../index.html" class="el_bundle">src</a> &gt; <a href="index.source.html" class="el_package">MainApp</a> &gt; <span class="el_source">CourseCalendarApp.java</span></div><h1>CourseCalendarApp.java</h1><pre class="source lang-java linenums">package MainApp;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.text.ParseException;
+import java.util.Calendar;
+import java.util.List;
+
+import API.*;
+import Board.CourseBoard;
+import Exceptions.LocationConflictException;
+import Exceptions.LocationNotFoundException;
+import Exceptions.PlanEntryNotCreateException;
+import Exceptions.PlanEntryOccupyLocationException;
+import Exceptions.PlanEntryOccupyResourceException;
+import Exceptions.PlanEntryStateNotMatchException;
+import Exceptions.ResourceConflictException;
+import Exceptions.ResourceNotFoundException;
+import Exceptions.SameLabelException;
+import Location.Location;
+import Resources.Teacher;
+import Schedule.CourseSchedule;
+import Timeslot.Timeslot;
+import common.PlanningEntry;
+import compositeinterface.CourseEntry;
+
+<span class="nc" id="L28">public class CourseCalendarApp {</span>
+	public void menu() {//功能目录
+<span class="nc" id="L30">		System.out.println(&quot;-------课程管理系统-------&quot;);</span>
+<span class="nc" id="L31">		System.out.println(&quot;**** 1.增加管理的教师  ****&quot;);</span>
+<span class="nc" id="L32">		System.out.println(&quot;**** 2.删除管理的教师  ****&quot;);</span>
+<span class="nc" id="L33">		System.out.println(&quot;**** 3.增加管理的教室  ****&quot;);</span>
+<span class="nc" id="L34">		System.out.println(&quot;**** 4.删除管理的教室  ****&quot;);</span>
+<span class="nc" id="L35">		System.out.println(&quot;**** 5.增加一门新课程  ****&quot;);</span>
+<span class="nc" id="L36">		System.out.println(&quot;**** 6.为课程分配教师  ****&quot;);</span>
+<span class="nc" id="L37">		System.out.println(&quot;**** 7.更改课程教室      ****&quot;);</span>
+<span class="nc" id="L38">		System.out.println(&quot;**** 8.教师指定课程上课****&quot;);</span>
+<span class="nc" id="L39">		System.out.println(&quot;**** 9.教师指定课程下课****&quot;);</span>
+<span class="nc" id="L40">		System.out.println(&quot;**** 10.查看课程状态    ****&quot;);</span>
+<span class="nc" id="L41">		System.out.println(&quot;**** 11.提前取消课程    ****&quot;);</span>
+<span class="nc" id="L42">		System.out.println(&quot;**** 12.展示教室课程表 ****&quot;);</span>
+<span class="nc" id="L43">		System.out.println(&quot;**** 13.检测教室占用冲突***&quot;);</span>
+<span class="nc" id="L44">		System.out.println(&quot;**** 14.检测教师分配冲突***&quot;);</span>
+<span class="nc" id="L45">		System.out.println(&quot;**** 15.展示教师课程安排***&quot;);</span>
+<span class="nc" id="L46">		System.out.println(&quot;**** 16.退出系统           ****&quot;);</span>
+<span class="nc" id="L47">	}</span>
+	
+	public static void main(String[] args) throws IOException {
+<span class="nc" id="L50">		BufferedReader bf = new BufferedReader(new InputStreamReader(System.in));</span>
+<span class="nc" id="L51">		CourseCalendarApp ccApp=new CourseCalendarApp();</span>
+<span class="nc" id="L52">		ccApp.menu();</span>
+<span class="nc" id="L53">		String input=bf.readLine();</span>
+<span class="nc" id="L54">		CourseSchedule cs=new CourseSchedule();</span>
+<span class="nc bnc" id="L55" title="All 2 branches missed.">		while(!input.equals(&quot;16&quot;)) {</span>
+<span class="nc bnc" id="L56" title="All 16 branches missed.">			switch (input) {</span>
+			case &quot;1&quot;:{//增加教师
+<span class="nc" id="L58">				System.out.println(&quot;请依次输入教师的身份证号、姓名、性别(M/F)、职称&quot;);</span>
+<span class="nc" id="L59">				input=bf.readLine();</span>
+<span class="nc" id="L60">				String[] information=input.split(&quot; &quot;);</span>
+<span class="nc bnc" id="L61" title="All 6 branches missed.">				while(information.length!=4||(!information[2].equals(&quot;F&quot;)&amp;&amp;!information[2].equals(&quot;M&quot;))) {</span>
+<span class="nc bnc" id="L62" title="All 2 branches missed.">					if(information.length!=4)</span>
+<span class="nc" id="L63">						System.out.println(&quot;输入不完善!请重新输入!&quot;);//异常处理</span>
+					else
+<span class="nc" id="L65">						System.out.println(&quot;性别输入有误!请重新输入!&quot;);//异常处理</span>
+<span class="nc" id="L66">					input=bf.readLine();</span>
+<span class="nc" id="L67">					information=input.split(&quot; &quot;);</span>
+				}
+<span class="nc bnc" id="L69" title="All 2 branches missed.">				if(information[2].equals(&quot;M&quot;)) {//新增教师</span>
+<span class="nc" id="L70">					Teacher teacher=new Teacher(information[0],information[1] , true, information[3]);</span>
+<span class="nc" id="L71">					cs.addTeacher(teacher);</span>
+<span class="nc" id="L72">				}</span>
+				else {
+<span class="nc" id="L74">					Teacher teacher=new Teacher(information[0],information[1] , false, information[3]);</span>
+<span class="nc" id="L75">					cs.addTeacher(teacher);</span>
+				}		
+<span class="nc" id="L77">				break;</span>
+			}
+			case &quot;2&quot;:{//删除教师
+<span class="nc" id="L80">				System.out.println(&quot;请输入待删除教师的身份证号:&quot;);</span>
+<span class="nc" id="L81">				input=bf.readLine();</span>
+				try {
+<span class="nc" id="L83">					cs.deleteTeacher(input);</span>
+<span class="nc" id="L84">				} catch (ResourceNotFoundException e) {</span>
+<span class="nc" id="L85">					System.out.println(e.getErrorMessage()+&quot;删除失败!&quot;);</span>
+<span class="nc" id="L86">				} catch (PlanEntryOccupyResourceException e) {</span>
+<span class="nc" id="L87">					System.out.println(e.getErrorMessage()+&quot;删除失败!&quot;);</span>
+				}
+<span class="nc" id="L89">				break;</span>
+			}
+			case &quot;3&quot;:{//增加教室
+<span class="nc" id="L92">				System.out.println(&quot;请依次输入教室的经度、纬度、名称&quot;);</span>
+<span class="nc" id="L93">				input=bf.readLine();</span>
+<span class="nc" id="L94">				String[] information=input.split(&quot; &quot;);</span>
+<span class="nc bnc" id="L95" title="All 2 branches missed.">				while(information.length!=3) {</span>
+<span class="nc" id="L96">					System.out.println(&quot;输入不完善!请重新输入!&quot;);//异常处理</span>
+<span class="nc" id="L97">					input=bf.readLine();</span>
+<span class="nc" id="L98">					information=input.split(&quot; &quot;);			</span>
+				}
+<span class="nc" id="L100">				Location location=new Location(information[0], information[1], information[2], false);</span>
+<span class="nc" id="L101">				cs.addLocation(location);//添加位置</span>
+<span class="nc" id="L102">				break;</span>
+			}
+			case &quot;4&quot;:{//删除教室
+<span class="nc" id="L105">				System.out.println(&quot;请输入待删除教室的名称:&quot;);</span>
+<span class="nc" id="L106">				input=bf.readLine();</span>
+				try {
+<span class="nc" id="L108">					cs.deleteLocation(input);</span>
+<span class="nc" id="L109">				} catch (LocationNotFoundException e) {</span>
+<span class="nc" id="L110">					System.out.println(e.getErrorMessage()+&quot;删除失败!&quot;);</span>
+<span class="nc" id="L111">				} catch (PlanEntryOccupyLocationException e) {</span>
+<span class="nc" id="L112">					System.out.println(e.getErrorMessage()+&quot;删除失败!&quot;);</span>
+				}
+<span class="nc" id="L114">				break;</span>
+			}
+			case &quot;5&quot;:{//创建课程
+<span class="nc" id="L117">				System.out.println(&quot;请输入要创建的课程名称:&quot;);</span>
+<span class="nc" id="L118">				String coursename=bf.readLine();</span>
+<span class="nc" id="L119">				System.out.println(&quot;请输入课程要占用的教室名称:&quot;);</span>
+<span class="nc" id="L120">				String location=bf.readLine();</span>
+<span class="nc" id="L121">				System.out.println(&quot;请输入课程预计上课时间(yyyy-MM-dd HH:mm):&quot;);</span>
+<span class="nc" id="L122">				String start=bf.readLine();</span>
+<span class="nc" id="L123">				System.out.println(&quot;请输入课程预计下课时间(yyyy-MM-dd HH:mm):&quot;);</span>
+<span class="nc" id="L124">				String end=bf.readLine();</span>
+<span class="nc" id="L125">				Timeslot timeslot=new Timeslot(start, end);</span>
+				try {
+<span class="nc" id="L127">					cs.createCourse(coursename, location, timeslot);</span>
+<span class="nc" id="L128">				} catch (LocationNotFoundException e) {</span>
+<span class="nc" id="L129">					System.out.println(e.getErrorMessage()+&quot;无法创建!&quot;);</span>
+<span class="nc" id="L130">				} catch (SameLabelException e) {</span>
+<span class="nc" id="L131">					System.out.println(e.getErrorMessage()+&quot;不能创建重名课程!&quot;);</span>
+<span class="nc" id="L132">				} catch (LocationConflictException e) {</span>
+<span class="nc" id="L133">					System.out.println(e.getErrorMessage()+&quot;请重新选定地点!&quot;);</span>
+				}
+<span class="nc" id="L135">				break;</span>
+			}
+			case &quot;6&quot;:{//为课程分配教师
+<span class="nc" id="L138">				System.out.println(&quot;请输入要分配课程名称:&quot;);</span>
+<span class="nc" id="L139">				String coursename=bf.readLine();</span>
+<span class="nc" id="L140">				System.out.println(&quot;请输入为课程要分配教师身份证号:&quot;);</span>
+<span class="nc" id="L141">				String teacher=bf.readLine();</span>
+				try {
+<span class="nc" id="L143">					cs.allocateTeacher(coursename, teacher);</span>
+<span class="nc" id="L144">				} catch (ResourceNotFoundException e) {</span>
+<span class="nc" id="L145">					System.out.println(e.getErrorMessage()+&quot;请重新选择教师进行分配!&quot;);</span>
+<span class="nc" id="L146">				} catch (PlanEntryNotCreateException e) {</span>
+<span class="nc" id="L147">					System.out.println(e.getErrorMessage());</span>
+<span class="nc" id="L148">				} catch (ResourceConflictException e) {</span>
+<span class="nc" id="L149">					System.out.println(e.getErrorMessage()+&quot;请重新选择教师进行分配!&quot;);</span>
+				}
+<span class="nc" id="L151">				break;</span>
+			}
+			case &quot;7&quot;:{//课程更改位置
+<span class="nc" id="L154">				System.out.println(&quot;请输入要更改教室的课程名称:&quot;);</span>
+<span class="nc" id="L155">				String coursename=bf.readLine();</span>
+<span class="nc" id="L156">				System.out.println(&quot;请输入要更改的新位置:&quot;);</span>
+<span class="nc" id="L157">				String location=bf.readLine();</span>
+				try {
+<span class="nc" id="L159">					cs.changeLocation(coursename, location);</span>
+<span class="nc" id="L160">				} catch (LocationNotFoundException e) {</span>
+<span class="nc" id="L161">					System.out.println(e.getErrorMessage()+&quot;请重新选择教室!&quot;);</span>
+<span class="nc" id="L162">				} catch (PlanEntryNotCreateException e) {</span>
+<span class="nc" id="L163">					System.out.println(e.getErrorMessage()+&quot;请重新选择课程!&quot;);</span>
+<span class="nc" id="L164">				} catch (PlanEntryStateNotMatchException e) {</span>
+<span class="nc" id="L165">					System.out.println(e.getErrorMessage()+&quot;该课程已无需更改位置!&quot;);</span>
+				}
+<span class="nc" id="L167">				break;</span>
+			}
+			case &quot;8&quot;:{//上课
+<span class="nc" id="L170">				System.out.println(&quot;请输入要上课的课程名称:&quot;);</span>
+<span class="nc" id="L171">				String coursename=bf.readLine();</span>
+				try {
+<span class="nc" id="L173">					cs.startCourse(coursename);</span>
+<span class="nc" id="L174">				} catch (PlanEntryNotCreateException e) {</span>
+<span class="nc" id="L175">					System.out.println(e.getErrorMessage());</span>
+				}
+<span class="nc" id="L177">				break;</span>
+			}
+			case &quot;9&quot;:{//下课
+<span class="nc" id="L180">				System.out.println(&quot;请输入要下课的课程名称:&quot;);</span>
+<span class="nc" id="L181">				String coursename=bf.readLine();</span>
+				try {
+<span class="nc" id="L183">					cs.endCourse(coursename);</span>
+<span class="nc" id="L184">				} catch (PlanEntryNotCreateException e) {</span>
+<span class="nc" id="L185">					System.out.println(e.getErrorMessage());</span>
+				}
+<span class="nc" id="L187">				break;</span>
+			}
+			case &quot;10&quot;:{//查看课程状态
+<span class="nc" id="L190">				System.out.println(&quot;请输入要查看状态的课程名称:&quot;);</span>
+<span class="nc" id="L191">				String coursename=bf.readLine();</span>
+<span class="nc" id="L192">				System.out.println(&quot;目前课程状态为:&quot;+cs.getCourseState(coursename));</span>
+<span class="nc" id="L193">				break;</span>
+			}
+			case &quot;11&quot;:{//取消课程
+<span class="nc" id="L196">				System.out.println(&quot;请输入提前取消的课程名称:&quot;);</span>
+<span class="nc" id="L197">				String coursename=bf.readLine();</span>
+				try {
+<span class="nc" id="L199">					cs.cancelCourse(coursename);</span>
+<span class="nc" id="L200">				} catch (PlanEntryNotCreateException e) {</span>
+<span class="nc" id="L201">					System.out.println(e.getErrorMessage());</span>
+				}
+<span class="nc" id="L203">				break;</span>
+			}
+			case &quot;12&quot;:{//Board可视化
+<span class="nc" id="L206">				System.out.println(&quot;请输入要展示课程的教室名称:&quot;);</span>
+<span class="nc" id="L207">				String locationname=bf.readLine();</span>
+<span class="nc" id="L208">				Location location=cs.getLocationbyName(locationname);</span>
+<span class="nc" id="L209">				Calendar calendar=Calendar.getInstance();</span>
+<span class="nc" id="L210">				CourseBoard cb=new CourseBoard(location, cs.getCourses(),calendar);</span>
+				try {
+<span class="nc" id="L212">					cb.visualize();</span>
+<span class="nc" id="L213">				} catch (ParseException e) {</span>
+<span class="nc" id="L214">					e.printStackTrace();</span>
+				}
+<span class="nc" id="L216">				break;</span>
+			}
+			case &quot;13&quot;:{//检测位置冲突
+<span class="nc" id="L219">				PlanningEntryAPIs peAPI=new PlanningEntryAPIsFirstImpl();</span>
+				//PlanningEntryAPIs peAPI=new PlanningEntryAPIsSecondImpl();//策略模式，client可自由选择一种实现方式
+<span class="nc" id="L221">				boolean flag=peAPI.checkLocationConflict(cs.getCourses());</span>
+<span class="nc bnc" id="L222" title="All 2 branches missed.">				if(flag) {</span>
+<span class="nc" id="L223">					System.out.println(&quot;当前计划项存在位置冲突!&quot;);</span>
+<span class="nc" id="L224">				}</span>
+				else {
+<span class="nc" id="L226">					System.out.println(&quot;当前计划项不存在位置冲突!&quot;);</span>
+				}
+<span class="nc" id="L228">				break;</span>
+			}
+			case &quot;14&quot;:{//检测教师分配冲突
+<span class="nc" id="L231">				PlanningEntryAPIs peAPI=new PlanningEntryAPIsFirstImpl();</span>
+				//PlanningEntryAPIs peAPI=new PlanningEntryAPIsSecondImpl();//策略模式，client可自由选择一种实现方式
+<span class="nc" id="L233">				boolean flag=peAPI.checkResourceExclusiveConflict(cs.getCourses());</span>
+<span class="nc bnc" id="L234" title="All 2 branches missed.">				if(flag) {</span>
+<span class="nc" id="L235">					System.out.println(&quot;当前课程集合中存在教师分配冲突!&quot;);</span>
+<span class="nc" id="L236">				}</span>
+				else {
+<span class="nc" id="L238">					System.out.println(&quot;当前课程集合中不存在教师分配冲突!&quot;);</span>
+				}
+<span class="nc" id="L240">				break;</span>
+			}
+			case &quot;15&quot;:{//查看教师课程安排
+<span class="nc" id="L243">				System.out.println(&quot;请输入要查看课程安排的教师身份证号:&quot;);</span>
+<span class="nc" id="L244">				String teacherId=bf.readLine();</span>
+<span class="nc" id="L245">				PlanningEntryAPIs peAPI=new PlanningEntryAPIsFirstImpl();</span>
+<span class="nc" id="L246">				List&lt;CourseEntry&lt;Teacher&gt;&gt; ces=cs.getCoursesofassignTeacher(teacherId);</span>
+<span class="nc bnc" id="L247" title="All 2 branches missed.">				if(ces==null) {</span>
+<span class="nc" id="L248">					System.out.println(&quot;该教师未分配课程!&quot;);</span>
+<span class="nc" id="L249">					break;</span>
+				}
+				else {
+<span class="nc" id="L252">					System.out.println(&quot;该教师分配的课程有:&quot;);</span>
+<span class="nc bnc" id="L253" title="All 2 branches missed.">					for(CourseEntry&lt;Teacher&gt; ce:ces) {</span>
+<span class="nc" id="L254">						System.out.println(ce.getName()+&quot; 目前课程状态为:&quot;+ce.getStateName());</span>
+					}
+<span class="nc" id="L256">					System.out.println(&quot;是否需要查看指定课程的前序课程?(Y/N)&quot;);</span>
+<span class="nc" id="L257">					input=bf.readLine();</span>
+<span class="nc bnc" id="L258" title="All 2 branches missed.">					if(input.equals(&quot;Y&quot;)) {</span>
+<span class="nc" id="L259">						System.out.println(&quot;请输入要查看的指定课程:&quot;);</span>
+<span class="nc" id="L260">						input=bf.readLine();</span>
+<span class="nc" id="L261">						CourseEntry&lt;Teacher&gt; courseEntry=cs.getCoursebyName(input);</span>
+<span class="nc bnc" id="L262" title="All 2 branches missed.">						while(courseEntry==null) {</span>
+<span class="nc" id="L263">							System.out.println(&quot;查询失败!请从以上输入中选取!&quot;);</span>
+<span class="nc" id="L264">							input=bf.readLine();</span>
+<span class="nc" id="L265">							courseEntry=cs.getCoursebyName(input);</span>
+						}
+<span class="nc" id="L267">						Teacher teacher=cs.getTeacherbyID(teacherId);</span>
+						try {
+<span class="nc" id="L269">							PlanningEntry&lt;Teacher&gt; cEntry=peAPI.findPreEntryPerResource(teacher, courseEntry, cs.getCourses());</span>
+<span class="nc bnc" id="L270" title="All 2 branches missed.">							if(cEntry==null)</span>
+<span class="nc" id="L271">								System.out.println(&quot;该课程无前序课程!&quot;);</span>
+							else
+<span class="nc" id="L273">								System.out.println(&quot;其前序课程为:&quot;+cEntry.getName());</span>
+<span class="nc" id="L274">						} catch (ParseException e) {</span>
+<span class="nc" id="L275">							e.printStackTrace();</span>
+						}
+					}
+				}
+<span class="nc" id="L279">				break;</span>
+			}
+			default:{
+<span class="nc" id="L282">				System.out.println(&quot;输入错误,请重新选择功能!&quot;);</span>
+				break;
+			}
+			
+			}
+			
+<span class="nc bnc" id="L288" title="All 2 branches missed.">			if(!input.equals(&quot;16&quot;)) {//每完成一次功能,重新打印菜单供用户选取</span>
+<span class="nc" id="L289">				ccApp.menu();</span>
+<span class="nc" id="L290">				input=bf.readLine();</span>
+			}
+		}
+<span class="nc" id="L293">	}</span>
+}
+	
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.3.201901230119</span>Lab4-2020SP (2020-5-23 15:07:06)</div></body></html>

@@ -1,0 +1,287 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../jacoco-resources/report.gif" type="image/gif"/><title>TrainScheduleApp.java</title><link rel="stylesheet" href="../../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">Lab4-2020SP (2020-5-23 15:07:06)</a> &gt; <a href="../../index.html" class="el_group">Lab4-2020SP</a> &gt; <a href="../index.html" class="el_bundle">src</a> &gt; <a href="index.source.html" class="el_package">MainApp</a> &gt; <span class="el_source">TrainScheduleApp.java</span></div><h1>TrainScheduleApp.java</h1><pre class="source lang-java linenums">package MainApp;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.List;
+
+import API.*;
+import Board.TrainBoard;
+import Exceptions.LocationNotFoundException;
+import Exceptions.PlanEntryNotCreateException;
+import Exceptions.PlanEntryOccupyLocationException;
+import Exceptions.PlanEntryOccupyResourceException;
+import Exceptions.ResourceConflictException;
+import Exceptions.ResourceNotFoundException;
+import Exceptions.SameLabelException;
+import Location.Location;
+import Resources.Carriage;
+import Schedule.TrainSchedule;
+import Timeslot.Timeslot;
+import common.PlanningEntry;
+import compositeinterface.TrainEntry;
+
+<span class="nc" id="L27">public class TrainScheduleApp {</span>
+	public void menu() {
+<span class="nc" id="L29">		System.out.println(&quot;-------高铁管理系统-------&quot;);</span>
+<span class="nc" id="L30">		System.out.println(&quot;**** 1.增加管理的车厢  ****&quot;);</span>
+<span class="nc" id="L31">		System.out.println(&quot;**** 2.删除管理的车厢  ****&quot;);</span>
+<span class="nc" id="L32">		System.out.println(&quot;**** 3.增加管理的站点  ****&quot;);</span>
+<span class="nc" id="L33">		System.out.println(&quot;**** 4.删除管理的站点  ****&quot;);</span>
+<span class="nc" id="L34">		System.out.println(&quot;**** 5.增加一个新车次  ****&quot;);</span>
+<span class="nc" id="L35">		System.out.println(&quot;**** 6.为车次分配车厢  ****&quot;);</span>
+<span class="nc" id="L36">		System.out.println(&quot;**** 7.指定车次进行启动****&quot;);</span>
+<span class="nc" id="L37">		System.out.println(&quot;**** 8.指定车次进行停车****&quot;);</span>
+<span class="nc" id="L38">		System.out.println(&quot;**** 9.展示站点车次表   ****&quot;);</span>
+<span class="nc" id="L39">		System.out.println(&quot;**** 10.查看列车状态     ****&quot;);</span>
+<span class="nc" id="L40">		System.out.println(&quot;**** 11.提前取消车次     ****&quot;);	</span>
+<span class="nc" id="L41">		System.out.println(&quot;**** 12.检测车厢分配冲突***&quot;);</span>
+<span class="nc" id="L42">		System.out.println(&quot;**** 13.展示车厢车次安排***&quot;);</span>
+<span class="nc" id="L43">		System.out.println(&quot;**** 14.对车次进行阻塞  ****&quot;);</span>
+<span class="nc" id="L44">		System.out.println(&quot;**** 15.退出系统	      ****&quot;);</span>
+<span class="nc" id="L45">	}</span>
+	
+	public static void main(String[] args) throws IOException {
+<span class="nc" id="L48">		BufferedReader bf = new BufferedReader(new InputStreamReader(System.in));</span>
+<span class="nc" id="L49">		TrainScheduleApp tsApp=new TrainScheduleApp();</span>
+<span class="nc" id="L50">		tsApp.menu();</span>
+<span class="nc" id="L51">		String input=bf.readLine();</span>
+<span class="nc" id="L52">		TrainSchedule ts=new TrainSchedule();</span>
+<span class="nc bnc" id="L53" title="All 2 branches missed.">		while(!input.equals(&quot;15&quot;)) {</span>
+<span class="nc bnc" id="L54" title="All 15 branches missed.">			switch (input) {</span>
+			case &quot;1&quot;:{//增加车厢
+<span class="nc" id="L56">				System.out.println(&quot;请依次输入车厢的编号、类型、定员数、出厂年份&quot;);</span>
+<span class="nc" id="L57">				input=bf.readLine();</span>
+<span class="nc" id="L58">				String[] information=input.split(&quot; &quot;);</span>
+<span class="nc bnc" id="L59" title="All 2 branches missed.">				while(information.length!=4) {</span>
+<span class="nc" id="L60">					System.out.println(&quot;输入不完善!请重新输入!&quot;);//异常处理</span>
+<span class="nc" id="L61">					input=bf.readLine();</span>
+<span class="nc" id="L62">					information=input.split(&quot; &quot;);</span>
+				}
+<span class="nc" id="L64">				int seats=Integer.parseInt(information[2]);</span>
+<span class="nc" id="L65">				Carriage carriage=new Carriage(information[0], information[1], seats, information[3]);</span>
+<span class="nc" id="L66">				ts.addCarriage(carriage);</span>
+<span class="nc" id="L67">				break;</span>
+			}
+			case &quot;2&quot;:{//删除车厢
+<span class="nc" id="L70">				System.out.println(&quot;请输入待删除车厢的编号:&quot;);</span>
+<span class="nc" id="L71">				input=bf.readLine();</span>
+				try {
+<span class="nc" id="L73">					ts.deleteCarriage(input);</span>
+<span class="nc" id="L74">				} catch (ResourceNotFoundException e) {</span>
+<span class="nc" id="L75">					System.out.println(e.getErrorMessage()+&quot;删除失败!&quot;);</span>
+<span class="nc" id="L76">				} catch (PlanEntryOccupyResourceException e) {</span>
+<span class="nc" id="L77">					System.out.println(e.getErrorMessage()+&quot;删除失败!&quot;);</span>
+				}
+<span class="nc" id="L79">				break;</span>
+			}
+			case &quot;3&quot;:{//增加站点
+<span class="nc" id="L82">				System.out.println(&quot;请依次输入高铁站点的经度、纬度、名称&quot;);</span>
+<span class="nc" id="L83">				input=bf.readLine();</span>
+<span class="nc" id="L84">				String[] information=input.split(&quot; &quot;);</span>
+<span class="nc bnc" id="L85" title="All 2 branches missed.">				while(information.length!=3) {</span>
+<span class="nc" id="L86">					System.out.println(&quot;输入不完善!请重新输入!&quot;);//异常处理</span>
+<span class="nc" id="L87">					input=bf.readLine();</span>
+<span class="nc" id="L88">					information=input.split(&quot; &quot;);</span>
+					
+				}
+<span class="nc" id="L91">				Location location=new Location(information[0], information[1], information[2], false);</span>
+<span class="nc" id="L92">				ts.addLocation(location);//添加位置</span>
+<span class="nc" id="L93">				break;</span>
+			}
+			case &quot;4&quot;:{//删除站点
+<span class="nc" id="L96">				System.out.println(&quot;请输入待删除高铁站点的名称:&quot;);</span>
+<span class="nc" id="L97">				input=bf.readLine();</span>
+				try {
+<span class="nc" id="L99">					ts.deleteLocation(input);</span>
+<span class="nc" id="L100">				} catch (LocationNotFoundException e) {</span>
+<span class="nc" id="L101">					System.out.println(e.getErrorMessage()+&quot;删除失败!&quot;);</span>
+<span class="nc" id="L102">				} catch (PlanEntryOccupyLocationException e) {</span>
+<span class="nc" id="L103">					System.out.println(e.getErrorMessage()+&quot;删除失败!&quot;);</span>
+				}//根据名称删除
+<span class="nc" id="L105">				break;</span>
+			}
+			case &quot;5&quot;:{//创建高铁车次
+<span class="nc" id="L108">				System.out.println(&quot;请输入要新建的高铁车次名称:&quot;);</span>
+<span class="nc" id="L109">				String trainname=bf.readLine();</span>
+<span class="nc" id="L110">				System.out.println(&quot;请依次输入车次经过的站点名称(每个位置间以#分隔):&quot;);</span>
+<span class="nc" id="L111">				input=bf.readLine();</span>
+<span class="nc" id="L112">				String[] locations=input.split(&quot;#&quot;);</span>
+<span class="nc" id="L113">				List&lt;String&gt; locationnames=new ArrayList&lt;String&gt;();</span>
+<span class="nc bnc" id="L114" title="All 2 branches missed.">				for(int i=0;i&lt;locations.length;i++) {</span>
+<span class="nc" id="L115">					locationnames.add(locations[i]);</span>
+				}
+<span class="nc" id="L117">				System.out.println(&quot;请依次输入对应的预计经停时间(yyyy-MM-dd HH:mm)(每个时间点按一次回车进行确认):&quot;);</span>
+<span class="nc" id="L118">				List&lt;Timeslot&gt; timeslots=new ArrayList&lt;Timeslot&gt;();</span>
+<span class="nc" id="L119">				String start=null;</span>
+<span class="nc" id="L120">				String end=null;</span>
+<span class="nc bnc" id="L121" title="All 2 branches missed.">				for(int i=0;i&lt;2*(locations.length-1);i++) {</span>
+<span class="nc" id="L122">					input=bf.readLine();</span>
+<span class="nc bnc" id="L123" title="All 2 branches missed.">					if(i%2==0) {</span>
+<span class="nc" id="L124">						start=input;</span>
+<span class="nc" id="L125">					}</span>
+					else {
+<span class="nc" id="L127">						end=input;</span>
+<span class="nc" id="L128">						Timeslot timeslot=new Timeslot(start, end);</span>
+<span class="nc" id="L129">						timeslots.add(timeslot);</span>
+					}
+					
+				}
+				try {
+<span class="nc" id="L134">					ts.createTrain(trainname, locationnames, timeslots);</span>
+<span class="nc" id="L135">				} catch (LocationNotFoundException e) {</span>
+<span class="nc" id="L136">					System.out.println(e.getErrorMessage()+&quot;无法创建!&quot;);</span>
+<span class="nc" id="L137">				} catch (SameLabelException e) {</span>
+<span class="nc" id="L138">					System.out.println(e.getErrorMessage()+&quot;不能创建重名车次!&quot;);</span>
+				}
+<span class="nc" id="L140">				break;</span>
+			}
+			case &quot;6&quot;:{//分配车厢
+<span class="nc" id="L143">				System.out.println(&quot;请输入要分配车厢的车次名称:&quot;);</span>
+<span class="nc" id="L144">				String trainname=bf.readLine();</span>
+<span class="nc" id="L145">				System.out.println(&quot;请依次输入为车次分配的车厢编号:&quot;);</span>
+<span class="nc" id="L146">				String ID=bf.readLine();</span>
+<span class="nc" id="L147">				String[] IDs=ID.split(&quot; &quot;);</span>
+<span class="nc" id="L148">				List&lt;String&gt; carriageIDs=new ArrayList&lt;String&gt;();</span>
+<span class="nc bnc" id="L149" title="All 2 branches missed.">				for(int i=0;i&lt;IDs.length;i++) {</span>
+<span class="nc" id="L150">					carriageIDs.add(IDs[i]);</span>
+				}
+				try {
+<span class="nc" id="L153">					ts.allocateCarriage(trainname, carriageIDs);</span>
+<span class="nc" id="L154">				} catch (ResourceNotFoundException e) {</span>
+<span class="nc" id="L155">					System.out.println(e.getErrorMessage()+&quot;请重新选择车厢进行分配!&quot;);</span>
+<span class="nc" id="L156">				} catch (PlanEntryNotCreateException e) {</span>
+<span class="nc" id="L157">					System.out.println(e.getErrorMessage());</span>
+<span class="nc" id="L158">				} catch (ResourceConflictException e) {</span>
+<span class="nc" id="L159">					System.out.println(e.getErrorMessage()+&quot;请重新选择车厢进行分配!&quot;);</span>
+				}
+<span class="nc" id="L161">				break;</span>
+			}
+			case &quot;7&quot;:{//列车启动
+<span class="nc" id="L164">				System.out.println(&quot;请输入要启动的车次名称:&quot;);</span>
+<span class="nc" id="L165">				String trainname=bf.readLine();</span>
+				try {
+<span class="nc" id="L167">					ts.startTrain(trainname);</span>
+<span class="nc" id="L168">				} catch (PlanEntryNotCreateException e) {</span>
+<span class="nc" id="L169">					System.out.println(e.getErrorMessage());</span>
+				}
+<span class="nc" id="L171">				break;</span>
+			}
+			case &quot;8&quot;:{//列车停车
+<span class="nc" id="L174">				System.out.println(&quot;请输入要停车的列车名称:&quot;);</span>
+<span class="nc" id="L175">				String trainname=bf.readLine();</span>
+				try {
+<span class="nc" id="L177">					ts.endTrain(trainname);</span>
+<span class="nc" id="L178">				} catch (PlanEntryNotCreateException e) {</span>
+<span class="nc" id="L179">					System.out.println(e.getErrorMessage());</span>
+				}
+<span class="nc" id="L181">				break;</span>
+			}
+			case &quot;9&quot;:{//Board可视化
+<span class="nc" id="L184">				System.out.println(&quot;请输入要展示车次的站点名称:&quot;);</span>
+<span class="nc" id="L185">				String locationname=bf.readLine();</span>
+<span class="nc" id="L186">				Location location=ts.getLocationbyName(locationname);</span>
+<span class="nc" id="L187">				Calendar calendar=Calendar.getInstance();</span>
+<span class="nc" id="L188">				TrainBoard tb=new TrainBoard(location, ts.getTrains(),calendar);</span>
+				try {
+<span class="nc" id="L190">					tb.visualize();</span>
+<span class="nc" id="L191">				} catch (ParseException e) {</span>
+<span class="nc" id="L192">					e.printStackTrace();</span>
+				}
+<span class="nc" id="L194">				break;</span>
+			}
+			case &quot;10&quot;:{//查看列车状态
+<span class="nc" id="L197">				System.out.println(&quot;请输入要查看状态的车次名称:&quot;);</span>
+<span class="nc" id="L198">				String trainname=bf.readLine();</span>
+<span class="nc" id="L199">				System.out.println(&quot;目前列车状态为:&quot;+ts.getTrainState(trainname));</span>
+<span class="nc" id="L200">				break;</span>
+			}
+			case &quot;11&quot;:{//提前取消列车
+<span class="nc" id="L203">				System.out.println(&quot;请输入提前取消的车次名称:&quot;);</span>
+<span class="nc" id="L204">				String trainname=bf.readLine();</span>
+				try {
+<span class="nc" id="L206">					ts.cancelTrain(trainname);</span>
+<span class="nc" id="L207">				} catch (PlanEntryNotCreateException e) {</span>
+<span class="nc" id="L208">					System.out.println(e.getErrorMessage());</span>
+				}
+<span class="nc" id="L210">				break;</span>
+			}
+			case &quot;12&quot;:{//检测车厢分配冲突
+<span class="nc" id="L213">				PlanningEntryAPIs peAPI=new PlanningEntryAPIsFirstImpl();</span>
+				//PlanningEntryAPIs peAPI=new PlanningEntryAPIsSecondImpl();//策略模式，client可自由选择一种实现方式
+<span class="nc" id="L215">				boolean flag=peAPI.checkResourceExclusiveConflict(ts.getTrains());</span>
+<span class="nc bnc" id="L216" title="All 2 branches missed.">				if(flag) {</span>
+<span class="nc" id="L217">					System.out.println(&quot;当前列车集合中存在车厢分配冲突!&quot;);</span>
+<span class="nc" id="L218">				}</span>
+				else {
+<span class="nc" id="L220">					System.out.println(&quot;当前列车集合不存在车厢分配冲突!&quot;);</span>
+				}
+<span class="nc" id="L222">				break;</span>
+			}
+			case &quot;13&quot;:{//展示占用指定车厢的列车
+<span class="nc" id="L225">				System.out.println(&quot;请输入要查看列车占用的车厢编号:&quot;);</span>
+<span class="nc" id="L226">				String CarriageId=bf.readLine();</span>
+<span class="nc" id="L227">				PlanningEntryAPIs peAPI=new PlanningEntryAPIsFirstImpl();</span>
+<span class="nc" id="L228">				List&lt;TrainEntry&lt;Carriage&gt;&gt; tEntries=ts.getTrainsofassignCarriage(CarriageId);</span>
+<span class="nc bnc" id="L229" title="All 2 branches missed.">				if(tEntries==null) {</span>
+<span class="nc" id="L230">					System.out.println(&quot;该车厢未分配车次!&quot;);</span>
+<span class="nc" id="L231">					break;</span>
+				}
+				else {
+<span class="nc" id="L234">					System.out.println(&quot;占用该车厢的列车有:&quot;);</span>
+<span class="nc bnc" id="L235" title="All 2 branches missed.">					for(TrainEntry&lt;Carriage&gt; te:tEntries) {</span>
+<span class="nc" id="L236">						System.out.println(te.getName()+&quot; 目前列车状态为:&quot;+te.getStateName());</span>
+					}
+<span class="nc" id="L238">					System.out.println(&quot;是否需要查看指定车次的前序车次?(Y/N)&quot;);</span>
+<span class="nc" id="L239">					input=bf.readLine();</span>
+<span class="nc bnc" id="L240" title="All 2 branches missed.">					if(input.equals(&quot;Y&quot;)) {</span>
+<span class="nc" id="L241">						System.out.println(&quot;请输入要查看的指定车次:&quot;);</span>
+<span class="nc" id="L242">						input=bf.readLine();</span>
+<span class="nc" id="L243">						TrainEntry&lt;Carriage&gt; tEntry=ts.getTrainbyName(input);</span>
+<span class="nc bnc" id="L244" title="All 2 branches missed.">						while(tEntry==null) {</span>
+<span class="nc" id="L245">							System.out.println(&quot;查询失败!请从以上输入中选取!&quot;);</span>
+<span class="nc" id="L246">							input=bf.readLine();</span>
+<span class="nc" id="L247">							tEntry=ts.getTrainbyName(input);</span>
+						}
+<span class="nc" id="L249">						Carriage carriage=ts.getCarriagebyID(CarriageId);</span>
+						try {
+<span class="nc" id="L251">							PlanningEntry&lt;Carriage&gt; planningEntry=peAPI.findPreEntryPerResource(carriage, tEntry, ts.getTrains());</span>
+<span class="nc bnc" id="L252" title="All 2 branches missed.">							if(planningEntry==null)</span>
+<span class="nc" id="L253">								System.out.println(&quot;该车次无前序车次!&quot;);</span>
+							else
+<span class="nc" id="L255">								System.out.println(&quot;其前序车次为:&quot;+planningEntry.getName());</span>
+<span class="nc" id="L256">						} catch (ParseException e) {</span>
+<span class="nc" id="L257">							e.printStackTrace();</span>
+						}
+					}
+				}
+<span class="nc" id="L261">				break;</span>
+			}
+			case &quot;14&quot;:{
+<span class="nc" id="L264">				System.out.println(&quot;请输入要阻塞的车次名称:&quot;);</span>
+<span class="nc" id="L265">				String trainname=bf.readLine();</span>
+				try {
+<span class="nc" id="L267">					ts.blockTrain(trainname);</span>
+<span class="nc" id="L268">				} catch (PlanEntryNotCreateException e) {</span>
+<span class="nc" id="L269">					System.out.println(e.getErrorMessage());</span>
+				}
+<span class="nc" id="L271">				break;</span>
+			}
+			default:{
+<span class="nc" id="L274">				System.out.println(&quot;输入错误,请重新选择功能!&quot;);</span>
+				break;
+			}
+			
+			}
+			
+<span class="nc bnc" id="L280" title="All 2 branches missed.">			if(!input.equals(&quot;15&quot;)) {//每完成一次功能,重新打印菜单供用户选取</span>
+<span class="nc" id="L281">				tsApp.menu();</span>
+<span class="nc" id="L282">				input=bf.readLine();</span>
+			}
+		}
+<span class="nc" id="L285">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.3.201901230119</span>Lab4-2020SP (2020-5-23 15:07:06)</div></body></html>

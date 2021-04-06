@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../jacoco-resources/report.gif" type="image/gif"/><title>SingleSortedResourceEntryImplTest.java</title><link rel="stylesheet" href="../../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">Lab4-2020SP (2020-5-23 15:07:06)</a> &gt; <a href="../../index.html" class="el_group">Lab4-2020SP</a> &gt; <a href="../index.html" class="el_bundle">test</a> &gt; <a href="index.source.html" class="el_package">multiimplement</a> &gt; <span class="el_source">SingleSortedResourceEntryImplTest.java</span></div><h1>SingleSortedResourceEntryImplTest.java</h1><pre class="source lang-java linenums">package multiimplement;
+
+import static org.junit.Assert.*;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.junit.Test;
+
+import Resources.Teacher;
+
+<span class="fc" id="L12">public class SingleSortedResourceEntryImplTest {</span>
+
+	//测试策略:分配资源一次；分配资源n次(n&gt;=2)
+	//为了解开allocateResource函数与get函数之间的耦合,将类中的resource属性设置为public进行测试
+	//*
+	@Test
+	public void allocateResourcetest() {
+<span class="fc" id="L19">		List&lt;Teacher&gt; teacher=new ArrayList&lt;Teacher&gt;();</span>
+<span class="fc" id="L20">		Teacher teacher1=new Teacher(&quot;id&quot;, &quot;name&quot;,true, &quot;professtionalTitle&quot;);</span>
+<span class="fc" id="L21">		teacher.add(teacher1);</span>
+<span class="fc" id="L22">		SingleSortedResourceEntryImpl&lt;Teacher&gt; ssre=new SingleSortedResourceEntryImpl&lt;Teacher&gt;();</span>
+<span class="fc" id="L23">		ssre.allocateResource(teacher);</span>
+<span class="fc" id="L24">		assertEquals(teacher1, ssre.resource.get(0));</span>
+<span class="fc" id="L25">		Teacher teacher2=new Teacher(&quot;id2&quot;, &quot;name&quot;,true, &quot;professtionalTitle&quot;);</span>
+<span class="fc" id="L26">		teacher.remove(teacher1);</span>
+<span class="fc" id="L27">		teacher.add(teacher2);</span>
+<span class="fc" id="L28">		ssre.allocateResource(teacher);</span>
+<span class="fc" id="L29">		assertEquals(teacher1, ssre.resource.get(0));</span>
+<span class="fc" id="L30">	}</span>
+	
+	
+	//测试策略:分配资源一次；分配资源n次(n&gt;=2)
+	@Test
+	public void getResourceTest() {
+<span class="fc" id="L36">		List&lt;Teacher&gt; teacher=new ArrayList&lt;Teacher&gt;();</span>
+<span class="fc" id="L37">		Teacher teacher1=new Teacher(&quot;id&quot;, &quot;name&quot;,true, &quot;professtionalTitle&quot;);</span>
+<span class="fc" id="L38">		teacher.add(teacher1);</span>
+<span class="fc" id="L39">		SingleSortedResourceEntryImpl&lt;Teacher&gt; ssre=new SingleSortedResourceEntryImpl&lt;Teacher&gt;();</span>
+<span class="fc" id="L40">		ssre.allocateResource(teacher);</span>
+<span class="fc" id="L41">		assertEquals(teacher1, ssre.getResource().get(0));</span>
+<span class="fc" id="L42">		Teacher teacher2=new Teacher(&quot;id2&quot;, &quot;name&quot;,true, &quot;professtionalTitle&quot;);</span>
+<span class="fc" id="L43">		teacher.remove(teacher1);</span>
+<span class="fc" id="L44">		teacher.add(teacher2);</span>
+<span class="fc" id="L45">		ssre.allocateResource(teacher);</span>
+<span class="fc" id="L46">		assertEquals(teacher1, ssre.getResource().get(0));</span>
+<span class="fc" id="L47">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.3.201901230119</span>Lab4-2020SP (2020-5-23 15:07:06)</div></body></html>

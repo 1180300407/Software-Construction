@@ -1,0 +1,396 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../jacoco-resources/report.gif" type="image/gif"/><title>TrainBoard.java</title><link rel="stylesheet" href="../../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">Lab4-2020SP (2020-5-23 15:07:06)</a> &gt; <a href="../../index.html" class="el_group">Lab4-2020SP</a> &gt; <a href="../index.html" class="el_bundle">src</a> &gt; <a href="index.source.html" class="el_package">Board</a> &gt; <span class="el_source">TrainBoard.java</span></div><h1>TrainBoard.java</h1><pre class="source lang-java linenums">package Board;
+
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Map.Entry;
+
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.WindowConstants;
+import javax.swing.table.TableColumn;
+
+import Location.Location;
+import Resources.Carriage;
+import Timeslot.Timeslot;
+import compositeinterface.*;
+
+<span class="pc bpc" id="L34" title="1 of 2 branches missed.">public class TrainBoard implements Iterable&lt;TrainEntry&lt;Carriage&gt;&gt;{</span>
+	public final Location location;
+<span class="fc" id="L36">	public Map&lt;TrainEntry&lt;Carriage&gt;,Long&gt; reachTrains=new HashMap&lt;&gt;();</span>
+<span class="fc" id="L37">	public Map&lt;TrainEntry&lt;Carriage&gt;,Long&gt; leaveTrains=new HashMap&lt;&gt;();</span>
+<span class="fc" id="L38">	public List&lt;TrainEntry&lt;Carriage&gt;&gt; trains=new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L39">	public final int count=1;</span>
+	//Abstraction function:
+	//	AF(location,reachTrains,leaveTrains,trains)=一个location处的信息板
+	//	其中reachTrains包含在count一小时前后的抵达车次
+	//	reachTrains包含在count小时前后的发车车次
+	//	trains表示所有count小时前后经过该位置的车次集合
+	//Representation invariant:
+	//	trains中所有列车均应已分配车厢
+	//Safety from rep exposure:
+	//	成员变量全是private的，防御式拷贝
+	private void checkRep() {
+<span class="fc bfc" id="L50" title="All 2 branches covered.">		for(TrainEntry&lt;Carriage&gt; te:trains) {</span>
+<span class="pc bpc" id="L51" title="2 of 4 branches missed.">			assert te.getResource()!=null;</span>
+<span class="pc bpc" id="L52" title="2 of 4 branches missed.">			assert te.getResource().size()!=0;</span>
+		}
+<span class="fc" id="L54">	}</span>
+	
+	/**
+	 * 构造函数
+	 * @param location 信息板所属位置
+	 * @param tpes 该位置待搜索的列车集合，所有列车均应已分配车厢
+	 */
+<span class="fc" id="L61">	public TrainBoard(Location location,List&lt;TrainEntry&lt;Carriage&gt;&gt; tpes,Calendar calendar) {</span>
+<span class="fc" id="L62">		this.location=location;</span>
+<span class="fc" id="L63">		this.trains=tpes;</span>
+		try {
+<span class="fc" id="L65">			setRequestTrains(calendar);</span>
+<span class="pc" id="L66">		} catch (ParseException e) {</span>
+<span class="nc" id="L67">			e.printStackTrace();</span>
+		}
+		
+<span class="fc" id="L70">		checkRep();</span>
+<span class="fc" id="L71">	}</span>
+	
+	//实现迭代器
+	@Override
+	public Iterator&lt;TrainEntry&lt;Carriage&gt;&gt; iterator(){
+<span class="fc" id="L76">		sortTrains();//先排序以实现有序迭代</span>
+<span class="fc" id="L77">		return trains.iterator();</span>
+	}
+	
+	/**
+	 * 在Board中存储的所有列车集合中搜索得到在location位置所有在指定时间一小时前后的车次,并分别保存
+	 * @param calendar 指定时刻
+	 * @throws ParseException 未能将时间转化为标准格式
+	 */
+	public void setRequestTrains(Calendar calendar) throws ParseException {
+<span class="fc" id="L86">		SimpleDateFormat sdf=new SimpleDateFormat(&quot;yyyy-MM-dd HH:mm&quot;,Locale.CHINA);</span>
+<span class="fc" id="L87">		leaveTrains=new HashMap&lt;TrainEntry&lt;Carriage&gt;, Long&gt;();</span>
+<span class="fc" id="L88">		reachTrains=new HashMap&lt;TrainEntry&lt;Carriage&gt;, Long&gt;();</span>
+		Timeslot timeslot;
+<span class="fc bfc" id="L90" title="All 2 branches covered.">		for(TrainEntry&lt;Carriage&gt; tpe:trains) {</span>
+<span class="pc bpc" id="L91" title="1 of 2 branches missed.">			if(tpe.getResource().isEmpty())</span>
+<span class="nc" id="L92">				continue;</span>
+<span class="pc bpc" id="L93" title="1 of 2 branches missed.">			if(!tpe.getLocation().contains(location)) </span>
+<span class="nc" id="L94">				continue;</span>
+<span class="fc" id="L95">			int index=tpe.getLocation().indexOf(location);</span>
+<span class="pc bpc" id="L96" title="1 of 2 branches missed.">			if(index==0) {//该位置为起点，只有可能在离开车次中</span>
+<span class="fc" id="L97">				timeslot=tpe.getTime().get(0);</span>
+<span class="fc" id="L98">				Date date=sdf.parse(timeslot.getStarttime());</span>
+<span class="fc" id="L99">				Calendar cal=Calendar.getInstance();</span>
+<span class="fc" id="L100">				cal.setTime(date);</span>
+<span class="pc bpc" id="L101" title="3 of 6 branches missed.">				if(cal.get(0)==calendar.get(0)&amp;&amp;cal.get(1)==calendar.get(1)&amp;&amp;cal.get(6)==calendar.get(6)) {</span>
+<span class="fc bfc" id="L102" title="All 2 branches covered.">					if(cal.get(Calendar.HOUR_OF_DAY)==calendar.get(Calendar.HOUR_OF_DAY))//在同一小时之内，必定符合要求</span>
+<span class="fc" id="L103">						leaveTrains.put(tpe, cal.getTime().getTime());</span>
+<span class="pc bpc" id="L104" title="1 of 2 branches missed.">					else if(cal.get(Calendar.HOUR_OF_DAY)==calendar.get(Calendar.HOUR_OF_DAY)-count){//在前一小时，分钟大于等于指定时刻，则在一小时之内</span>
+<span class="nc bnc" id="L105" title="All 2 branches missed.">						if(cal.get(Calendar.MINUTE)&gt;=calendar.get(Calendar.MINUTE))</span>
+<span class="nc" id="L106">							leaveTrains.put(tpe, cal.getTime().getTime());</span>
+<span class="nc" id="L107">					}</span>
+<span class="pc bpc" id="L108" title="1 of 2 branches missed.">					else if(cal.get(Calendar.HOUR_OF_DAY)==calendar.get(Calendar.HOUR_OF_DAY)+count) {//在后一小时，分钟小于等于制定时刻，则在一小时之内</span>
+<span class="nc bnc" id="L109" title="All 2 branches missed.">						if(cal.get(Calendar.MINUTE)&lt;=calendar.get(Calendar.MINUTE))</span>
+<span class="nc" id="L110">							leaveTrains.put(tpe, cal.getTime().getTime());</span>
+					}
+				}
+<span class="nc" id="L113">			}</span>
+<span class="nc bnc" id="L114" title="All 2 branches missed.">			else if(index==tpe.getLocation().size()-1) {//该位置为终点，只有可能在抵达车次中</span>
+<span class="nc" id="L115">				timeslot=tpe.getTime().get(index-1);</span>
+<span class="nc" id="L116">				Date date=sdf.parse(timeslot.getEndtime());</span>
+<span class="nc" id="L117">				Calendar cal=Calendar.getInstance();</span>
+<span class="nc" id="L118">				cal.setTime(date);</span>
+<span class="nc bnc" id="L119" title="All 6 branches missed.">				if(cal.get(0)==calendar.get(0)&amp;&amp;cal.get(1)==calendar.get(1)&amp;&amp;cal.get(6)==calendar.get(6)) {</span>
+<span class="nc bnc" id="L120" title="All 2 branches missed.">					if(cal.get(Calendar.HOUR_OF_DAY)==calendar.get(Calendar.HOUR_OF_DAY))//在同一小时之内，必定符合要求</span>
+<span class="nc" id="L121">						reachTrains.put(tpe, cal.getTime().getTime());</span>
+<span class="nc bnc" id="L122" title="All 2 branches missed.">					else if(cal.get(Calendar.HOUR_OF_DAY)==calendar.get(Calendar.HOUR_OF_DAY)-count){//在前一小时，分钟大于等于指定时刻，则在一小时之内</span>
+<span class="nc bnc" id="L123" title="All 2 branches missed.">						if(cal.get(Calendar.MINUTE)&gt;=calendar.get(Calendar.MINUTE))</span>
+<span class="nc" id="L124">							reachTrains.put(tpe, cal.getTime().getTime());</span>
+<span class="nc" id="L125">					}</span>
+<span class="nc bnc" id="L126" title="All 2 branches missed.">					else if(cal.get(Calendar.HOUR_OF_DAY)==calendar.get(Calendar.HOUR_OF_DAY)+count) {//在后一小时，分钟小于等于制定时刻，则在一小时之内</span>
+<span class="nc bnc" id="L127" title="All 2 branches missed.">						if(cal.get(Calendar.MINUTE)&lt;=calendar.get(Calendar.MINUTE))</span>
+<span class="nc" id="L128">							reachTrains.put(tpe, cal.getTime().getTime());</span>
+					}
+				}
+<span class="nc" id="L131">			}</span>
+			else {//中间站次
+<span class="nc" id="L133">				Timeslot timeslot1=tpe.getTime().get(index-1);//到达第index个位置的时间</span>
+<span class="nc" id="L134">				Date date1=sdf.parse(timeslot1.getEndtime());</span>
+<span class="nc" id="L135">				Calendar cal1=Calendar.getInstance();</span>
+<span class="nc" id="L136">				cal1.setTime(date1);</span>
+<span class="nc" id="L137">				Timeslot timeslot2=tpe.getTime().get(index);</span>
+<span class="nc" id="L138">				Date date2=sdf.parse(timeslot2.getStarttime());//从第index个位置离开的时间</span>
+<span class="nc" id="L139">				Calendar cal2=Calendar.getInstance();</span>
+<span class="nc" id="L140">				cal2.setTime(date2);</span>
+<span class="nc bnc" id="L141" title="All 6 branches missed.">				if(cal1.get(0)==calendar.get(0)&amp;&amp;cal1.get(1)==calendar.get(1)&amp;&amp;cal1.get(6)==calendar.get(6)) {//在同一天</span>
+<span class="nc bnc" id="L142" title="All 2 branches missed.">					if(cal1.get(Calendar.HOUR_OF_DAY)==calendar.get(Calendar.HOUR_OF_DAY))//在同一小时之内，必定符合要求</span>
+<span class="nc" id="L143">						reachTrains.put(tpe, cal1.getTime().getTime());</span>
+<span class="nc bnc" id="L144" title="All 2 branches missed.">					else if(cal1.get(Calendar.HOUR_OF_DAY)==calendar.get(Calendar.HOUR_OF_DAY-count)){//在前一小时，分钟大于等于指定时刻，则在一小时之内</span>
+<span class="nc bnc" id="L145" title="All 2 branches missed.">						if(cal1.get(Calendar.MINUTE)&gt;=calendar.get(Calendar.MINUTE))</span>
+<span class="nc" id="L146">							reachTrains.put(tpe, cal1.getTime().getTime());</span>
+<span class="nc" id="L147">					}</span>
+<span class="nc bnc" id="L148" title="All 2 branches missed.">					else if(cal1.get(Calendar.HOUR_OF_DAY)==calendar.get(Calendar.HOUR_OF_DAY)+count) {//在后一小时，分钟小于等于制定时刻，则在一小时之内</span>
+<span class="nc bnc" id="L149" title="All 2 branches missed.">						if(cal1.get(Calendar.MINUTE)&lt;=calendar.get(Calendar.MINUTE))</span>
+<span class="nc" id="L150">							reachTrains.put(tpe, cal1.getTime().getTime());</span>
+					}
+				}
+<span class="nc bnc" id="L153" title="All 6 branches missed.">				if(cal2.get(0)==calendar.get(0)&amp;&amp;cal2.get(1)==calendar.get(1)&amp;&amp;cal2.get(6)==calendar.get(6)) {//在同一天</span>
+<span class="nc bnc" id="L154" title="All 2 branches missed.">					if(cal2.get(Calendar.HOUR_OF_DAY)==calendar.get(Calendar.HOUR_OF_DAY))//在同一小时之内，必定符合要求</span>
+<span class="nc" id="L155">						leaveTrains.put(tpe, cal2.getTime().getTime());</span>
+<span class="nc bnc" id="L156" title="All 2 branches missed.">					else if(cal1.get(Calendar.HOUR_OF_DAY)==calendar.get(Calendar.HOUR_OF_DAY)-count){//在前一小时，分钟大于等于指定时刻，则在一小时之内</span>
+<span class="nc bnc" id="L157" title="All 2 branches missed.">						if(cal1.get(Calendar.MINUTE)&gt;=calendar.get(Calendar.MINUTE))</span>
+<span class="nc" id="L158">							leaveTrains.put(tpe, cal2.getTime().getTime());</span>
+<span class="nc" id="L159">					}</span>
+<span class="nc bnc" id="L160" title="All 2 branches missed.">					else if(cal1.get(Calendar.HOUR_OF_DAY)==calendar.get(Calendar.HOUR_OF_DAY)+count) {//在后一小时，分钟小于等于制定时刻，则在一小时之内</span>
+<span class="nc bnc" id="L161" title="All 2 branches missed.">						if(cal1.get(Calendar.MINUTE)&lt;=calendar.get(Calendar.MINUTE))</span>
+<span class="nc" id="L162">							leaveTrains.put(tpe, cal2.getTime().getTime());</span>
+					}
+				}
+			}
+		}
+<span class="fc" id="L167">		sortTrains();</span>
+<span class="fc" id="L168">	}</span>
+	
+	/**
+	 * 为reachTrains和departureTrains中的元素排序，以及trains排序
+	 */
+	public void sortTrains() {
+<span class="fc" id="L174">		Map&lt;TrainEntry&lt;Carriage&gt;, Long&gt; sortreach=new LinkedHashMap&lt;TrainEntry&lt;Carriage&gt;, Long&gt;();</span>
+<span class="fc" id="L175">		Map&lt;TrainEntry&lt;Carriage&gt;, Long&gt; sortleave=new LinkedHashMap&lt;TrainEntry&lt;Carriage&gt;, Long&gt;();</span>
+<span class="fc" id="L176">		List&lt;Map.Entry&lt;TrainEntry&lt;Carriage&gt;, Long&gt;&gt; list1=new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L177">		list1.addAll(reachTrains.entrySet());</span>
+<span class="fc" id="L178">		List&lt;Map.Entry&lt;TrainEntry&lt;Carriage&gt;, Long&gt;&gt; list2=new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L179">		list2.addAll(leaveTrains.entrySet());//将map中元素复制到list中以进行排序</span>
+<span class="fc" id="L180">		Collections.sort(list1, new MapvalueComparator());</span>
+<span class="fc" id="L181">		Collections.sort(list2,new MapvalueComparator());</span>
+<span class="pc bpc" id="L182" title="1 of 2 branches missed.">		for(Map.Entry&lt;TrainEntry&lt;Carriage&gt;, Long&gt; entry:list1) {//将排序后的加入到有序map中</span>
+<span class="nc" id="L183">			sortreach.put(entry.getKey(), entry.getValue());</span>
+		}
+		
+<span class="fc bfc" id="L186" title="All 2 branches covered.">		for(Map.Entry&lt;TrainEntry&lt;Carriage&gt;, Long&gt; entry:list2) {//将排序后的加入到有序map中</span>
+<span class="fc" id="L187">			sortleave.put(entry.getKey(), entry.getValue());</span>
+		}
+<span class="fc" id="L189">		this.reachTrains=sortreach;</span>
+<span class="fc" id="L190">		this.leaveTrains=sortleave;</span>
+<span class="fc" id="L191">		trains=new ArrayList&lt;TrainEntry&lt;Carriage&gt;&gt;();</span>
+<span class="fc" id="L192">		int i=0,j=0;</span>
+<span class="pc bpc" id="L193" title="1 of 4 branches missed.">		while(i&lt;list1.size()||j&lt;list2.size()) {//将leaveTrains和reachTrains中所有列车按从早到晚顺序加入trains</span>
+<span class="pc bpc" id="L194" title="1 of 2 branches missed.">			if(i==list1.size()) {		//使其成为从早到晚排序的有序列车集合</span>
+<span class="fc" id="L195">				trains.add(list2.get(j).getKey());//抵达列车全部加入，将排序后的出发列车直接加入</span>
+<span class="fc" id="L196">				j++;</span>
+<span class="fc" id="L197">			}</span>
+<span class="nc bnc" id="L198" title="All 2 branches missed.">			else if(j==list2.size()) {//出发列车全部加入，将排序后的抵达列车直接加入</span>
+<span class="nc" id="L199">				trains.add(list1.get(i).getKey());</span>
+<span class="nc" id="L200">				i++;</span>
+<span class="nc" id="L201">			}</span>
+			else {//二者更小的先加入
+<span class="nc" id="L203">				Long timei=list1.get(i).getValue();</span>
+<span class="nc" id="L204">				Long timej=list2.get(j).getValue();</span>
+<span class="nc bnc" id="L205" title="All 2 branches missed.">				if(timei&lt;=timej) {</span>
+<span class="nc" id="L206">					trains.add(list1.get(i).getKey());</span>
+<span class="nc" id="L207">					i++;</span>
+<span class="nc" id="L208">				}</span>
+				else {
+<span class="nc" id="L210">					trains.add(list2.get(j).getKey());</span>
+<span class="nc" id="L211">					j++;</span>
+				}
+			}
+		}
+<span class="fc" id="L215">	}</span>
+	
+	/**
+	 * Board的可视化展现
+	 * @throws ParseException 时间未能转化为标准格式
+	 */
+	public void visualize() throws ParseException {
+<span class="nc" id="L222">		Calendar calendar=Calendar.getInstance();</span>
+<span class="nc" id="L223">		setRequestTrains(calendar);</span>
+<span class="nc" id="L224">		SimpleDateFormat sdf=new SimpleDateFormat(&quot;yyyy-MM-dd HH:mm&quot;,Locale.CHINA);</span>
+<span class="nc" id="L225">		String time=sdf.format(calendar.getTime());</span>
+<span class="nc" id="L226">		JFrame jf=new JFrame(&quot;TrainBoard&quot;);</span>
+<span class="nc" id="L227">		jf.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);</span>
+		// 创建内容面板，使用边界布局
+<span class="nc" id="L229">        JPanel panel = new JPanel(new BorderLayout());</span>
+<span class="nc" id="L230">        String[] col= {&quot; &quot;,time,location.getName(),&quot; &quot;};</span>
+<span class="nc" id="L231">        Object[][] rowData=new Object[reachTrains.size()+1+leaveTrains.size()+1][4];</span>
+<span class="nc" id="L232">        int i=1;</span>
+<span class="nc" id="L233">        rowData[0][0]=&quot; &quot;;</span>
+<span class="nc" id="L234">        rowData[0][1]=&quot; &quot;;</span>
+<span class="nc" id="L235">        rowData[0][2]=&quot;抵达车次&quot;;</span>
+<span class="nc" id="L236">        rowData[0][3]=&quot; &quot;;</span>
+<span class="nc bnc" id="L237" title="All 2 branches missed.">        for(Map.Entry&lt;TrainEntry&lt;Carriage&gt;, Long&gt; entry:reachTrains.entrySet()) {//将抵达车次可视化</span>
+<span class="nc" id="L238">        	TrainEntry&lt;Carriage&gt; tpe=entry.getKey();</span>
+<span class="nc" id="L239">        	Date date=new Date(entry.getValue());</span>
+<span class="nc" id="L240">        	sdf.format(date);</span>
+<span class="nc" id="L241">			Calendar calendar2=Calendar.getInstance();</span>
+<span class="nc" id="L242">			calendar2.setTime(date);</span>
+<span class="nc" id="L243">			int hour1=calendar2.get(Calendar.HOUR_OF_DAY);</span>
+<span class="nc" id="L244">			int minute1=calendar2.get(Calendar.MINUTE);</span>
+			String time1;//时间
+<span class="nc bnc" id="L246" title="All 2 branches missed.">			if(minute1&lt;10)</span>
+<span class="nc" id="L247">				time1=hour1+&quot;:&quot;+&quot;0&quot;+minute1;</span>
+			else 
+<span class="nc" id="L249">				time1=hour1+&quot;:&quot;+minute1;</span>
+<span class="nc" id="L250">			rowData[i][0]= time1;</span>
+<span class="nc" id="L251">			rowData[i][1]=tpe.getName();//列车名称</span>
+<span class="nc" id="L252">			int maxindex=tpe.getLocation().size()-1;</span>
+<span class="nc" id="L253">			String locationString=tpe.getLocation().get(0).getName()+&quot;-&quot;+tpe.getLocation().get(maxindex).getName();//起点-终点</span>
+<span class="nc" id="L254">			rowData[i][2]=locationString;</span>
+<span class="nc bnc" id="L255" title="All 5 branches missed.">			switch (tpe.getStateName()) {//状态</span>
+			case &quot;Running&quot;:
+<span class="nc" id="L257">				rowData[i][3]=&quot;即将抵达&quot;;</span>
+<span class="nc" id="L258">				break;</span>
+			case &quot;Cancelled&quot;:
+<span class="nc" id="L260">				rowData[i][3]=&quot;已取消&quot;;</span>
+<span class="nc" id="L261">				break;</span>
+			case &quot;Ended&quot;:
+<span class="nc" id="L263">				rowData[i][3]=&quot;已到达&quot;;</span>
+<span class="nc" id="L264">				break;</span>
+			case &quot;Blocked&quot;:
+<span class="nc" id="L266">				rowData[i][3]=&quot;已到达&quot;;</span>
+<span class="nc" id="L267">				break;</span>
+			default:
+				break;
+			}
+<span class="nc" id="L271">			i++;</span>
+        }
+<span class="nc" id="L273">        rowData[i][0]=&quot; &quot;;</span>
+<span class="nc" id="L274">        rowData[i][1]=&quot; &quot;;</span>
+<span class="nc" id="L275">        rowData[i][2]=&quot;出发车次&quot;;</span>
+<span class="nc" id="L276">        rowData[i][3]=&quot; &quot;;</span>
+<span class="nc" id="L277">        i++;</span>
+<span class="nc bnc" id="L278" title="All 2 branches missed.">        for(Map.Entry&lt;TrainEntry&lt;Carriage&gt;, Long&gt; entry:leaveTrains.entrySet()) {//将出发航班可视化</span>
+<span class="nc" id="L279">        	TrainEntry&lt;Carriage&gt; tpe=entry.getKey();</span>
+<span class="nc" id="L280">        	Date date=new Date(entry.getValue());</span>
+<span class="nc" id="L281">        	sdf.format(date);</span>
+<span class="nc" id="L282">			Calendar calendar2=Calendar.getInstance();</span>
+<span class="nc" id="L283">			calendar2.setTime(date);</span>
+<span class="nc" id="L284">			int hour1=calendar2.get(Calendar.HOUR_OF_DAY);</span>
+<span class="nc" id="L285">			int minute1=calendar2.get(Calendar.MINUTE);</span>
+			String time1;//时间
+<span class="nc bnc" id="L287" title="All 2 branches missed.">			if(minute1&lt;10)</span>
+<span class="nc" id="L288">				time1=hour1+&quot;:&quot;+&quot;0&quot;+minute1;</span>
+			else 
+<span class="nc" id="L290">				time1=hour1+&quot;:&quot;+minute1;</span>
+<span class="nc" id="L291">			rowData[i][0]= time1;</span>
+<span class="nc" id="L292">			rowData[i][1]=tpe.getName();//列车名称</span>
+<span class="nc" id="L293">			int maxindex=tpe.getLocation().size()-1;</span>
+<span class="nc" id="L294">			String locationString=tpe.getLocation().get(0).getName()+&quot;-&quot;+tpe.getLocation().get(maxindex).getName();//起点-终点</span>
+<span class="nc" id="L295">			rowData[i][2]=locationString;</span>
+<span class="nc bnc" id="L296" title="All 5 branches missed.">			switch (tpe.getStateName()) {//状态</span>
+			case &quot;Running&quot;:
+<span class="nc" id="L298">				rowData[i][3]=&quot;已发车&quot;;</span>
+<span class="nc" id="L299">				break;</span>
+			case &quot;Cancelled&quot;:
+<span class="nc" id="L301">				rowData[i][3]=&quot;已取消&quot;;</span>
+<span class="nc" id="L302">				break;</span>
+			case &quot;Allocated&quot;:
+<span class="nc" id="L304">				rowData[i][3]=&quot;即将发车&quot;;</span>
+<span class="nc" id="L305">				break;</span>
+			case &quot;Blocked&quot;:
+<span class="nc" id="L307">				rowData[i][3]=&quot;即将发车&quot;;</span>
+<span class="nc" id="L308">				break;</span>
+			default:
+				break;
+			}
+<span class="nc" id="L312">			i++;</span>
+        }
+<span class="nc" id="L314">        JTable table=new JTable(rowData,col);</span>
+<span class="nc" id="L315">        table.setGridColor(Color.GRAY);</span>
+<span class="nc" id="L316">        table.setForeground(Color.BLACK);</span>
+<span class="nc" id="L317">        table.getTableHeader().setForeground(Color.BLACK);</span>
+<span class="nc" id="L318">        table.getTableHeader().setResizingAllowed(false);</span>
+<span class="nc" id="L319">        table.getTableHeader().setReorderingAllowed(false);</span>
+<span class="nc" id="L320">        table.setRowHeight(100);</span>
+<span class="nc" id="L321">        TableColumn tableColumn = table.getColumnModel().getColumn(1);</span>
+<span class="nc" id="L322">        tableColumn.setWidth(600);</span>
+<span class="nc" id="L323">        tableColumn = table.getColumnModel().getColumn(2);</span>
+<span class="nc" id="L324">        tableColumn.setWidth(600);</span>
+<span class="nc" id="L325">        table.setFont(new Font(null, Font.PLAIN, 25));</span>
+<span class="nc" id="L326">        table.getTableHeader().setFont(new Font(null, Font.BOLD, 25));</span>
+<span class="nc" id="L327">        table.getColumnModel().getColumn(0).setPreferredWidth(130);</span>
+<span class="nc" id="L328">        table.setPreferredScrollableViewportSize(new Dimension(1000, 400));</span>
+<span class="nc" id="L329">        JScrollPane scrollPane = new JScrollPane(table);</span>
+<span class="nc" id="L330">        panel.add(scrollPane);</span>
+        
+<span class="nc" id="L332">        jf.setContentPane(panel);</span>
+<span class="nc" id="L333">        jf.pack();</span>
+<span class="nc" id="L334">        jf.setLocationRelativeTo(null);</span>
+<span class="nc" id="L335">        jf.setVisible(true);</span>
+<span class="nc" id="L336">        jf.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);</span>
+<span class="nc" id="L337">	}</span>
+	
+	/*   //测试用的main函数
+	public static void main(String[] args) throws ParseException {
+		Location startlocation=new Location(&quot;10E&quot;,&quot;45N&quot; , &quot;哈尔滨西&quot;, true);
+		Location endlocation=new Location(&quot;3E&quot;,&quot;30N&quot; , &quot;长春北&quot;, true);
+		List&lt;TrainEntry&lt;Carriage&gt;&gt; cpes=new ArrayList&lt;&gt;();
+		TrainEntry&lt;Carriage&gt; cpe1=TrainPlanningEntry.CreateTrain(&quot;T147&quot;);
+		List&lt;Location&gt; locations=new ArrayList&lt;Location&gt;();
+		locations.add(startlocation);
+		locations.add(endlocation);
+		Timeslot timeslot=new Timeslot(&quot;2020-05-14 22:00&quot;, &quot;2020-05-15 03:20&quot;);//根据现实时间调整测试时间,日期应设置为与测试日期相同
+		List&lt;Timeslot&gt; oneTimeslot=new ArrayList&lt;Timeslot&gt;();
+		oneTimeslot.add(timeslot);
+		cpe1.setLocations(locations);
+		cpe1.setTime(oneTimeslot);
+		Carriage carriage=new Carriage(&quot;4&quot;, &quot;rt&quot;, 200, &quot;century&quot;);
+		List&lt;Carriage&gt; carriages=new ArrayList&lt;&gt;();
+		carriages.add(carriage);
+		cpe1.allocateResource(carriages);	
+		cpe1.start();
+		Timeslot timeslot2=new Timeslot(&quot;2020-05-13 10:11&quot;, &quot;2020-05-14 22:50&quot;);//根据现实时间调整测试时间,日期应设置为与测试日期相同
+		List&lt;Timeslot&gt; seTimeslot=new ArrayList&lt;Timeslot&gt;();
+		seTimeslot.add(timeslot2);
+		TrainEntry&lt;Carriage&gt; cpe2=TrainPlanningEntry.CreateTrain(&quot;G1238&quot;);
+		List&lt;Location&gt; locations2=new ArrayList&lt;Location&gt;();
+		locations2.add(endlocation);
+		locations2.add(startlocation);
+		cpe2.setLocations(locations2);
+		cpe2.setTime(seTimeslot);
+		cpe2.allocateResource(carriages);
+		cpe2.start();
+		cpes.add(cpe2);
+		cpes.add(cpe1);
+		Timeslot timeslot3=new Timeslot(&quot;2020-05-13 10:11&quot;, &quot;2020-05-14 22:30&quot;);//根据现实时间调整测试时间,日期应设置为与测试日期相同
+		List&lt;Timeslot&gt; seTimeslot2=new ArrayList&lt;Timeslot&gt;();
+		seTimeslot2.add(timeslot3);
+		TrainEntry&lt;Carriage&gt; cpe3=TrainPlanningEntry.CreateTrain(&quot;G1438&quot;);
+		cpe3.setLocations(locations2);
+		cpe3.setTime(seTimeslot2);
+		cpe3.allocateResource(carriages);
+		cpe3.start();
+		cpes.add(cpe3);
+		Calendar calendar=Calendar.getInstance();
+		TrainBoard tb=new TrainBoard(startlocation, cpes,calendar);
+		tb.visualize();
+	}*/
+	
+}
+
+<span class="fc" id="L387">	class MapvalueComparator implements Comparator&lt;Map.Entry&lt;TrainEntry&lt;Carriage&gt;, Long&gt;&gt;{</span>
+		
+		@Override
+		public int compare(Entry&lt;TrainEntry&lt;Carriage&gt;, Long&gt; e1 ,Entry&lt;TrainEntry&lt;Carriage&gt;, Long&gt; e2) {
+<span class="fc" id="L391">			return e1.getValue().compareTo(e2.getValue());</span>
+		}
+	}
+	
+	
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.3.201901230119</span>Lab4-2020SP (2020-5-23 15:07:06)</div></body></html>

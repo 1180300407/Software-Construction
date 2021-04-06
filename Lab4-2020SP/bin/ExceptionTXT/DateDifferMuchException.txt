@@ -1,0 +1,39 @@
+Flight:2020-01-02,MU66
+{
+DepartureAirport:Chengdu
+ArrivalAirport:Nanchang
+DepatureTime:2020-01-02 06:14
+ArrivalTime:2020-01-02 11:57
+Plane:B6863
+{
+Type:A319
+Seats:140
+Age:8.5
+}
+}
+Flight:2020-01-01,MU819
+{
+DepartureAirport:Beijing
+ArrivalAirport:Hongkong
+DepatureTime:2020-01-01 16:10
+ArrivalTime:2020-01-04 21:26
+Plane:B8639
+{
+Type:B757
+Seats:261
+Age:19.2
+}
+}
+Flight:2020-01-02,MU819
+{
+DepartureAirport:Beijing
+ArrivalAirport:Hongkong
+DepatureTime:2020-01-02 16:10
+ArrivalTime:2020-01-04 21:26
+Plane:N4804
+{
+Type:B757
+Seats:261
+Age:15.4
+}
+}

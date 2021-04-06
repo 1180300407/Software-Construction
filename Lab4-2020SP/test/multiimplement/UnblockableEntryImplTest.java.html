@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../jacoco-resources/report.gif" type="image/gif"/><title>UnblockableEntryImplTest.java</title><link rel="stylesheet" href="../../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">Lab4-2020SP (2020-5-23 15:07:06)</a> &gt; <a href="../../index.html" class="el_group">Lab4-2020SP</a> &gt; <a href="../index.html" class="el_bundle">test</a> &gt; <a href="index.source.html" class="el_package">multiimplement</a> &gt; <span class="el_source">UnblockableEntryImplTest.java</span></div><h1>UnblockableEntryImplTest.java</h1><pre class="source lang-java linenums">package multiimplement;
+
+import static org.junit.Assert.*;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.junit.Test;
+
+import Timeslot.Timeslot;
+
+<span class="fc" id="L12">public class UnblockableEntryImplTest {</span>
+	//测试策略:设置时间一次；设置时间n次(n&gt;=2)
+	//			单个时间对；n个时间对（n&gt;=2）
+	//为了解开set函数与get函数之间的耦合,将类中的timeslot属性设置为public进行测试
+	//
+	@Test
+	public void setTimetest() {
+<span class="fc" id="L19">		Timeslot timeslot=new Timeslot(&quot;2005-04-17 10:47&quot;, &quot;2005-04-18 14:54&quot;);</span>
+<span class="fc" id="L20">		Timeslot timeslot2=new Timeslot(&quot;2020-07-17 00:47&quot;, &quot;2020-07-18 14:50&quot;);</span>
+<span class="fc" id="L21">		UnBlockableEntryImpl ube=new UnBlockableEntryImpl();</span>
+<span class="fc" id="L22">		List&lt;Timeslot&gt; timeslots=new ArrayList&lt;Timeslot&gt;();</span>
+<span class="fc" id="L23">		timeslots.add(timeslot2);</span>
+<span class="fc" id="L24">		timeslots.add(timeslot);</span>
+<span class="fc" id="L25">		ube.setTime(timeslots);</span>
+<span class="fc" id="L26">		assertEquals(0, ube.timeslot.size());</span>
+<span class="fc" id="L27">		timeslots.remove(timeslot2);</span>
+<span class="fc" id="L28">		ube.setTime(timeslots);</span>
+<span class="fc" id="L29">		assertEquals(1, ube.timeslot.size());</span>
+<span class="fc" id="L30">		assertTrue(ube.timeslot.contains(timeslot));</span>
+<span class="fc" id="L31">		timeslots.remove(0);</span>
+<span class="fc" id="L32">		timeslots.add(timeslot2);</span>
+<span class="fc" id="L33">		ube.setTime(timeslots);</span>
+<span class="fc" id="L34">		assertEquals(1, ube.timeslot.size());</span>
+<span class="fc" id="L35">		assertTrue(ube.timeslot.contains(timeslot));</span>
+<span class="fc" id="L36">	}</span>
+
+	//测试策略:设置时间一次；设置时间n次(n&gt;=2)
+	//			单个时间对；n个时间对（n&gt;=2）
+	//			
+	@Test
+	public void getTimeTest() {
+<span class="fc" id="L43">		Timeslot timeslot=new Timeslot(&quot;2005-04-17 10:47&quot;, &quot;2005-04-18 14:54&quot;);</span>
+<span class="fc" id="L44">		Timeslot timeslot2=new Timeslot(&quot;2020-07-17 00:47&quot;, &quot;2020-07-18 14:50&quot;);</span>
+<span class="fc" id="L45">		UnBlockableEntryImpl ube=new UnBlockableEntryImpl();</span>
+<span class="fc" id="L46">		List&lt;Timeslot&gt; timeslots=new ArrayList&lt;Timeslot&gt;();</span>
+<span class="fc" id="L47">		timeslots.add(timeslot2);</span>
+<span class="fc" id="L48">		timeslots.add(timeslot);</span>
+<span class="fc" id="L49">		ube.setTime(timeslots);</span>
+<span class="fc" id="L50">		assertEquals(0, ube.getTime().size());</span>
+<span class="fc" id="L51">		timeslots.remove(timeslot2);</span>
+<span class="fc" id="L52">		ube.setTime(timeslots);</span>
+<span class="fc" id="L53">		assertEquals(1, ube.getTime().size());</span>
+<span class="fc" id="L54">		assertTrue(ube.getTime().contains(timeslot));</span>
+<span class="fc" id="L55">		timeslots.remove(0);</span>
+<span class="fc" id="L56">		timeslots.add(timeslot2);</span>
+<span class="fc" id="L57">		ube.setTime(timeslots);</span>
+<span class="fc" id="L58">		assertEquals(1, ube.getTime().size());</span>
+<span class="fc" id="L59">		assertTrue(ube.getTime().contains(timeslot));</span>
+<span class="fc" id="L60">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.3.201901230119</span>Lab4-2020SP (2020-5-23 15:07:06)</div></body></html>

@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../jacoco-resources/report.gif" type="image/gif"/><title>MultipleLocationEntryImplTest.java</title><link rel="stylesheet" href="../../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">Lab4-2020SP (2020-5-23 15:07:06)</a> &gt; <a href="../../index.html" class="el_group">Lab4-2020SP</a> &gt; <a href="../index.html" class="el_bundle">test</a> &gt; <a href="index.source.html" class="el_package">multiimplement</a> &gt; <span class="el_source">MultipleLocationEntryImplTest.java</span></div><h1>MultipleLocationEntryImplTest.java</h1><pre class="source lang-java linenums">package multiimplement;
+
+import static org.junit.Assert.*;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.junit.Before;
+import org.junit.Test;
+
+import Location.Location;
+
+<span class="fc" id="L13">public class MultipleLocationEntryImplTest {</span>
+<span class="fc" id="L14">	Location location1=new Location(&quot;157W&quot;, &quot;30N&quot;, &quot;name&quot;, true);</span>
+<span class="fc" id="L15">	Location location2=new Location(&quot;50E&quot;, &quot;47S&quot;, &quot;nam&quot;, false);</span>
+<span class="fc" id="L16">	Location location3=new Location(&quot;24E&quot;, &quot;47S&quot;, &quot;5&quot;, true);</span>
+<span class="fc" id="L17">	List&lt;Location&gt; locs=new ArrayList&lt;Location&gt;();</span>
+	MultipleLocationEntryImpl mle;
+	
+	@Before
+	public void prepare() {
+<span class="fc" id="L22">		locs.add(location1);</span>
+<span class="fc" id="L23">		locs.add(location2);</span>
+<span class="fc" id="L24">		locs.add(location3);</span>
+<span class="fc" id="L25">		mle=new MultipleLocationEntryImpl();</span>
+<span class="fc" id="L26">	}</span>
+	
+	//为了解开set函数与get函数之间的耦合,将类中的locations和setbefore属性设置为public进行测试
+	//测试策略:locations：设置一次是否成功;设置多次考察是否只能设置一次
+	//*
+	@Test
+	public void setLocationstest1() {
+<span class="fc" id="L33">		mle.setLocations(locs);</span>
+<span class="fc" id="L34">		assertEquals(locs, mle.locations);</span>
+<span class="fc" id="L35">		List&lt;Location&gt; l=new ArrayList&lt;Location&gt;();</span>
+<span class="fc" id="L36">		l.add(location1);</span>
+<span class="fc" id="L37">		l.add(location2);</span>
+<span class="fc" id="L38">		mle.setLocations(l);</span>
+<span class="fc" id="L39">		assertNotEquals(l, mle.locations);</span>
+<span class="fc" id="L40">	}</span>
+	
+	
+	@Test
+	public void getLocationTest() {
+<span class="fc" id="L45">		assertFalse(mle.getsetbefore());</span>
+<span class="fc" id="L46">		mle.setLocations(locs);</span>
+<span class="fc" id="L47">		assertEquals(locs, mle.getLocation());</span>
+<span class="fc" id="L48">		assertTrue(mle.getsetbefore());</span>
+<span class="fc" id="L49">	}</span>
+	
+	//测试策略:位置个数等于2；位置个数大于2
+	@Test
+	public void setLocationsTest2() {
+<span class="fc" id="L54">		List&lt;Location&gt; l=new ArrayList&lt;Location&gt;();</span>
+<span class="fc" id="L55">		l.add(location1);</span>
+<span class="fc" id="L56">		l.add(location2);</span>
+<span class="fc" id="L57">		mle.setLocations(l);</span>
+<span class="fc" id="L58">		assertEquals(l, mle.getLocation());</span>
+<span class="fc" id="L59">		assertTrue(mle.getsetbefore());</span>
+		
+<span class="fc" id="L61">		MultipleLocationEntryImpl mle2=new MultipleLocationEntryImpl();</span>
+<span class="fc" id="L62">		mle2.setLocations(locs);</span>
+<span class="fc" id="L63">		assertEquals(locs, mle2.getLocation());</span>
+<span class="fc" id="L64">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.3.201901230119</span>Lab4-2020SP (2020-5-23 15:07:06)</div></body></html>

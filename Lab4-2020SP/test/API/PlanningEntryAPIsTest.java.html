@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../jacoco-resources/report.gif" type="image/gif"/><title>PlanningEntryAPIsTest.java</title><link rel="stylesheet" href="../../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">Lab4-2020SP (2020-5-23 15:07:06)</a> &gt; <a href="../../index.html" class="el_group">Lab4-2020SP</a> &gt; <a href="../index.html" class="el_bundle">test</a> &gt; <a href="index.source.html" class="el_package">API</a> &gt; <span class="el_source">PlanningEntryAPIsTest.java</span></div><h1>PlanningEntryAPIsTest.java</h1><pre class="source lang-java linenums">package API;
+
+import static org.junit.Assert.*;
+
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.junit.Test;
+
+import Location.Location;
+import Resources.Teacher;
+import Timeslot.Timeslot;
+import compositeinterface.CourseEntry;
+
+<span class="fc" id="L16">public abstract class PlanningEntryAPIsTest {</span>
+
+	public abstract PlanningEntryAPIs getAPI();
+	
+	/*在验证checkLocationConflict前先验证其中checkTimeConflict方法正确性,因为是private的，测试时改为public
+	//测试策略:时间有冲突能否检测；时间没冲突能否确认
+	@Test
+	public void checkTimeConflictTest() throws ParseException {
+		PlanningEntryAPIs peAPI=getAPI();
+		Timeslot timeslot=new Timeslot(&quot;2020-05-07 10:08&quot;, &quot;2020-05-08 15:17&quot;);
+		List&lt;Timeslot&gt; timeslots=new ArrayList&lt;Timeslot&gt;();
+		timeslots.add(timeslot);
+		Timeslot timeslot2=new Timeslot(&quot;2020-05-09 10:08&quot;, &quot;2020-05-10 15:17&quot;);
+		timeslots.add(timeslot2);
+		assertFalse(peAPI.checkTimeConflict(timeslots));
+		Timeslot timeslot3=new Timeslot(&quot;2020-05-07 12:08&quot;, &quot;2020-05-08 15:17&quot;);
+		timeslots.add(timeslot3);
+		assertTrue(peAPI.checkTimeConflict(timeslots));
+	}*/
+	
+	//测试策略:位置有冲突能否检测；位置没冲突能否确认
+	@Test
+	public void checkLocationConflicttest() {
+<span class="fc" id="L39">		PlanningEntryAPIs peAPI=getAPI();</span>
+<span class="fc" id="L40">		CourseEntry&lt;Teacher&gt; ce=new CourseEntry&lt;Teacher&gt;(&quot;soft&quot;);</span>
+<span class="fc" id="L41">		Teacher teacher=new Teacher(&quot;130283xxx&quot;, &quot;name&quot;, true, &quot;professtionalTitle&quot;);</span>
+<span class="fc" id="L42">		List&lt;Teacher&gt; teachers=new ArrayList&lt;Teacher&gt;();</span>
+<span class="fc" id="L43">		teachers.add(teacher);</span>
+<span class="fc" id="L44">		Location location=new Location(&quot;130E&quot;,&quot;45S&quot; , &quot;test&quot;, false);</span>
+<span class="fc" id="L45">		List&lt;Location&gt; locations=new ArrayList&lt;Location&gt;();</span>
+<span class="fc" id="L46">		locations.add(location);</span>
+<span class="fc" id="L47">		ce.setLocation(locations);</span>
+<span class="fc" id="L48">		Timeslot timeslot=new Timeslot(&quot;2020-05-07 10:08&quot;, &quot;2020-05-08 15:17&quot;);</span>
+<span class="fc" id="L49">		List&lt;Timeslot&gt; timeslots=new ArrayList&lt;Timeslot&gt;();</span>
+<span class="fc" id="L50">		timeslots.add(timeslot);</span>
+<span class="fc" id="L51">		ce.setTime(timeslots);</span>
+<span class="fc" id="L52">		ce.allocateResource(teachers);</span>
+<span class="fc" id="L53">		Timeslot timeslot2=new Timeslot(&quot;2020-05-09 10:08&quot;, &quot;2020-05-10 15:17&quot;);</span>
+<span class="fc" id="L54">		Timeslot timeslot3=new Timeslot(&quot;2020-05-07 11:08&quot;, &quot;2020-05-10 15:17&quot;);</span>
+<span class="fc" id="L55">		List&lt;Timeslot&gt; timeslots2=new ArrayList&lt;Timeslot&gt;();</span>
+<span class="fc" id="L56">		List&lt;Timeslot&gt; timeslots3=new ArrayList&lt;Timeslot&gt;();</span>
+<span class="fc" id="L57">		timeslots2.add(timeslot2);</span>
+<span class="fc" id="L58">		timeslots3.add(timeslot3);</span>
+<span class="fc" id="L59">		CourseEntry&lt;Teacher&gt; ce2=new CourseEntry&lt;Teacher&gt;(&quot;sos&quot;);</span>
+<span class="fc" id="L60">		ce2.setLocation(locations);</span>
+<span class="fc" id="L61">		ce2.setTime(timeslots2);</span>
+<span class="fc" id="L62">		List&lt;CourseEntry&lt;Teacher&gt;&gt; ces=new ArrayList&lt;CourseEntry&lt;Teacher&gt;&gt;();</span>
+<span class="fc" id="L63">		ces.add(ce);</span>
+<span class="fc" id="L64">		ces.add(ce2);</span>
+<span class="fc" id="L65">		assertFalse(peAPI.checkLocationConflict(ces));//无冲突情况</span>
+<span class="fc" id="L66">		CourseEntry&lt;Teacher&gt; ce3=new CourseEntry&lt;Teacher&gt;(&quot;sosr&quot;);</span>
+<span class="fc" id="L67">		ce3.setLocation(locations);</span>
+<span class="fc" id="L68">		ce3.setTime(timeslots3);</span>
+<span class="fc" id="L69">		ces.add(ce3);</span>
+<span class="fc" id="L70">		assertTrue(peAPI.checkLocationConflict(ces));//有冲突情况</span>
+<span class="fc" id="L71">	}</span>
+	
+	@Test
+	public void findPreEntryPerResourceTest() throws ParseException {
+<span class="fc" id="L75">		PlanningEntryAPIs peAPI=getAPI();</span>
+<span class="fc" id="L76">		CourseEntry&lt;Teacher&gt; ce=new CourseEntry&lt;Teacher&gt;(&quot;soft&quot;);</span>
+<span class="fc" id="L77">		Teacher teacher=new Teacher(&quot;130283xxx&quot;, &quot;name&quot;, true, &quot;professtionalTitle&quot;);</span>
+<span class="fc" id="L78">		List&lt;Teacher&gt; teachers=new ArrayList&lt;Teacher&gt;();</span>
+<span class="fc" id="L79">		teachers.add(teacher);</span>
+<span class="fc" id="L80">		Timeslot timeslot=new Timeslot(&quot;2020-05-07 10:08&quot;, &quot;2020-05-08 15:17&quot;);</span>
+<span class="fc" id="L81">		List&lt;Timeslot&gt; timeslots=new ArrayList&lt;Timeslot&gt;();</span>
+<span class="fc" id="L82">		timeslots.add(timeslot);</span>
+<span class="fc" id="L83">		ce.setTime(timeslots);</span>
+<span class="fc" id="L84">		ce.allocateResource(teachers);</span>
+<span class="fc" id="L85">		Timeslot timeslot2=new Timeslot(&quot;2020-05-09 10:08&quot;, &quot;2020-05-10 15:17&quot;);</span>
+<span class="fc" id="L86">		Timeslot timeslot3=new Timeslot(&quot;2020-05-05 10:08&quot;, &quot;2020-05-06 15:17&quot;);//ce的前序计划项</span>
+<span class="fc" id="L87">		List&lt;Timeslot&gt; timeslots2=new ArrayList&lt;Timeslot&gt;();</span>
+<span class="fc" id="L88">		List&lt;Timeslot&gt; timeslots3=new ArrayList&lt;Timeslot&gt;();</span>
+<span class="fc" id="L89">		timeslots2.add(timeslot2);</span>
+<span class="fc" id="L90">		timeslots3.add(timeslot3);</span>
+<span class="fc" id="L91">		CourseEntry&lt;Teacher&gt; ce2=new CourseEntry&lt;Teacher&gt;(&quot;sos&quot;);</span>
+<span class="fc" id="L92">		ce2.setTime(timeslots2);</span>
+<span class="fc" id="L93">		ce2.allocateResource(teachers);</span>
+<span class="fc" id="L94">		List&lt;CourseEntry&lt;Teacher&gt;&gt; ces=new ArrayList&lt;CourseEntry&lt;Teacher&gt;&gt;();</span>
+<span class="fc" id="L95">		ces.add(ce2);</span>
+<span class="fc" id="L96">		CourseEntry&lt;Teacher&gt; ce3=new CourseEntry&lt;Teacher&gt;(&quot;sosr&quot;);</span>
+<span class="fc" id="L97">		ce3.setTime(timeslots3);</span>
+<span class="fc" id="L98">		ce3.allocateResource(teachers);</span>
+<span class="fc" id="L99">		ces.add(ce3);</span>
+<span class="fc" id="L100">		assertEquals(ce3, peAPI.findPreEntryPerResource(teacher, ce, ces));</span>
+<span class="fc" id="L101">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.3.201901230119</span>Lab4-2020SP (2020-5-23 15:07:06)</div></body></html>

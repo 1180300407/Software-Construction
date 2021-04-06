@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../jacoco-resources/report.gif" type="image/gif"/><title>CourseEntry.java</title><link rel="stylesheet" href="../../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">Lab4-2020SP (2020-5-23 15:07:06)</a> &gt; <a href="../../index.html" class="el_group">Lab4-2020SP</a> &gt; <a href="../index.html" class="el_bundle">src</a> &gt; <a href="index.source.html" class="el_package">compositeinterface</a> &gt; <span class="el_source">CourseEntry.java</span></div><h1>CourseEntry.java</h1><pre class="source lang-java linenums">package compositeinterface;
+
+import Resources.*;
+import State.AllocatedState;
+import Timeslot.Timeslot;
+
+import java.util.List;
+
+import Location.Location;
+import common.CommonPlanningEntry;
+import multiimplement.SingleLocationEntryImpl;
+import multiimplement.SingleSortedResourceEntryImpl;
+import multiimplement.UnBlockableEntryImpl;
+/**
+ * CoursePlanningEntry的具体实现，一个课程，可变类
+ * @author 123
+ *
+ * @param &lt;R&gt; 占用资源类型
+ */
+public class CourseEntry&lt;R&gt; extends CommonPlanningEntry&lt;Teacher&gt; implements CoursePlanningEntry&lt;Teacher&gt;{
+<span class="fc" id="L21">	private SingleLocationEntryImpl sle=new SingleLocationEntryImpl();</span>
+<span class="fc" id="L22">	private SingleSortedResourceEntryImpl&lt;Teacher&gt; ssre=new SingleSortedResourceEntryImpl&lt;Teacher&gt;();</span>
+<span class="fc" id="L23">	private UnBlockableEntryImpl ube=new UnBlockableEntryImpl();</span>
+	
+	//Abstraction function:
+	//	AF(sle,ssre,ube)=一个符合单位置、单资源、不可阻塞的课程计划项
+	//Representation invariant:
+	//	true(由每个维度的成员变量保证)
+	//Safety from rep exposure:
+	//	成员变量全是private的，并由各个成员变量的对于表示泄露的安全性进行保证
+	
+	/**
+	 * 构造函数
+	 * @param name 课程名称
+	 */
+	public CourseEntry(String name) {
+<span class="fc" id="L37">		super(name);</span>
+<span class="fc" id="L38">		super.setType(&quot;CoursePlanningEntry&quot;);</span>
+<span class="fc" id="L39">	}</span>
+	
+	@Override
+	public List&lt;Location&gt; getLocation() {
+<span class="fc" id="L43">		return sle.getLocation();</span>
+	}
+	
+	@Override
+	public void setLocation(List&lt;Location&gt; location) {
+<span class="fc" id="L48">		sle.setLocation(location);</span>
+<span class="fc" id="L49">	}</span>
+	
+	@Override
+	public List&lt;Teacher&gt; getResource() {
+<span class="fc" id="L53">		return ssre.getResource();</span>
+	}
+	
+	@Override
+	public void allocateResource(List&lt;Teacher&gt; resource) {
+<span class="pc bpc" id="L58" title="1 of 2 branches missed.">		if(this.getStateName().equals(&quot;Waiting&quot;)) {</span>
+<span class="fc" id="L59">			ssre.allocateResource(resource);</span>
+<span class="fc" id="L60">			super.setState(new AllocatedState());</span>
+<span class="fc" id="L61">		}</span>
+			
+		else
+<span class="nc" id="L64">			System.out.println(&quot;课程目前状态为:&quot;+this.getStateName()+&quot;,无法分配教师!&quot;);</span>
+<span class="fc" id="L65">	}</span>
+	
+	@Override
+	public List&lt;Timeslot&gt; getTime() {
+<span class="fc" id="L69">		return ube.getTime();</span>
+	}
+	
+	@Override
+	public void setTime(List&lt;Timeslot&gt; timeslot) {
+<span class="fc" id="L74">		ube.setTime(timeslot);</span>
+<span class="fc" id="L75">	}</span>
+
+	@Override
+	public String getName() {
+<span class="fc" id="L79">		return super.getName();</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.3.201901230119</span>Lab4-2020SP (2020-5-23 15:07:06)</div></body></html>

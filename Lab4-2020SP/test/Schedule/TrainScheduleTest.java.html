@@ -1,0 +1,599 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../jacoco-resources/report.gif" type="image/gif"/><title>TrainScheduleTest.java</title><link rel="stylesheet" href="../../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">Lab4-2020SP (2020-5-23 15:07:06)</a> &gt; <a href="../../index.html" class="el_group">Lab4-2020SP</a> &gt; <a href="../index.html" class="el_bundle">test</a> &gt; <a href="index.source.html" class="el_package">Schedule</a> &gt; <span class="el_source">TrainScheduleTest.java</span></div><h1>TrainScheduleTest.java</h1><pre class="source lang-java linenums">package Schedule;
+
+import static org.junit.Assert.*;
+
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
+
+import Exceptions.LocationNotFoundException;
+import Exceptions.PlanEntryNotCreateException;
+import Exceptions.PlanEntryOccupyLocationException;
+import Exceptions.PlanEntryOccupyResourceException;
+import Exceptions.ResourceConflictException;
+import Exceptions.ResourceNotFoundException;
+import Exceptions.SameLabelException;
+import Location.Location;
+import Resources.Carriage;
+import Timeslot.Timeslot;
+import compositeinterface.TrainEntry;
+
+<span class="fc" id="L26">public class TrainScheduleTest {</span>
+	TrainSchedule ts;
+<span class="fc" id="L28">	Carriage carriage=new Carriage(&quot;1&quot;, &quot;type&quot;, 5, &quot;manufactureyear&quot;);</span>
+<span class="fc" id="L29">	Carriage carriage2=new Carriage(&quot;10&quot;, &quot;type&quot;, 15, &quot;manufactureyear&quot;);</span>
+<span class="fc" id="L30">	Location location=new Location(&quot;130E&quot;,&quot;45S&quot; , &quot;test&quot;, true);</span>
+<span class="fc" id="L31">	Location location2=new Location(&quot;10E&quot;,&quot;47n&quot; , &quot;tet&quot;, true);</span>
+	
+	@Before
+	public void prepare() {
+<span class="fc" id="L35">		ts=new TrainSchedule();</span>
+<span class="fc" id="L36">	}</span>
+	
+	//*为了避免get函数与该函数之间的联系，先将属性改为public进行测试
+	//测试策略：单次添加车厢；重复添加车厢
+	//			添加一个车厢；添加多个车厢
+	@Test
+	public void addCarriagetest() {
+<span class="fc" id="L43">		ts.addCarriage(carriage);</span>
+<span class="fc" id="L44">		assertEquals(1, ts.carriages.size());</span>
+<span class="fc" id="L45">		assertTrue(ts.carriages.contains(carriage));</span>
+<span class="fc" id="L46">		ts.addCarriage(carriage);</span>
+<span class="fc" id="L47">		assertEquals(1, ts.carriages.size());</span>
+<span class="fc" id="L48">		ts.addCarriage(carriage2);</span>
+<span class="fc" id="L49">		assertEquals(2, ts.carriages.size());</span>
+<span class="fc" id="L50">		assertTrue(ts.carriages.contains(carriage2));</span>
+<span class="fc" id="L51">	}</span>
+	
+	//为了避免get函数与该函数之间的联系，先将属性改为public进行函数的测试
+	//测试策略：单次添加位置；重复添加位置
+	//			添加一个位置；添加多个位置
+	@Test
+	public void addLocationTest() {
+<span class="fc" id="L58">		ts.addLocation(location);</span>
+<span class="fc" id="L59">		assertEquals(1, ts.locations.size());</span>
+<span class="fc" id="L60">		assertEquals(1, ts.locationnames.size());</span>
+<span class="fc" id="L61">		assertTrue(ts.locations.contains(location));</span>
+<span class="fc" id="L62">		assertTrue(ts.locationnames.contains(location.getName()));</span>
+<span class="fc" id="L63">		ts.addLocation(location);</span>
+<span class="fc" id="L64">		assertEquals(1, ts.locations.size());</span>
+<span class="fc" id="L65">		assertEquals(1, ts.locationnames.size());</span>
+<span class="fc" id="L66">		ts.addLocation(location2);</span>
+<span class="fc" id="L67">		assertEquals(2, ts.locations.size());</span>
+<span class="fc" id="L68">		assertEquals(2, ts.locationnames.size());</span>
+<span class="fc" id="L69">		assertTrue(ts.locations.contains(location2));</span>
+<span class="fc" id="L70">		assertTrue(ts.locationnames.contains(location2.getName()));</span>
+<span class="fc" id="L71">	}</span>
+	@Rule
+<span class="fc" id="L73">	public ExpectedException expectedEx = ExpectedException.none();</span>
+	//为了避免get函数与该函数之间的联系，先将属性改为public进行函数的测试
+	//测试策略:位置尚未纳入管理；位置已经纳入管理
+	//		   列车之前从未创建过；列车已经创建
+	//		  站点个数与时间个数不匹配；站点个数与时间个数匹配
+	//异常情况：位置尚未纳入管理
+	@Test
+	public void createTrainTest() throws LocationNotFoundException, SameLabelException {
+<span class="fc" id="L81">		ts.addLocation(location);</span>
+<span class="fc" id="L82">		List&lt;String&gt; locations=new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L83">		locations.add(location.getName());</span>
+<span class="fc" id="L84">		locations.add(location2.getName());</span>
+<span class="fc" id="L85">		List&lt;Timeslot&gt; timeslots=new ArrayList&lt;Timeslot&gt;();</span>
+<span class="fc" id="L86">		Timeslot timeslot=new Timeslot(&quot;2020-04-05 10:14&quot;, &quot;2020-04-07 14:15&quot;);</span>
+<span class="fc" id="L87">		timeslots.add(timeslot);</span>
+<span class="fc" id="L88">		expectedEx.expect(LocationNotFoundException.class);</span>
+<span class="nc" id="L89">		ts.createTrain(&quot;T120&quot;, locations, timeslots);</span>
+<span class="nc" id="L90">	}</span>
+	
+	//异常情况：位置已经纳入管理,列车之前从未创建过，站点个数与时间个数匹配
+	@Test
+	public void createTrainTest2() throws LocationNotFoundException, SameLabelException {
+<span class="fc" id="L95">		ts.addLocation(location);</span>
+<span class="fc" id="L96">		List&lt;String&gt; locations=new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L97">		locations.add(location.getName());</span>
+<span class="fc" id="L98">		locations.add(location2.getName());</span>
+<span class="fc" id="L99">		List&lt;Timeslot&gt; timeslots=new ArrayList&lt;Timeslot&gt;();</span>
+<span class="fc" id="L100">		Timeslot timeslot=new Timeslot(&quot;2020-04-05 10:14&quot;, &quot;2020-04-07 14:15&quot;);</span>
+<span class="fc" id="L101">		timeslots.add(timeslot);</span>
+<span class="fc" id="L102">		ts.addLocation(location2);</span>
+<span class="fc" id="L103">		ts.createTrain(&quot;T120&quot;, locations, timeslots);</span>
+<span class="fc" id="L104">		assertEquals(1, ts.trains.size());</span>
+<span class="fc" id="L105">	}</span>
+	
+	//异常情况：列车已经创建
+	@Test
+	public void createTrainTest3() throws LocationNotFoundException, SameLabelException {
+<span class="fc" id="L110">		ts.addLocation(location);</span>
+<span class="fc" id="L111">		List&lt;String&gt; locations=new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L112">		locations.add(location.getName());</span>
+<span class="fc" id="L113">		locations.add(location2.getName());</span>
+<span class="fc" id="L114">		List&lt;Timeslot&gt; timeslots=new ArrayList&lt;Timeslot&gt;();</span>
+<span class="fc" id="L115">		Timeslot timeslot=new Timeslot(&quot;2020-04-05 10:14&quot;, &quot;2020-04-07 14:15&quot;);</span>
+<span class="fc" id="L116">		timeslots.add(timeslot);</span>
+<span class="fc" id="L117">		ts.addLocation(location2);</span>
+<span class="fc" id="L118">		ts.createTrain(&quot;T120&quot;, locations, timeslots);</span>
+<span class="fc" id="L119">		assertEquals(1, ts.trains.size());</span>
+<span class="fc" id="L120">		expectedEx.expect(SameLabelException.class);</span>
+<span class="nc" id="L121">		ts.createTrain(&quot;T120&quot;, locations, timeslots);</span>
+<span class="nc" id="L122">	}</span>
+	
+	//异常情况： 站点个数与时间个数不匹配
+	@Test
+	public void createTrainTest4() throws LocationNotFoundException, SameLabelException {
+<span class="fc" id="L127">		ts.addLocation(location);</span>
+<span class="fc" id="L128">		List&lt;String&gt; locations=new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L129">		locations.add(location.getName());</span>
+<span class="fc" id="L130">		locations.add(location2.getName());</span>
+<span class="fc" id="L131">		List&lt;Timeslot&gt; timeslots=new ArrayList&lt;Timeslot&gt;();</span>
+<span class="fc" id="L132">		Timeslot timeslot=new Timeslot(&quot;2020-04-05 10:14&quot;, &quot;2020-04-07 14:15&quot;);</span>
+<span class="fc" id="L133">		timeslots.add(timeslot);</span>
+<span class="fc" id="L134">		ts.addLocation(location2);</span>
+<span class="fc" id="L135">		Location location3=new Location(&quot;10W&quot;,&quot;47S&quot; , &quot;e6&quot;, true);</span>
+<span class="fc" id="L136">		locations.add(location3.getName());</span>
+<span class="fc" id="L137">		ts.addLocation(location3);</span>
+<span class="fc" id="L138">		ts.createTrain(&quot;TR12&quot;, locations, timeslots);</span>
+<span class="fc" id="L139">		assertEquals(0, ts.trains.size());</span>
+<span class="fc" id="L140">	}</span>
+	
+	//将直接用属性获取的地方改为用get函数获取
+	@Test
+	public void getTrainsTest() throws LocationNotFoundException, SameLabelException {
+<span class="fc" id="L145">		ts.addLocation(location);</span>
+<span class="fc" id="L146">		List&lt;String&gt; locations=new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L147">		locations.add(location.getName());</span>
+<span class="fc" id="L148">		locations.add(location2.getName());</span>
+<span class="fc" id="L149">		List&lt;Timeslot&gt; timeslots=new ArrayList&lt;Timeslot&gt;();</span>
+<span class="fc" id="L150">		Timeslot timeslot=new Timeslot(&quot;2020-04-05 10:14&quot;, &quot;2020-04-07 14:15&quot;);</span>
+<span class="fc" id="L151">		timeslots.add(timeslot);</span>
+<span class="fc" id="L152">		ts.addLocation(location2);</span>
+<span class="fc" id="L153">		ts.createTrain(&quot;T120&quot;, locations, timeslots);</span>
+<span class="fc" id="L154">		assertEquals(1, ts.getTrains().size());</span>
+<span class="fc" id="L155">	}</span>
+	
+	//测试策略同前addCarriage,将直接用属性获取的地方改为用get函数获取
+	@Test
+	public void getCarriagesTest() {
+<span class="fc" id="L160">		ts.addCarriage(carriage);</span>
+<span class="fc" id="L161">		assertEquals(1, ts.getCarriages().size());</span>
+<span class="fc" id="L162">		assertTrue(ts.getCarriages().contains(carriage));</span>
+<span class="fc" id="L163">		ts.addCarriage(carriage);</span>
+<span class="fc" id="L164">		assertEquals(1, ts.getCarriages().size());</span>
+<span class="fc" id="L165">		ts.addCarriage(carriage2);</span>
+<span class="fc" id="L166">		assertEquals(2, ts.getCarriages().size());</span>
+<span class="fc" id="L167">		assertTrue(ts.getCarriages().contains(carriage2));</span>
+<span class="fc" id="L168">	}</span>
+	
+	//测试策略同前addLocation,将直接用属性获取的地方改为用get函数获取
+	@Test
+	public void getLocatonsTest() {
+<span class="fc" id="L173">		ts.addLocation(location);</span>
+<span class="fc" id="L174">		assertEquals(1, ts.getLocations().size());</span>
+<span class="fc" id="L175">		assertEquals(1, ts.getLocationNames().size());</span>
+<span class="fc" id="L176">		assertTrue(ts.getLocations().contains(location));</span>
+<span class="fc" id="L177">		assertTrue(ts.getLocationNames().contains(location.getName()));</span>
+<span class="fc" id="L178">		ts.addLocation(location);</span>
+<span class="fc" id="L179">		assertEquals(1, ts.getLocations().size());</span>
+<span class="fc" id="L180">		assertEquals(1, ts.getLocationNames().size());</span>
+<span class="fc" id="L181">		ts.addLocation(location2);</span>
+<span class="fc" id="L182">		assertEquals(2, ts.getLocations().size());</span>
+<span class="fc" id="L183">		assertTrue(ts.getLocations().contains(location2));</span>
+<span class="fc" id="L184">		assertTrue(ts.getLocationNames().contains(location2.getName()));</span>
+<span class="fc" id="L185">	}</span>
+	
+	//测试策略：车厢已纳入管理；车厢未纳入管理
+	//			车厢已被分配；车厢未被分配
+	//异常情况：车厢未纳入管理
+	@Test
+	public void deleteCarriageTest() throws LocationNotFoundException, SameLabelException, ResourceNotFoundException, PlanEntryOccupyResourceException, PlanEntryNotCreateException, ResourceConflictException {
+<span class="fc" id="L192">		expectedEx.expect(ResourceNotFoundException.class);</span>
+<span class="nc" id="L193">		ts.deleteCarriage(&quot;10&quot;);</span>
+<span class="nc" id="L194">	}</span>
+	
+	//车厢已纳入管理、车厢未被分配
+	@Test
+	public void deleteCarriageTest2() throws LocationNotFoundException, SameLabelException, ResourceNotFoundException, PlanEntryOccupyResourceException, PlanEntryNotCreateException, ResourceConflictException {
+<span class="fc" id="L199">		ts.addCarriage(carriage);</span>
+<span class="fc" id="L200">		ts.addCarriage(carriage2);</span>
+<span class="fc" id="L201">		assertEquals(2, ts.getCarriages().size());</span>
+<span class="fc" id="L202">		ts.deleteCarriage(&quot;10&quot;);</span>
+<span class="fc" id="L203">		assertEquals(1, ts.getCarriages().size());</span>
+<span class="fc" id="L204">	}</span>
+	
+	//异常情况：车厢被分配
+	@Test
+	public void deleteCarriageTest3() throws LocationNotFoundException, SameLabelException, ResourceNotFoundException, PlanEntryOccupyResourceException, PlanEntryNotCreateException, ResourceConflictException {
+<span class="fc" id="L209">		ts.addCarriage(carriage);</span>
+<span class="fc" id="L210">		assertEquals(1, ts.getCarriages().size());</span>
+<span class="fc" id="L211">		List&lt;Timeslot&gt; timeslots=new ArrayList&lt;Timeslot&gt;();</span>
+<span class="fc" id="L212">		ts.addLocation(location);</span>
+<span class="fc" id="L213">		ts.addLocation(location2);</span>
+<span class="fc" id="L214">		List&lt;String&gt; locations=new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L215">		locations.add(location.getName());</span>
+<span class="fc" id="L216">		locations.add(location2.getName());</span>
+<span class="fc" id="L217">		Timeslot timeslot=new Timeslot(&quot;2020-04-05 10:14&quot;, &quot;2020-04-07 14:15&quot;);</span>
+<span class="fc" id="L218">		timeslots.add(timeslot);</span>
+<span class="fc" id="L219">		ts.createTrain(&quot;G1238&quot;, locations, timeslots);</span>
+<span class="fc" id="L220">		List&lt;String&gt; ids=new ArrayList&lt;String&gt;();</span>
+<span class="fc" id="L221">		ids.add(carriage.getId());</span>
+<span class="fc" id="L222">		ts.allocateCarriage(&quot;G1238&quot;,ids );</span>
+<span class="fc" id="L223">		expectedEx.expect(PlanEntryOccupyResourceException.class);</span>
+<span class="nc" id="L224">		ts.deleteCarriage(&quot;1&quot;);</span>
+<span class="nc" id="L225">	}</span>
+	
+	//测试策略：位置已纳入管理；位置未纳入管理
+	//			位置被占用；位置未被占用
+	//异常情况：位置未纳入管理
+	@Test
+	public void deleteLocationTest() throws LocationNotFoundException, SameLabelException, PlanEntryOccupyLocationException {
+<span class="fc" id="L232">		expectedEx.expect(LocationNotFoundException.class);</span>
+<span class="nc" id="L233">		ts.deleteLocation(&quot;tet&quot;);</span>
+<span class="nc" id="L234">	}</span>
+	
+	//位置已纳入管理、位置未被占用
+	@Test
+	public void deleteLocationTest2() throws LocationNotFoundException, SameLabelException, PlanEntryOccupyLocationException {
+<span class="fc" id="L239">		ts.addLocation(location);</span>
+<span class="fc" id="L240">		ts.addLocation(location2);</span>
+<span class="fc" id="L241">		assertEquals(2, ts.getLocations().size());</span>
+<span class="fc" id="L242">		ts.deleteLocation(&quot;tet&quot;);</span>
+<span class="fc" id="L243">		assertEquals(1, ts.getLocations().size());</span>
+<span class="fc" id="L244">	}</span>
+	
+	//异常情况：位置被占用
+	@Test
+	public void deleteLocationTest3() throws LocationNotFoundException, SameLabelException, PlanEntryOccupyLocationException {
+<span class="fc" id="L249">		ts.addLocation(location);</span>
+<span class="fc" id="L250">		ts.addLocation(location2);</span>
+<span class="fc" id="L251">		List&lt;String&gt; locations=new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L252">		locations.add(location.getName());</span>
+<span class="fc" id="L253">		locations.add(location2.getName());</span>
+<span class="fc" id="L254">		List&lt;Timeslot&gt; timeslots=new ArrayList&lt;Timeslot&gt;();</span>
+<span class="fc" id="L255">		Timeslot timeslot=new Timeslot(&quot;2020-04-05 10:14&quot;, &quot;2020-04-07 14:15&quot;);</span>
+<span class="fc" id="L256">		timeslots.add(timeslot);</span>
+<span class="fc" id="L257">		ts.createTrain(&quot;G1238&quot;, locations, timeslots);</span>
+<span class="fc" id="L258">		expectedEx.expect(PlanEntryOccupyLocationException.class);</span>
+<span class="nc" id="L259">		ts.deleteLocation(&quot;tet&quot;);</span>
+<span class="nc" id="L260">	}</span>
+	
+	//测试策略：车次已创建；车次未创建
+	@Test
+	public void getTrainStateTest() throws LocationNotFoundException, SameLabelException {
+<span class="fc" id="L265">		ts.addLocation(location);</span>
+<span class="fc" id="L266">		ts.addLocation(location2);</span>
+<span class="fc" id="L267">		List&lt;String&gt; locations=new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L268">		locations.add(location.getName());</span>
+<span class="fc" id="L269">		locations.add(location2.getName());</span>
+<span class="fc" id="L270">		List&lt;Timeslot&gt; timeslots=new ArrayList&lt;Timeslot&gt;();</span>
+<span class="fc" id="L271">		Timeslot timeslot=new Timeslot(&quot;2020-04-05 10:14&quot;, &quot;2020-04-07 14:15&quot;);</span>
+<span class="fc" id="L272">		timeslots.add(timeslot);</span>
+<span class="fc" id="L273">		ts.createTrain(&quot;G1238&quot;, locations, timeslots);</span>
+<span class="fc" id="L274">		assertEquals(&quot;null&quot;, ts.getTrainState(&quot;&quot;));</span>
+<span class="fc" id="L275">		assertEquals(&quot;Waiting&quot;, ts.getTrainState(&quot;G1238&quot;));</span>
+<span class="fc" id="L276">	}</span>
+	
+	//测试策略：车次已创建；车次未创建
+	//			车厢已纳入管理；车厢未纳入管理
+	//异常情况：车厢未纳入管理
+	@Test
+	public void allocateCarriageTest() throws LocationNotFoundException, SameLabelException, ResourceNotFoundException, PlanEntryNotCreateException, ResourceConflictException {
+<span class="fc" id="L283">		ts.addLocation(location);</span>
+<span class="fc" id="L284">		ts.addLocation(location2);</span>
+<span class="fc" id="L285">		List&lt;String&gt; locations=new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L286">		locations.add(location.getName());</span>
+<span class="fc" id="L287">		locations.add(location2.getName());</span>
+<span class="fc" id="L288">		List&lt;Timeslot&gt; timeslots=new ArrayList&lt;Timeslot&gt;();</span>
+<span class="fc" id="L289">		Timeslot timeslot=new Timeslot(&quot;2020-04-05 10:14&quot;, &quot;2020-04-07 14:15&quot;);</span>
+<span class="fc" id="L290">		timeslots.add(timeslot);</span>
+<span class="fc" id="L291">		ts.createTrain(&quot;G1238&quot;, locations, timeslots);</span>
+<span class="fc" id="L292">		List&lt;String&gt; carriages=new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L293">		carriages.add(carriage.getId());</span>
+<span class="fc" id="L294">		expectedEx.expect(ResourceNotFoundException.class);</span>
+<span class="nc" id="L295">		ts.allocateCarriage(&quot;G1238&quot;, carriages);</span>
+<span class="nc" id="L296">		assertEquals(&quot;Waiting&quot;, ts.getTrainState(&quot;G1238&quot;));//车厢未纳入管理</span>
+<span class="nc" id="L297">	}</span>
+	
+	//车次已创建、车厢已纳入管理；
+	@Test
+	public void allocateCarriageTest2() throws SameLabelException, ResourceNotFoundException, PlanEntryNotCreateException, ResourceConflictException, LocationNotFoundException {
+<span class="fc" id="L302">		ts.addLocation(location);</span>
+<span class="fc" id="L303">		ts.addLocation(location2);</span>
+<span class="fc" id="L304">		List&lt;String&gt; locations=new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L305">		locations.add(location.getName());</span>
+<span class="fc" id="L306">		locations.add(location2.getName());</span>
+<span class="fc" id="L307">		List&lt;Timeslot&gt; timeslots=new ArrayList&lt;Timeslot&gt;();</span>
+<span class="fc" id="L308">		Timeslot timeslot=new Timeslot(&quot;2020-04-05 10:14&quot;, &quot;2020-04-07 14:15&quot;);</span>
+<span class="fc" id="L309">		timeslots.add(timeslot);</span>
+<span class="fc" id="L310">		ts.createTrain(&quot;G1238&quot;, locations, timeslots);</span>
+<span class="fc" id="L311">		List&lt;String&gt; carriages=new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L312">		carriages.add(carriage.getId());</span>
+<span class="fc" id="L313">		ts.addCarriage(carriage);</span>
+<span class="fc" id="L314">		ts.allocateCarriage(&quot;G1238&quot;, carriages);</span>
+<span class="fc" id="L315">		assertEquals(&quot;Allocated&quot;, ts.getTrainState(&quot;G1238&quot;));//单次分配</span>
+<span class="fc" id="L316">	}</span>
+	
+	//异常情况：车次未创建
+	@Test
+	public void allocateCarriageTest3() throws SameLabelException, ResourceNotFoundException, PlanEntryNotCreateException, ResourceConflictException {
+<span class="fc" id="L321">		ts.addCarriage(carriage);</span>
+<span class="fc" id="L322">		List&lt;String&gt; carriages=new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L323">		carriages.add(carriage.getId());</span>
+<span class="fc" id="L324">		expectedEx.expect(PlanEntryNotCreateException.class);</span>
+<span class="nc" id="L325">		ts.allocateCarriage(&quot;null&quot;, carriages);</span>
+<span class="nc" id="L326">	}</span>
+	
+	//测试策略:列车已创建；列车未创建
+	//		   列车已分配车厢；列车未分配车厢
+	//异常情况：列车未创建
+	@Test
+	public void startTrainTest() throws LocationNotFoundException, SameLabelException, PlanEntryNotCreateException, ResourceNotFoundException, ResourceConflictException {
+<span class="fc" id="L333">		expectedEx.expect(PlanEntryNotCreateException.class);</span>
+<span class="nc" id="L334">		ts.startTrain(&quot;F4&quot;);</span>
+<span class="nc" id="L335">	}</span>
+	
+	//列车已创建、分配车厢
+	@Test
+	public void startTrainTest2() throws LocationNotFoundException, SameLabelException, PlanEntryNotCreateException, ResourceNotFoundException, ResourceConflictException {
+<span class="fc" id="L340">		ts.addLocation(location);</span>
+<span class="fc" id="L341">		ts.addLocation(location2);</span>
+<span class="fc" id="L342">		List&lt;String&gt; locations=new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L343">		locations.add(location.getName());</span>
+<span class="fc" id="L344">		locations.add(location2.getName());</span>
+<span class="fc" id="L345">		List&lt;Timeslot&gt; timeslots=new ArrayList&lt;Timeslot&gt;();</span>
+<span class="fc" id="L346">		Timeslot timeslot=new Timeslot(&quot;2020-04-05 10:14&quot;, &quot;2020-04-07 14:15&quot;);</span>
+<span class="fc" id="L347">		timeslots.add(timeslot);</span>
+<span class="fc" id="L348">		ts.createTrain(&quot;G1238&quot;, locations, timeslots);</span>
+<span class="fc" id="L349">		List&lt;String&gt; carriages=new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L350">		carriages.add(carriage.getId());</span>
+<span class="fc" id="L351">		ts.addCarriage(carriage);</span>
+<span class="fc" id="L352">		ts.allocateCarriage(&quot;G1238&quot;, carriages);</span>
+<span class="fc" id="L353">		ts.startTrain(&quot;G1238&quot;);</span>
+<span class="fc" id="L354">		assertEquals(&quot;Running&quot;, ts.getTrainState(&quot;G1238&quot;));//列车已分配</span>
+<span class="fc" id="L355">	}</span>
+	
+	//异常情况：列车未分配车厢
+	@Test
+	public void startTrainTest3() throws LocationNotFoundException, SameLabelException, PlanEntryNotCreateException, ResourceNotFoundException, ResourceConflictException {
+<span class="fc" id="L360">		ts.addLocation(location);</span>
+<span class="fc" id="L361">		ts.addLocation(location2);</span>
+<span class="fc" id="L362">		List&lt;String&gt; locations=new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L363">		locations.add(location.getName());</span>
+<span class="fc" id="L364">		locations.add(location2.getName());</span>
+<span class="fc" id="L365">		List&lt;Timeslot&gt; timeslots=new ArrayList&lt;Timeslot&gt;();</span>
+<span class="fc" id="L366">		Timeslot timeslot=new Timeslot(&quot;2020-04-05 10:14&quot;, &quot;2020-04-07 14:15&quot;);</span>
+<span class="fc" id="L367">		timeslots.add(timeslot);</span>
+<span class="fc" id="L368">		ts.createTrain(&quot;G1238&quot;, locations, timeslots);</span>
+<span class="fc" id="L369">		ts.startTrain(&quot;G1238&quot;);</span>
+<span class="fc" id="L370">		assertNotEquals(&quot;Running&quot;, ts.getTrainState(&quot;G1238&quot;));//列车未分配</span>
+<span class="fc" id="L371">	}</span>
+	
+	//测试策略:列车已创建；列车未创建
+	//			列车未启动；列车已启动
+	//异常情况：列车未创建
+	@Test
+	public void cancelTrainTest() throws LocationNotFoundException, SameLabelException, PlanEntryNotCreateException, ResourceNotFoundException, ResourceConflictException {
+<span class="fc" id="L378">		expectedEx.expect(PlanEntryNotCreateException.class);</span>
+<span class="nc" id="L379">		ts.cancelTrain(&quot;F4&quot;);//列车未创建</span>
+<span class="nc" id="L380">	}</span>
+	
+	//列车已创建、未启动
+	@Test
+	public void cancelTrainTest2() throws LocationNotFoundException, SameLabelException, PlanEntryNotCreateException, ResourceNotFoundException, ResourceConflictException {
+<span class="fc" id="L385">		ts.addLocation(location);</span>
+<span class="fc" id="L386">		ts.addLocation(location2);</span>
+<span class="fc" id="L387">		List&lt;String&gt; locations=new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L388">		locations.add(location.getName());</span>
+<span class="fc" id="L389">		locations.add(location2.getName());</span>
+<span class="fc" id="L390">		List&lt;Timeslot&gt; timeslots=new ArrayList&lt;Timeslot&gt;();</span>
+<span class="fc" id="L391">		Timeslot timeslot=new Timeslot(&quot;2020-04-05 10:14&quot;, &quot;2020-04-07 14:15&quot;);</span>
+<span class="fc" id="L392">		timeslots.add(timeslot);</span>
+<span class="fc" id="L393">		ts.createTrain(&quot;G1238&quot;, locations, timeslots);</span>
+<span class="fc" id="L394">		assertEquals(&quot;null&quot;, ts.getTrainState(&quot;F4&quot;));</span>
+<span class="fc" id="L395">		assertEquals(&quot;Waiting&quot;, ts.getTrainState(&quot;G1238&quot;));</span>
+<span class="fc" id="L396">		ts.cancelTrain(&quot;G1238&quot;);</span>
+<span class="fc" id="L397">		assertEquals(&quot;Cancelled&quot;, ts.getTrainState(&quot;G1238&quot;));//列车未启动</span>
+<span class="fc" id="L398">	}</span>
+	
+	//异常情况：列车已启动
+	@Test
+	public void cancelTrainTest3() throws LocationNotFoundException, SameLabelException, PlanEntryNotCreateException, ResourceNotFoundException, ResourceConflictException {
+<span class="fc" id="L403">		ts.addLocation(location);</span>
+<span class="fc" id="L404">		ts.addLocation(location2);</span>
+<span class="fc" id="L405">		List&lt;String&gt; locations=new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L406">		locations.add(location.getName());</span>
+<span class="fc" id="L407">		locations.add(location2.getName());</span>
+<span class="fc" id="L408">		List&lt;Timeslot&gt; timeslots=new ArrayList&lt;Timeslot&gt;();</span>
+<span class="fc" id="L409">		List&lt;String&gt; carriages=new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L410">		carriages.add(carriage.getId());</span>
+<span class="fc" id="L411">		ts.addCarriage(carriage);</span>
+<span class="fc" id="L412">		Timeslot timeslot2=new Timeslot(&quot;2020-04-25 10:14&quot;, &quot;2020-04-27 14:15&quot;);</span>
+<span class="fc" id="L413">		timeslots.add(timeslot2);</span>
+<span class="fc" id="L414">		ts.createTrain(&quot;G147&quot;, locations, timeslots);</span>
+<span class="fc" id="L415">		ts.allocateCarriage(&quot;G147&quot;, carriages);</span>
+<span class="fc" id="L416">		ts.startTrain(&quot;G147&quot;);</span>
+<span class="fc" id="L417">		ts.cancelTrain(&quot;G147&quot;);</span>
+<span class="fc" id="L418">		assertEquals(&quot;Running&quot;, ts.getTrainState(&quot;G147&quot;));//列车已启动</span>
+<span class="fc" id="L419">	}</span>
+	
+	//测试策略:列车已创建；列车未创建
+	//			列车未启动；列车已启动
+	//异常情况：列车未创建
+	@Test
+	public void endTrainTest() throws ResourceNotFoundException, PlanEntryNotCreateException, ResourceConflictException, LocationNotFoundException, SameLabelException {
+<span class="fc" id="L426">		expectedEx.expect(PlanEntryNotCreateException.class);</span>
+<span class="nc" id="L427">		ts.endTrain(&quot;F4&quot;);//列车未创建</span>
+<span class="nc" id="L428">	}</span>
+	
+	//列车已创建、已启动
+	@Test
+	public void endTrainTest2() throws ResourceNotFoundException, PlanEntryNotCreateException, ResourceConflictException, LocationNotFoundException, SameLabelException {
+<span class="fc" id="L433">		ts.addLocation(location);</span>
+<span class="fc" id="L434">		ts.addLocation(location2);</span>
+<span class="fc" id="L435">		List&lt;String&gt; locations=new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L436">		locations.add(location.getName());</span>
+<span class="fc" id="L437">		locations.add(location2.getName());</span>
+<span class="fc" id="L438">		List&lt;Timeslot&gt; timeslots=new ArrayList&lt;Timeslot&gt;();</span>
+<span class="fc" id="L439">		Timeslot timeslot=new Timeslot(&quot;2020-04-05 10:14&quot;, &quot;2020-04-07 14:15&quot;);</span>
+<span class="fc" id="L440">		timeslots.add(timeslot);</span>
+<span class="fc" id="L441">		ts.createTrain(&quot;G1238&quot;, locations, timeslots);</span>
+<span class="fc" id="L442">		List&lt;String&gt; carriages=new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L443">		carriages.add(carriage.getId());</span>
+<span class="fc" id="L444">		ts.addCarriage(carriage);</span>
+<span class="fc" id="L445">		ts.allocateCarriage(&quot;G1238&quot;, carriages);</span>
+<span class="fc" id="L446">		ts.startTrain(&quot;G1238&quot;);</span>
+<span class="fc" id="L447">		ts.endTrain(&quot;G1238&quot;);</span>
+<span class="fc" id="L448">		assertEquals(&quot;Ended&quot;, ts.getTrainState(&quot;G1238&quot;));//列车已启动</span>
+<span class="fc" id="L449">	}</span>
+	
+	//异常情况：列车未启动
+	@Test
+	public void endTrainTest3() throws ResourceNotFoundException, PlanEntryNotCreateException, ResourceConflictException, LocationNotFoundException, SameLabelException {
+<span class="fc" id="L454">		ts.addLocation(location);</span>
+<span class="fc" id="L455">		ts.addLocation(location2);</span>
+<span class="fc" id="L456">		List&lt;String&gt; locations=new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L457">		locations.add(location.getName());</span>
+<span class="fc" id="L458">		locations.add(location2.getName());</span>
+<span class="fc" id="L459">		List&lt;Timeslot&gt; timeslots=new ArrayList&lt;Timeslot&gt;();</span>
+<span class="fc" id="L460">		Timeslot timeslot=new Timeslot(&quot;2020-04-05 10:14&quot;, &quot;2020-04-07 14:15&quot;);</span>
+<span class="fc" id="L461">		timeslots.add(timeslot);</span>
+<span class="fc" id="L462">		ts.createTrain(&quot;G1238&quot;, locations, timeslots);</span>
+<span class="fc" id="L463">		assertNotEquals(&quot;Ended&quot;, ts.getTrainState(&quot;G1238&quot;));</span>
+<span class="fc" id="L464">		ts.endTrain(&quot;G1238&quot;);//列车未启动</span>
+<span class="fc" id="L465">	}</span>
+	
+	//测试策略:列车未创建；列车已创建；
+	//		     列车状态为Running;列车状态不是Running
+	//异常情况：列车未创建
+	@Test
+	public void blockTrainTest() throws ParseException, ResourceNotFoundException, PlanEntryNotCreateException, ResourceConflictException, LocationNotFoundException, SameLabelException {
+<span class="fc" id="L472">		expectedEx.expect(PlanEntryNotCreateException.class);</span>
+<span class="nc" id="L473">		ts.blockTrain(&quot;qw&quot;);//列车未创建</span>
+<span class="nc" id="L474">	}</span>
+	
+	//列车已创建，列车状态为Running
+	@Test
+	public void blockTrainTest2() throws ParseException, ResourceNotFoundException, PlanEntryNotCreateException, ResourceConflictException, LocationNotFoundException, SameLabelException {
+<span class="fc" id="L479">		Timeslot timeslot=new Timeslot(&quot;2020-04-05 10:14&quot;, &quot;2020-04-07 14:15&quot;);</span>
+<span class="fc" id="L480">		Timeslot timeslot2=new Timeslot(&quot;2020-04-07 17:14&quot; ,&quot;2020-04-08 14:15&quot;);</span>
+<span class="fc" id="L481">		Timeslot timeslot3=new Timeslot(&quot;2020-04-09 17:14&quot; ,&quot;2020-04-10 14:15&quot;);</span>
+<span class="fc" id="L482">		List&lt;Timeslot&gt; timeslots=new ArrayList&lt;Timeslot&gt;();</span>
+<span class="fc" id="L483">		timeslots.add(timeslot);</span>
+<span class="fc" id="L484">		timeslots.add(timeslot2);</span>
+<span class="fc" id="L485">		timeslots.add(timeslot3);</span>
+<span class="fc" id="L486">		ts.addLocation(location);</span>
+<span class="fc" id="L487">		ts.addLocation(location2);</span>
+<span class="fc" id="L488">		List&lt;String&gt; locations=new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L489">		locations.add(location.getName());</span>
+<span class="fc" id="L490">		locations.add(location2.getName());</span>
+<span class="fc" id="L491">		Location location3=new Location(&quot;58E&quot;,&quot;45S&quot; , &quot;qes&quot;, true);</span>
+<span class="fc" id="L492">		Location location4=new Location(&quot;36E&quot;,&quot;45S&quot; , &quot;mk&quot;, true);</span>
+<span class="fc" id="L493">		ts.addLocation(location3);</span>
+<span class="fc" id="L494">		ts.addLocation(location4);</span>
+<span class="fc" id="L495">		locations.add(location4.getName());</span>
+<span class="fc" id="L496">		locations.add(location3.getName());</span>
+<span class="fc" id="L497">		ts.createTrain(&quot;G1238&quot;, locations, timeslots);</span>
+<span class="fc" id="L498">		List&lt;String&gt; carriages=new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L499">		carriages.add(carriage.getId());</span>
+<span class="fc" id="L500">		ts.addCarriage(carriage);</span>
+<span class="fc" id="L501">		ts.allocateCarriage(&quot;G1238&quot;, carriages);</span>
+<span class="fc" id="L502">		ts.startTrain(&quot;G1238&quot;);</span>
+<span class="fc" id="L503">		ts.blockTrain(&quot;G1238&quot;);</span>
+<span class="fc" id="L504">		assertEquals(&quot;Blocked&quot;, ts.getTrainState(&quot;G1238&quot;));//启动后应该阻塞成功</span>
+<span class="fc" id="L505">	}</span>
+	
+	//异常情况：列车状态不是Running
+	@Test
+	public void blockTrainTest3() throws ParseException, ResourceNotFoundException, PlanEntryNotCreateException, ResourceConflictException, LocationNotFoundException, SameLabelException {
+<span class="fc" id="L510">		Timeslot timeslot=new Timeslot(&quot;2020-04-05 10:14&quot;, &quot;2020-04-07 14:15&quot;);</span>
+<span class="fc" id="L511">		Timeslot timeslot2=new Timeslot(&quot;2020-04-07 17:14&quot; ,&quot;2020-04-08 14:15&quot;);</span>
+<span class="fc" id="L512">		Timeslot timeslot3=new Timeslot(&quot;2020-04-09 17:14&quot; ,&quot;2020-04-10 14:15&quot;);</span>
+<span class="fc" id="L513">		List&lt;Timeslot&gt; timeslots=new ArrayList&lt;Timeslot&gt;();</span>
+<span class="fc" id="L514">		timeslots.add(timeslot);</span>
+<span class="fc" id="L515">		timeslots.add(timeslot2);</span>
+<span class="fc" id="L516">		timeslots.add(timeslot3);</span>
+<span class="fc" id="L517">		ts.addLocation(location);</span>
+<span class="fc" id="L518">		ts.addLocation(location2);</span>
+<span class="fc" id="L519">		List&lt;String&gt; locations=new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L520">		locations.add(location.getName());</span>
+<span class="fc" id="L521">		locations.add(location2.getName());</span>
+<span class="fc" id="L522">		Location location3=new Location(&quot;58E&quot;,&quot;45S&quot; , &quot;qes&quot;, true);</span>
+<span class="fc" id="L523">		Location location4=new Location(&quot;36E&quot;,&quot;45S&quot; , &quot;mk&quot;, true);</span>
+<span class="fc" id="L524">		ts.addLocation(location3);</span>
+<span class="fc" id="L525">		ts.addLocation(location4);</span>
+<span class="fc" id="L526">		locations.add(location4.getName());</span>
+<span class="fc" id="L527">		locations.add(location3.getName());</span>
+<span class="fc" id="L528">		ts.createTrain(&quot;G1238&quot;, locations, timeslots);</span>
+<span class="fc" id="L529">		ts.blockTrain(&quot;G1238&quot;);</span>
+<span class="fc" id="L530">		assertNotEquals(&quot;Blocked&quot;, ts.getTrainState(&quot;G1238&quot;));//还未启动，阻塞应该失败</span>
+<span class="fc" id="L531">	}</span>
+	
+	@Test
+	public void getTrainsofassignCarriageTest() throws LocationNotFoundException, SameLabelException, ResourceNotFoundException, PlanEntryNotCreateException, ResourceConflictException {
+<span class="fc" id="L535">		Timeslot timeslot=new Timeslot(&quot;2020-04-05 10:14&quot;, &quot;2020-04-07 14:15&quot;);</span>
+<span class="fc" id="L536">		List&lt;Timeslot&gt; timeslots=new ArrayList&lt;Timeslot&gt;();</span>
+<span class="fc" id="L537">		timeslots.add(timeslot);</span>
+<span class="fc" id="L538">		ts.addLocation(location);</span>
+<span class="fc" id="L539">		ts.addLocation(location2);</span>
+<span class="fc" id="L540">		List&lt;String&gt; locations=new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L541">		locations.add(location.getName());</span>
+<span class="fc" id="L542">		locations.add(location2.getName());</span>
+<span class="fc" id="L543">		ts.addCarriage(carriage);</span>
+<span class="fc" id="L544">		ts.addCarriage(carriage2);</span>
+<span class="fc" id="L545">		ts.createTrain(&quot;G124&quot;, locations, timeslots);</span>
+<span class="fc" id="L546">		List&lt;String&gt; carriages=new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L547">		carriages.add(carriage.getId());</span>
+<span class="fc" id="L548">		ts.allocateCarriage(&quot;G124&quot;, carriages);</span>
+<span class="fc" id="L549">		ts.createTrain(&quot;T12&quot;, locations, timeslots);</span>
+<span class="fc" id="L550">		carriages.remove(0);</span>
+<span class="fc" id="L551">		carriages.add(carriage2.getId());</span>
+<span class="fc" id="L552">		ts.allocateCarriage(&quot;T12&quot;, carriages);</span>
+<span class="fc" id="L553">		List&lt;TrainEntry&lt;Carriage&gt;&gt; tes=ts.getTrainsofassignCarriage(&quot;1&quot;);</span>
+<span class="fc" id="L554">		assertEquals(1, tes.size());</span>
+<span class="fc" id="L555">		assertEquals(&quot;G124&quot;, tes.get(0).getName());</span>
+<span class="fc" id="L556">		tes=ts.getTrainsofassignCarriage(&quot;10&quot;);</span>
+<span class="fc" id="L557">		assertEquals(1, tes.size());</span>
+<span class="fc" id="L558">		assertEquals(&quot;T12&quot;, tes.get(0).getName());</span>
+<span class="fc" id="L559">	}</span>
+	
+	@Test
+	public void getTrainbyNameTest() throws LocationNotFoundException, SameLabelException {
+<span class="fc" id="L563">		ts.addCarriage(carriage);</span>
+<span class="fc" id="L564">		ts.addLocation(location2);</span>
+<span class="fc" id="L565">		ts.addLocation(location);</span>
+<span class="fc" id="L566">		List&lt;String&gt; locationnames=new ArrayList&lt;String&gt;();</span>
+<span class="fc" id="L567">		locationnames.add(location.getName());</span>
+<span class="fc" id="L568">		locationnames.add(location2.getName());</span>
+<span class="fc" id="L569">		Timeslot timeslot=new Timeslot(&quot;2020-04-05 10:14&quot;, &quot;2020-04-07 14:15&quot;);</span>
+<span class="fc" id="L570">		List&lt;Timeslot&gt; timeslots=new ArrayList&lt;Timeslot&gt;();</span>
+<span class="fc" id="L571">		timeslots.add(timeslot);</span>
+<span class="fc" id="L572">		ts.createTrain(&quot;G74&quot;, locationnames, timeslots);</span>
+<span class="fc" id="L573">		assertEquals(&quot;G74&quot;, ts.getTrainbyName(&quot;G74&quot;).getName());</span>
+<span class="fc" id="L574">		assertEquals(2, ts.getTrainbyName(&quot;G74&quot;).getLocation().size());</span>
+<span class="fc" id="L575">		assertEquals(1, ts.getTrainbyName(&quot;G74&quot;).getTime().size());</span>
+<span class="fc" id="L576">	}</span>
+	
+	@Test
+	public void getCarriagebyIDTest() {
+<span class="fc" id="L580">		ts.addCarriage(carriage);</span>
+<span class="fc" id="L581">		ts.addCarriage(carriage2);</span>
+<span class="fc" id="L582">		assertEquals(&quot;1&quot;, ts.getCarriagebyID(&quot;1&quot;).getId());</span>
+<span class="fc" id="L583">		assertEquals(&quot;10&quot;, ts.getCarriagebyID(&quot;10&quot;).getId());</span>
+<span class="fc" id="L584">		assertEquals(&quot;type&quot;, ts.getCarriagebyID(&quot;1&quot;).getType());</span>
+<span class="fc" id="L585">		assertEquals(&quot;type&quot;, ts.getCarriagebyID(&quot;10&quot;).getType());</span>
+<span class="fc" id="L586">	}</span>
+	
+	@Test
+	public void getLocationbyNameTest() {
+<span class="fc" id="L590">		ts.addLocation(location);</span>
+<span class="fc" id="L591">		ts.addLocation(location2);</span>
+<span class="fc" id="L592">		assertEquals(&quot;test&quot;, ts.getLocationbyName(&quot;test&quot;).getName());</span>
+<span class="fc" id="L593">		assertEquals(&quot;tet&quot;, ts.getLocationbyName(&quot;tet&quot;).getName());</span>
+<span class="fc" id="L594">		assertEquals(&quot;130E&quot;, ts.getLocationbyName(&quot;test&quot;).getLongitude());</span>
+<span class="fc" id="L595">		assertEquals(&quot;47n&quot;, ts.getLocationbyName(&quot;tet&quot;).getLatitude());</span>
+<span class="fc" id="L596">	}</span>
+	
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.3.201901230119</span>Lab4-2020SP (2020-5-23 15:07:06)</div></body></html>

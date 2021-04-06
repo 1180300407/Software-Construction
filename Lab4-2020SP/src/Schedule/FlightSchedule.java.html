@@ -1,0 +1,698 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../jacoco-resources/report.gif" type="image/gif"/><title>FlightSchedule.java</title><link rel="stylesheet" href="../../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">Lab4-2020SP (2020-5-23 15:07:06)</a> &gt; <a href="../../index.html" class="el_group">Lab4-2020SP</a> &gt; <a href="../index.html" class="el_bundle">src</a> &gt; <a href="index.source.html" class="el_package">Schedule</a> &gt; <span class="el_source">FlightSchedule.java</span></div><h1>FlightSchedule.java</h1><pre class="source lang-java linenums">package Schedule;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import API.PlanningEntryAPIs;
+import API.PlanningEntryAPIsFirstImpl;
+import Exceptions.*;
+import Location.Location;
+import compositeinterface.*;
+import Resources.Plane;
+import Timeslot.Timeslot;
+
+/**
+ * 航班管理，可对多个机场，航班，飞机进行管理，可变类
+ * @author 123
+ *
+ */
+
+<span class="pc bpc" id="L36" title="1 of 2 branches missed.">public class FlightSchedule {</span>
+<span class="fc" id="L37">	public List&lt;FlightEntry&lt;Plane&gt;&gt; flights=new ArrayList&lt;&gt;();//航班</span>
+<span class="fc" id="L38">	public List&lt;Location&gt; locations=new ArrayList&lt;Location&gt;();//机场</span>
+<span class="fc" id="L39">	public List&lt;Plane&gt; planes=new ArrayList&lt;Plane&gt;();//飞机</span>
+	//Abstraction function:
+	//	AF(flights,planes,locations)=一个对航班flights，所有飞机planes，机场locations进行管理的系统
+	//Representation invariant:
+	//	管理的航班、飞机、机场中都不应含有重复元素
+	//Safety from rep exposure:
+	//	成员变量全是private的，对外返回时全部转为不可变类型，不存在表示泄露
+	
+	private void checkRep() {
+<span class="fc" id="L48">		Set&lt;Location&gt; locationSet=new HashSet&lt;Location&gt;(locations);</span>
+<span class="fc" id="L49">		Set&lt;Plane&gt; planeSet=new HashSet&lt;Plane&gt;(planes);</span>
+<span class="fc" id="L50">		Set&lt;FlightEntry&lt;Plane&gt;&gt; flightEntriesSet=new HashSet&lt;&gt;(flights);</span>
+<span class="pc bpc" id="L51" title="2 of 4 branches missed.">		assert locationSet.size()==locations.size();</span>
+<span class="pc bpc" id="L52" title="2 of 4 branches missed.">		assert planeSet.size()==planes.size();</span>
+<span class="pc bpc" id="L53" title="2 of 4 branches missed.">		assert flightEntriesSet.size()==flights.size();</span>
+<span class="fc" id="L54">	}</span>
+	
+	/**
+	 * 增加一个可供管理的飞机，若飞机已存在不会重复添加
+	 * @param plane 待添加的飞机
+	 * @throws IllegalPlaneContentException 之前该飞机已创建，除ID外其他部分与此次不一致
+	 */
+	public void addPlane(Plane plane) throws IllegalPlaneContentException {
+<span class="fc bfc" id="L62" title="All 2 branches covered.">		for(Plane plane2:planes) {</span>
+<span class="fc bfc" id="L63" title="All 2 branches covered.">			if(plane.getId().equals(plane2.getId())) {</span>
+<span class="fc" id="L64">				boolean flag=ifOneofTwoSameIDPlaneIllegal(plane, plane2);</span>
+<span class="fc bfc" id="L65" title="All 2 branches covered.">				if(flag) {</span>
+<span class="fc" id="L66">					throw new IllegalPlaneContentException(plane.getId());</span>
+				}
+				else
+<span class="fc" id="L69">					return;</span>
+			}
+		}
+<span class="fc" id="L72">		planes.add(plane);//此前未添加过该飞机</span>
+<span class="fc" id="L73">		checkRep();</span>
+<span class="fc" id="L74">	}</span>
+	
+	/**
+	 * 删除具有指定ID的飞机，若飞机不存在并不会进行删除操作 ,若有航班占用飞机，无法删除
+	 * @param ID 待删除飞机的ID
+	 * @throws ResourceNotFoundException  要删除的飞机不存在
+	 * @throws PlanEntryOccupyResourceException 要删除的飞机被航班占用中
+	 */
+	public void deletePlane(String ID) throws ResourceNotFoundException, PlanEntryOccupyResourceException {
+<span class="fc" id="L83">		int index=-1;</span>
+<span class="fc bfc" id="L84" title="All 2 branches covered.">		for(Plane plane:planes) {</span>
+<span class="fc bfc" id="L85" title="All 2 branches covered.">			if(plane.getId().equals(ID)) {</span>
+<span class="fc" id="L86">				index=planes.indexOf(plane);</span>
+<span class="fc" id="L87">				break;</span>
+			}
+		}
+<span class="fc bfc" id="L90" title="All 2 branches covered.">		if(index==-1) {</span>
+<span class="fc" id="L91">			throw new ResourceNotFoundException(ID);</span>
+		}
+		
+<span class="fc" id="L94">		boolean flag=false;</span>
+<span class="fc" id="L95">		FlightEntry&lt;Plane&gt; fentry=null;</span>
+<span class="fc bfc" id="L96" title="All 2 branches covered.">		for(FlightEntry&lt;Plane&gt; fe:flights) {//若有航班占用该飞机,且该航班已分配/运行中</span>
+<span class="pc bpc" id="L97" title="4 of 6 branches missed.">			if(fe.getResource().contains(planes.get(index))&amp;&amp;(fe.getStateName().equals(&quot;Allocated&quot;)||fe.getStateName().equals(&quot;Running&quot;))) {</span>
+<span class="fc" id="L98">				flag=true;</span>
+<span class="fc" id="L99">				fentry=fe;</span>
+<span class="fc" id="L100">				break;</span>
+			}
+		}
+<span class="fc bfc" id="L103" title="All 2 branches covered.">		if(!flag) {</span>
+<span class="fc" id="L104">			planes.remove(index);</span>
+<span class="fc" id="L105">			System.out.println(&quot;删除成功!&quot;);</span>
+<span class="fc" id="L106">			return;</span>
+		}
+		else {
+<span class="fc" id="L109">			throw new PlanEntryOccupyResourceException(fentry.getName());</span>
+		}
+	}
+	
+	/**
+	 * 增加一个可供管理的机场，若机场已存在不会重复添加
+	 * @param location 待添加的机场
+	 */
+	public void addLocation(Location location) {
+<span class="fc bfc" id="L118" title="All 2 branches covered.">		if(!locations.contains(location)) {</span>
+<span class="fc" id="L119">			locations.add(location);</span>
+<span class="fc" id="L120">			checkRep();</span>
+		}
+<span class="fc" id="L122">	}</span>
+	
+	/**
+	 * 删除具有指定名称的机场，若机场不存在并不会进行删除操作 ，若有计划项在占用，不执行删除操作并提示
+	 * @param locationname
+	 * @throws LocationNotFoundException 要删除的位置不存在
+	 * @throws PlanEntryOccupyLocationException 要删除的位置正在被计划项占用中
+	 */
+	public void deleteLocation(String locationname) throws LocationNotFoundException, PlanEntryOccupyLocationException {
+<span class="fc" id="L131">		int index=-1;</span>
+<span class="fc bfc" id="L132" title="All 2 branches covered.">		for(Location location:locations) {</span>
+<span class="fc bfc" id="L133" title="All 2 branches covered.">			if(location.getName().equals(locationname)) {</span>
+<span class="fc" id="L134">				index=locations.indexOf(location);</span>
+<span class="fc" id="L135">				break;</span>
+			}
+		}
+<span class="fc bfc" id="L138" title="All 2 branches covered.">		if(index==-1) {</span>
+<span class="fc" id="L139">			throw new LocationNotFoundException(locationname);</span>
+		}
+		
+<span class="fc" id="L142">		boolean flag=false;</span>
+<span class="fc" id="L143">		FlightEntry&lt;Plane&gt; flightEntry=null;</span>
+<span class="fc bfc" id="L144" title="All 2 branches covered.">		for(FlightEntry&lt;Plane&gt; fe:flights) {//若有航班占用该位置,且该航班未取消/结束</span>
+<span class="pc bpc" id="L145" title="3 of 6 branches missed.">			if(fe.getLocation().contains(locations.get(index))&amp;&amp;!fe.getStateName().equals(&quot;Cancelled&quot;)&amp;&amp;!fe.getStateName().equals(&quot;Ended&quot;)) {</span>
+<span class="fc" id="L146">				flag=true;</span>
+<span class="fc" id="L147">				flightEntry=fe;</span>
+<span class="fc" id="L148">				break;</span>
+			}
+		}
+<span class="fc bfc" id="L151" title="All 2 branches covered.">		if(!flag) {</span>
+<span class="fc" id="L152">			System.out.println(&quot;删除成功!&quot;);</span>
+<span class="fc" id="L153">			locations.remove(index);</span>
+<span class="fc" id="L154">			return;</span>
+		}
+		else {
+<span class="fc" id="L157">			throw new PlanEntryOccupyLocationException(flightEntry.getName());</span>
+		}
+		
+	}
+	
+	/**
+	 * 增加一个航班对其进行管理，不允许重名航班.新建航班的初始状态为Waiting
+	 * @param name 新建航班名称
+	 * @param start 航班起飞的机场名称
+	 * @param end 航班降落的机场名称
+	 * @param timeslot 起始时间与终止时间构成的时间对
+	 * @return 如果创建成功返回true，否则返回false
+	 * @throws LocationNotFoundException 位置尚未创建
+	 * @throws InconsistentStartOrEndException 相同航班号的起点或终点不一致
+	 * @throws SameLabelException 重复创建航班
+	 * @throws ParseException 时间未能转化为标准格式
+	 */
+	public boolean createFlight(String name,String start,String end,Timeslot timeslot) throws LocationNotFoundException, InconsistentStartOrEndException, SameLabelException{
+<span class="fc" id="L175">		int flag1=-1;</span>
+<span class="fc" id="L176">		int flag2=-1;</span>
+<span class="fc bfc" id="L177" title="All 2 branches covered.">		for(Location location2:locations) {</span>
+<span class="fc bfc" id="L178" title="All 2 branches covered.">			if(location2.getName().equals(start)) {//位置还未纳入管理</span>
+<span class="fc" id="L179">				flag1=locations.indexOf(location2);</span>
+			}
+<span class="fc bfc" id="L181" title="All 2 branches covered.">			if(location2.getName().equals(end)) {</span>
+<span class="fc" id="L182">				flag2=locations.indexOf(location2);</span>
+			}
+		}
+<span class="pc bpc" id="L185" title="1 of 4 branches missed.">		if(flag1==-1||flag2==-1) {</span>
+<span class="fc" id="L186">			throw new LocationNotFoundException();</span>
+		}
+		
+<span class="fc" id="L189">		FlightEntry&lt;Plane&gt; newflight=FlightPlanningEntry.CreateFlight(name);</span>
+<span class="fc" id="L190">		List&lt;Timeslot&gt; oneTimeslot=new ArrayList&lt;Timeslot&gt;();</span>
+<span class="fc" id="L191">		oneTimeslot.add(timeslot);</span>
+<span class="fc" id="L192">		newflight.setTime(oneTimeslot);</span>
+<span class="fc" id="L193">		newflight.setLocations(locations.get(flag1), locations.get(flag2));</span>
+<span class="fc" id="L194">		SimpleDateFormat sdf=new SimpleDateFormat(&quot;yyyy-MM-dd HH:mm&quot;,Locale.CHINA);</span>
+<span class="fc" id="L195">		String newstart=timeslot.getStarttime();</span>
+<span class="fc" id="L196">		String newend=timeslot.getEndtime();</span>
+<span class="fc" id="L197">		Date newstarttime=null;</span>
+<span class="fc" id="L198">		Date newendtime=null;</span>
+		try {
+<span class="fc" id="L200">			newstarttime=sdf.parse(newstart);</span>
+<span class="fc" id="L201">			newendtime = sdf.parse(newend);</span>
+<span class="pc" id="L202">		} catch (ParseException e) {</span>
+<span class="nc" id="L203">			e.printStackTrace();</span>
+		}
+<span class="fc" id="L205">		Calendar newstartCalendar=Calendar.getInstance();</span>
+<span class="fc" id="L206">		newstartCalendar.setTime(newstarttime);</span>
+<span class="fc" id="L207">		Calendar newendCalendar=Calendar.getInstance();</span>
+<span class="fc" id="L208">		newendCalendar.setTime(newendtime);</span>
+<span class="fc bfc" id="L209" title="All 2 branches covered.">		for(FlightEntry&lt;Plane&gt; flight:flights) {</span>
+			
+<span class="fc bfc" id="L211" title="All 2 branches covered.">			if(ifTwoSameFlightName(flight.getName(), name)) {</span>
+<span class="fc bfc" id="L212" title="All 2 branches covered.">				if(!flight.getLocation().equals(newflight.getLocation())) {</span>
+<span class="fc" id="L213">					throw new InconsistentStartOrEndException(false);</span>
+				}
+<span class="fc" id="L215">				String oldstart=flight.getTime().get(0).getStarttime();</span>
+<span class="fc" id="L216">				String oldend=flight.getTime().get(0).getEndtime();</span>
+<span class="fc" id="L217">				Date oldstarttime=null;</span>
+<span class="fc" id="L218">				Date oldendtime=null;</span>
+				try {
+<span class="fc" id="L220">					oldstarttime = sdf.parse(oldstart);</span>
+<span class="fc" id="L221">					oldendtime=sdf.parse(oldend);</span>
+<span class="pc" id="L222">				} catch (ParseException e) {</span>
+<span class="nc" id="L223">					e.printStackTrace();</span>
+				}
+<span class="fc" id="L225">				Calendar oldstartCalendar=Calendar.getInstance();</span>
+<span class="fc" id="L226">				oldstartCalendar.setTime(oldstarttime);</span>
+<span class="fc" id="L227">				Calendar oldendCalendar=Calendar.getInstance();</span>
+<span class="fc" id="L228">				oldendCalendar.setTime(oldendtime);</span>
+<span class="pc bpc" id="L229" title="2 of 6 branches missed.">				boolean flag3=oldendCalendar.get(0)==newendCalendar.get(0)&amp;&amp;oldendCalendar.get(1)==newendCalendar.get(1)&amp;&amp;oldendCalendar.get(6)==newendCalendar.get(6);</span>
+<span class="pc bpc" id="L230" title="2 of 6 branches missed.">				boolean flag4=oldstartCalendar.get(0)==newstartCalendar.get(0)&amp;&amp;oldstartCalendar.get(1)==newstartCalendar.get(1)&amp;&amp;oldstartCalendar.get(6)==newstartCalendar.get(6);</span>
+<span class="fc bfc" id="L231" title="All 4 branches covered.">				if(flag3&amp;&amp;flag4) {//抵达和出发日期均相同的同名航班必定不能再创建,若时间相同则是重复创建，若时间不同不满足要求</span>
+<span class="fc" id="L232">					throw new SameLabelException(name);</span>
+				}
+				else {
+<span class="pc bpc" id="L235" title="1 of 4 branches missed.">					if(flag3||flag4)//抵达和出发日期只有一个相同的同名航班必定不能再创建，因为时间点相同，而又位于同一天，有冲突</span>
+<span class="fc" id="L236">						throw new InconsistentStartOrEndException(true);</span>
+<span class="pc bpc" id="L237" title="3 of 8 branches missed.">					if(oldstartCalendar.get(Calendar.HOUR_OF_DAY)!=newstartCalendar.get(Calendar.HOUR_OF_DAY)||oldstartCalendar.get(Calendar.MINUTE)!=newstartCalendar.get(Calendar.MINUTE)||oldendCalendar.get(Calendar.HOUR_OF_DAY)!=newendCalendar.get(Calendar.HOUR_OF_DAY)||oldendCalendar.get(Calendar.MINUTE)!=newendCalendar.get(Calendar.MINUTE)) {</span>
+<span class="fc" id="L238">						throw new InconsistentStartOrEndException(true);</span>
+					}
+				}
+			}
+		}
+<span class="fc" id="L243">		flights.add(newflight);</span>
+<span class="fc" id="L244">		checkRep();</span>
+<span class="fc" id="L245">		System.out.println(&quot;创建成功!&quot;);</span>
+<span class="fc" id="L246">		return true;</span>
+	}
+	
+	/**
+	 * 通过读入文件创建航班
+	 * @param path 文件路径
+	 * @return 如果文件中的所有航班符合语法且全部创建成功,返回true，否则打印错误信息并返回false
+	 * @throws FileNotFoundException 未找到指定文件
+	 * @throws SameLabelException 重复创建航班
+	 * @throws IncorrectElementDependencyException 元素间依赖关系不正确
+	 * @throws LocationNotFoundException 位置尚未创建
+	 * @throws UnGrammaticalWordException 文件内容有语法错误
+	 */
+	public boolean createFlightByFile(String path) throws FileNotFoundException, LocationNotFoundException, IncorrectElementDependencyException, SameLabelException, UnGrammaticalWordException {
+<span class="fc" id="L260">		File file=new File(path);</span>
+<span class="pc bpc" id="L261" title="1 of 4 branches missed.">		if(!file.exists()||!file.isFile()) {</span>
+<span class="fc" id="L262">			throw new FileNotFoundException();</span>
+		}
+		InputStreamReader read;
+<span class="fc" id="L265">		BufferedReader bufferedReader=null;</span>
+<span class="fc" id="L266">		int number=0;</span>
+		try {
+<span class="fc" id="L268">			read = new InputStreamReader(new FileInputStream(file));</span>
+<span class="fc" id="L269">			bufferedReader = new BufferedReader(read);</span>
+<span class="fc" id="L270">			String line=null;</span>
+<span class="fc" id="L271">			int round=0;//记录对于当前航班的信息读入到第几行</span>
+<span class="fc" id="L272">			int seats=0; //记录飞机座位数</span>
+<span class="fc" id="L273">			double age=0;//记录飞机机龄</span>
+<span class="fc" id="L274">			String[] planeinformaion=new String[2];//用一个字符串数组保存语法正确的飞机信息，不同航班重新赋值</span>
+<span class="fc" id="L275">			String[] information=new String[5];//用一个字符串数组保存语法正确的航班创建信息，不同航班重新赋值</span>
+<span class="fc" id="L276">			String date=null;//一个航班的日期，遍历时每个航班重新赋值</span>
+<span class="fc bfc" id="L277" title="All 2 branches covered.">			while((line=bufferedReader.readLine())!=null) {</span>
+<span class="pc bpc" id="L278" title="1 of 2 branches missed.">				if(line.equals(&quot;&quot;))</span>
+<span class="nc" id="L279">					continue;</span>
+<span class="fc bfc" id="L280" title="All 11 branches covered.">				switch (round) {</span>
+				case 0:{//Flight
+<span class="fc" id="L282">					number++;</span>
+<span class="fc" id="L283">					System.out.printf(&quot;当前正在处理第%d个航班\n&quot;, number);</span>
+<span class="fc" id="L284">					Pattern pattern0=Pattern.compile(&quot;Flight:(\\d{4}-\\d{2}-\\d{2}),(\\w+)&quot;);</span>
+<span class="fc" id="L285">					Matcher matcher=pattern0.matcher(line);</span>
+<span class="fc bfc" id="L286" title="All 2 branches covered.">					if(!matcher.find()) {//日期格式错误</span>
+<span class="fc" id="L287">						throw new DateFormatException();</span>
+					}
+<span class="fc" id="L289">					date=matcher.group(1);</span>
+<span class="fc" id="L290">					String flightname=matcher.group(2);</span>
+<span class="fc" id="L291">					Pattern pattern01=Pattern.compile(&quot;([A-Z]{2}\\d{2,4})&quot;);</span>
+<span class="fc" id="L292">					Matcher matcher2=pattern01.matcher(flightname);</span>
+<span class="fc bfc" id="L293" title="All 2 branches covered.">					if(!matcher2.find()) {//航班名称格式错误</span>
+<span class="fc" id="L294">						throw new FlightNameFormatException(flightname);</span>
+					}
+<span class="fc" id="L296">					information[0]=flightname;//航班名称</span>
+<span class="fc" id="L297">					round++;</span>
+<span class="fc" id="L298">					break;</span>
+				}
+				case 2:{
+<span class="fc" id="L301">					Pattern pattern2=Pattern.compile(&quot;DepartureAirport:(\\w+)&quot;);</span>
+<span class="fc" id="L302">					Matcher matcher=pattern2.matcher(line);</span>
+<span class="fc bfc" id="L303" title="All 2 branches covered.">					if(!matcher.find()) {</span>
+<span class="fc" id="L304">						throw new IllegalCharacterForAirportNameException(line);//机场名称出现非法字符</span>
+					}
+<span class="fc" id="L306">					information[1]=matcher.group(1);</span>
+<span class="fc" id="L307">					round++;</span>
+<span class="fc" id="L308">					break;</span>
+				}
+				case 3:{
+<span class="fc" id="L311">					Pattern pattern3=Pattern.compile(&quot;ArrivalAirport:(\\w+)&quot;);</span>
+<span class="fc" id="L312">					Matcher matcher=pattern3.matcher(line);</span>
+<span class="pc bpc" id="L313" title="1 of 2 branches missed.">					if(!matcher.find()) {</span>
+<span class="nc" id="L314">						throw new IllegalCharacterForAirportNameException(line);//机场名称出现非法字符</span>
+					}
+<span class="fc" id="L316">					information[2]=matcher.group(1);</span>
+<span class="fc" id="L317">					round++;</span>
+<span class="fc" id="L318">					break;</span>
+				}
+				case 4:{
+<span class="fc" id="L321">					String pathString=&quot;DepatureTime:(\\d{4}-\\d{2}-\\d{2})( \\d{2}:\\d{2})&quot;;</span>
+<span class="fc" id="L322">					Pattern pattern4=Pattern.compile(pathString);</span>
+<span class="fc" id="L323">					Matcher matcher=pattern4.matcher(line);</span>
+<span class="pc bpc" id="L324" title="1 of 2 branches missed.">					if(!matcher.find()) {</span>
+<span class="nc" id="L325">						throw new DateFormatException();//日期格式错误</span>
+					}
+<span class="fc" id="L327">					String departuredate=matcher.group(1);				</span>
+<span class="fc bfc" id="L328" title="All 2 branches covered.">					if(!departuredate.equals(date)) {///起飞时间中的日期必须与第一行的日期一致 </span>
+<span class="fc" id="L329">						throw new InconsistentDateException();</span>
+					}
+<span class="fc" id="L331">					departuredate=departuredate.concat(matcher.group(2));//加上时间点的起飞时间</span>
+<span class="fc" id="L332">					information[3]=departuredate;</span>
+<span class="fc" id="L333">					round++;</span>
+<span class="fc" id="L334">					break;</span>
+				}
+				case 5:{
+<span class="fc" id="L337">					SimpleDateFormat sdf=new SimpleDateFormat(&quot;yyyy-MM-dd&quot;,Locale.CHINA);</span>
+<span class="fc" id="L338">					String pathString=&quot;ArrivalTime:(\\d{4}-\\d{2}-\\d{2})( \\d{2}:\\d{2})&quot;;</span>
+<span class="fc" id="L339">					Pattern pattern5=Pattern.compile(pathString);</span>
+<span class="fc" id="L340">					Matcher matcher=pattern5.matcher(line);</span>
+<span class="pc bpc" id="L341" title="1 of 2 branches missed.">					if(!matcher.find()) {</span>
+<span class="nc" id="L342">						throw new DateFormatException();//日期格式错误</span>
+					}
+<span class="fc" id="L344">					String reachdate=matcher.group(1);</span>
+					try {
+<span class="fc" id="L346">						Date timedate=sdf.parse(date);</span>
+<span class="fc" id="L347">						Date reachtimedate=sdf.parse(reachdate);</span>
+<span class="fc" id="L348">						Calendar timeCalendar=Calendar.getInstance();</span>
+<span class="fc" id="L349">						timeCalendar.setTime(timedate);</span>
+<span class="fc" id="L350">						Calendar reachCalendar=Calendar.getInstance();</span>
+<span class="fc" id="L351">						reachCalendar.setTime(reachtimedate);</span>
+<span class="pc bpc" id="L352" title="2 of 6 branches missed.">						if(reachCalendar.get(0)==timeCalendar.get(0)&amp;&amp;reachCalendar.get(1)==timeCalendar.get(1)&amp;&amp;reachCalendar.get(6)==timeCalendar.get(6)) {</span>
+<span class="fc" id="L353">							information[4]=reachdate.concat(matcher.group(2));//在同一天</span>
+<span class="fc" id="L354">							round++;</span>
+<span class="fc" id="L355">						}</span>
+<span class="pc bpc" id="L356" title="2 of 6 branches missed.">						else if(reachCalendar.get(0)==timeCalendar.get(0)&amp;&amp;reachCalendar.get(1)==timeCalendar.get(1)&amp;&amp;reachCalendar.get(6)==timeCalendar.get(6)+1) {</span>
+<span class="fc" id="L357">							information[4]=reachdate.concat(matcher.group(2));//在后一天</span>
+<span class="fc" id="L358">							round++;</span>
+<span class="fc" id="L359">						}</span>
+						else {
+<span class="fc" id="L361">							throw new DateDifferMuchException();</span>
+						}
+<span class="nc" id="L363">					} catch (ParseException e) {</span>
+<span class="nc" id="L364">						e.printStackTrace();</span>
+					}
+<span class="nc" id="L366">					break;</span>
+				}
+				case 6:{
+<span class="fc" id="L369">					Pattern pattern6=Pattern.compile(&quot;Plane:([BN]{1}\\d{4})&quot;);</span>
+<span class="fc" id="L370">					Matcher matcher=pattern6.matcher(line);</span>
+<span class="fc bfc" id="L371" title="All 2 branches covered.">					if(!matcher.find()) {</span>
+<span class="fc" id="L372">						throw new PlaneIDFormatException(line);</span>
+					}
+					
+<span class="fc" id="L375">					String PlaneID=matcher.group(1);</span>
+<span class="fc" id="L376">					planeinformaion[0]=PlaneID;</span>
+<span class="fc" id="L377">					round++;</span>
+<span class="fc" id="L378">					break;</span>
+				}
+				case 8:{
+<span class="fc" id="L381">					Pattern pattern8=Pattern.compile(&quot;^Type:(\\w+$)&quot;);</span>
+<span class="fc" id="L382">					Matcher matcher=pattern8.matcher(line);</span>
+<span class="fc bfc" id="L383" title="All 2 branches covered.">					if(!matcher.find()) {</span>
+<span class="fc" id="L384">						throw new TypeContainsOtherSymbolException(line);//机型出现非法字符</span>
+					}
+<span class="fc" id="L386">					planeinformaion[1]=matcher.group(1);</span>
+<span class="fc" id="L387">					round++;</span>
+<span class="fc" id="L388">					break;</span>
+				}
+				case 9:{
+<span class="fc" id="L391">					Pattern pattern9=Pattern.compile(&quot;^Seats:([1-9][0-9]*$)&quot;);</span>
+<span class="fc" id="L392">					Matcher matcher=pattern9.matcher(line);</span>
+<span class="fc bfc" id="L393" title="All 2 branches covered.">					if(!matcher.find()) {</span>
+<span class="fc" id="L394">						throw new NonNumberException();//座位数非数字</span>
+					}
+<span class="fc" id="L396">					seats=Integer.valueOf(matcher.group(1));</span>
+<span class="pc bpc" id="L397" title="1 of 4 branches missed.">					if(seats&lt;50||seats&gt;600) {</span>
+<span class="fc" id="L398">						throw new SeatsSizeOutofBoundException();</span>
+					}
+<span class="fc" id="L400">					round++;</span>
+<span class="fc" id="L401">					break;</span>
+				}
+				case 10:{
+<span class="fc" id="L404">					Pattern pattern10=Pattern.compile(&quot;Age:([1-9]?[0-9]?.[0-9]?)&quot;);</span>
+<span class="fc" id="L405">					Matcher matcher=pattern10.matcher(line);</span>
+<span class="pc bpc" id="L406" title="1 of 2 branches missed.">					if(!matcher.find()) {</span>
+<span class="nc" id="L407">						throw new NonNumberException();//机龄非数字</span>
+					}
+<span class="fc" id="L409">					age=Double.valueOf(matcher.group(1));</span>
+<span class="pc bpc" id="L410" title="1 of 4 branches missed.">					if(age&lt;0||age&gt;30) {</span>
+<span class="fc" id="L411">						throw new AgeOutofBoundException();</span>
+					}
+<span class="fc" id="L413">					round++;</span>
+<span class="fc" id="L414">					break;</span>
+				}
+				case 12:{
+<span class="fc" id="L417">					round=0;</span>
+<span class="fc" id="L418">					Plane plane=new Plane(planeinformaion[0], planeinformaion[1], seats, age);</span>
+<span class="fc" id="L419">					addPlane(plane);</span>
+<span class="fc" id="L420">					Timeslot timeslot=new Timeslot(information[3], information[4]);	</span>
+<span class="fc" id="L421">					Location start=new Location(&quot;10W&quot;, &quot;35N&quot;, information[1], true);</span>
+<span class="fc" id="L422">					Location end=new Location(&quot;10W&quot;, &quot;35N&quot;, information[2], true);</span>
+<span class="fc" id="L423">					addLocation(start);</span>
+<span class="fc" id="L424">					addLocation(end);</span>
+<span class="fc" id="L425">					boolean flag=createFlight(information[0], information[1], information[2], timeslot);</span>
+<span class="pc bpc" id="L426" title="1 of 2 branches missed.">					if(!flag) {</span>
+<span class="nc" id="L427">						return false;</span>
+					}
+					break;
+				}
+				default:{
+<span class="fc" id="L432">					round++;</span>
+					break;
+				}
+				}
+			}
+			
+<span class="fc" id="L438">			bufferedReader.close();</span>
+<span class="pc bpc" id="L439" title="1 of 2 branches missed.">			if(round!=0) {</span>
+<span class="fc" id="L440">				throw new IncompleteFlightInformationException();</span>
+			}
+<span class="nc" id="L442">		} catch (FileNotFoundException e) {</span>
+<span class="nc" id="L443">			e.printStackTrace();</span>
+<span class="nc" id="L444">		} catch (IOException e) {</span>
+<span class="nc" id="L445">			e.printStackTrace();</span>
+		}finally {
+<span class="pc bpc" id="L447" title="1 of 2 branches missed.">			if(bufferedReader!=null) {</span>
+				try {
+<span class="fc" id="L449">					bufferedReader.close();</span>
+<span class="pc" id="L450">				}catch (IOException e1) {</span>
+				}
+			}
+		}
+<span class="nc" id="L454">		return true;</span>
+	}
+	
+	/**
+	 * 为航班分配飞机，飞机应包含在管理的所有飞机之中
+	 * @param flightname 指定的航班名称
+	 * @param plane 待分配的飞机名称
+	 * @param timeslots 航班的起飞时间和降落时间，为了区分不同日期的同名航班
+	 * @throws ResourceNotFoundException 分配的飞机不存在
+	 * @throws ResourceConflictException 分配资源存在冲突
+	 * @throws PlanEntryNotCreateException 指定航班尚未创建
+	 */
+	public void allocatePlane(String flightname,String planeID,List&lt;Timeslot&gt; timeslots) throws ResourceNotFoundException, ResourceConflictException, PlanEntryNotCreateException {
+<span class="fc" id="L467">		int index=-1;</span>
+<span class="fc bfc" id="L468" title="All 2 branches covered.">		for(Plane plane:planes) {</span>
+<span class="fc bfc" id="L469" title="All 2 branches covered.">			if(plane.getId().equals(planeID)) {//根据飞机名称找到飞机</span>
+<span class="fc" id="L470">				index=planes.indexOf(plane);</span>
+			}
+		}
+<span class="fc bfc" id="L473" title="All 2 branches covered.">		if(index==-1) {</span>
+<span class="fc" id="L474">			throw new ResourceNotFoundException(planeID);</span>
+		}
+		
+<span class="fc bfc" id="L477" title="All 2 branches covered.">		for(FlightEntry&lt;Plane&gt; fe:flights) {</span>
+<span class="pc bpc" id="L478" title="1 of 4 branches missed.">			if(fe.getName().equals(flightname)&amp;&amp;fe.getTime().containsAll(timeslots)) {</span>
+<span class="fc" id="L479">				List&lt;Plane&gt; onePlane=new ArrayList&lt;Plane&gt;();</span>
+<span class="fc" id="L480">				onePlane.add(planes.get(index));</span>
+<span class="fc" id="L481">				FlightEntry&lt;Plane&gt; copyEntry=new FlightEntry&lt;Plane&gt;(&quot;copy&quot;);</span>
+<span class="fc" id="L482">				copyEntry.setLocations(fe.getStart(), fe.getEnd());</span>
+<span class="fc" id="L483">				copyEntry.setTime(timeslots);</span>
+<span class="fc" id="L484">				copyEntry.allocateResource(onePlane);//新建一个航班，为其分配与搜索得到的航班一样的属性，观察是否会产生冲突</span>
+<span class="fc" id="L485">				List&lt;FlightEntry&lt;Plane&gt;&gt; flightEntries=new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L486">				flightEntries.add(copyEntry);//不加入flights中，只是一个替代品，检测是否会发生冲突，避免真正分配带来的冲突</span>
+<span class="fc" id="L487">				flightEntries.addAll(flights);		</span>
+<span class="fc" id="L488">				PlanningEntryAPIs api=new PlanningEntryAPIsFirstImpl();</span>
+<span class="fc" id="L489">				boolean flag2=api.checkResourceExclusiveConflict(flightEntries);</span>
+<span class="pc bpc" id="L490" title="1 of 2 branches missed.">				if(flag2) {</span>
+<span class="nc" id="L491">					throw new ResourceConflictException();</span>
+				}
+<span class="fc" id="L493">				fe.allocateResource(onePlane);</span>
+<span class="fc" id="L494">				System.out.println(&quot;分配成功!&quot;);</span>
+<span class="fc" id="L495">				return;</span>
+			}
+		}
+		
+<span class="fc" id="L499">		throw new PlanEntryNotCreateException(flightname);</span>
+	}
+	
+	/**
+	 * @return 得到所有管理下的航班
+	 */
+	public List&lt;FlightEntry&lt;Plane&gt;&gt; getFlights() {
+<span class="fc" id="L506">		return Collections.unmodifiableList(flights);</span>
+	}
+	
+	/**
+	 * @return 得到所有管理下的机场
+	 */
+	public List&lt;Location&gt; getLocations() {
+<span class="fc" id="L513">		return Collections.unmodifiableList(locations);</span>
+	}
+
+	/**
+	 * @return 得到所有管理之下的飞机
+	 */
+	public List&lt;Plane&gt; getPlanes() {
+<span class="fc" id="L520">		return Collections.unmodifiableList(planes);</span>
+	}
+
+	/**
+	 * 指定航班进行起飞，航班应已经创建过,并且已经分配了飞机
+	 * @param flightname 指定航班名称
+	 * @param timeslots 航班的起飞和降落时间，为了区分不同日期的同名航班
+	 * @throws PlanEntryNotCreateException 指定航班尚未创建
+	 */
+	public void departure(String flightname,List&lt;Timeslot&gt; timeslots) throws PlanEntryNotCreateException {
+<span class="fc bfc" id="L530" title="All 2 branches covered.">		for(FlightEntry&lt;Plane&gt; fe:flights) {</span>
+<span class="pc bpc" id="L531" title="1 of 4 branches missed.">			if(fe.getName().equals(flightname)&amp;&amp;fe.getTime().containsAll(timeslots)) {//同名且时间点能够对应</span>
+<span class="fc" id="L532">				fe.start();</span>
+<span class="fc" id="L533">				return;</span>
+			}
+		}
+		
+<span class="fc" id="L537">		throw new PlanEntryNotCreateException(flightname);</span>
+	}
+	
+	/**
+	 * 取消指定航班，航班应该已经创建过，并且尚未起飞
+	 * @param flightname 指定航班名称
+	 * @param timeslots 航班的起飞和降落时间，为了区分不同日期的同名航班
+	 * @throws PlanEntryNotCreateException 指定航班尚未创建
+	 */
+	public void cancelFlight(String flightname,List&lt;Timeslot&gt; timeslots) throws PlanEntryNotCreateException {
+<span class="fc bfc" id="L547" title="All 2 branches covered.">		for(FlightEntry&lt;Plane&gt; fe:flights) {</span>
+<span class="pc bpc" id="L548" title="1 of 4 branches missed.">			if(fe.getName().equals(flightname)&amp;&amp;fe.getTime().containsAll(timeslots)) {//同名且时间点能够对应</span>
+<span class="fc" id="L549">				fe.cancel();</span>
+<span class="fc" id="L550">				return;</span>
+			}
+		}
+		
+<span class="fc" id="L554">		throw new PlanEntryNotCreateException(flightname);</span>
+	}
+	
+	/**
+	 * 得到指定航班的状态
+	 * @param flightname 指定航班的名称
+	 * @param timeslots 航班的起飞和降落时间，为了区分不同日期的同名航班
+	 * @return 如果该航班已创建，则返回其状态名称，否则返回一个 “null”字符串
+	 */
+	public String getFlightState(String flightname,List&lt;Timeslot&gt; timeslots) {
+<span class="fc bfc" id="L564" title="All 2 branches covered.">		for(FlightEntry&lt;Plane&gt; fe:flights) {</span>
+<span class="pc bpc" id="L565" title="1 of 4 branches missed.">			if(fe.getName().equals(flightname)&amp;&amp;fe.getTime().containsAll(timeslots)) {//同名且时间点能够对应</span>
+<span class="fc" id="L566">				return fe.getStateName();</span>
+			}
+		}
+		
+<span class="fc" id="L570">		return &quot;null&quot;;</span>
+	}
+	
+	/**
+	 * 结束指定航班，航班应该已经创建过，并且已经起飞
+	 * @param flightname 指定航班名称
+	 * @param timeslots 航班的起飞和降落时间，为了区分不同日期的同名航班
+	 * @throws PlanEntryNotCreateException 指定航班尚未创建
+	 */
+	public void endFlight(String flightname,List&lt;Timeslot&gt; timeslots) throws PlanEntryNotCreateException {
+<span class="fc bfc" id="L580" title="All 2 branches covered.">		for(FlightEntry&lt;Plane&gt; fe:flights) {</span>
+<span class="pc bpc" id="L581" title="1 of 4 branches missed.">			if(fe.getName().equals(flightname)&amp;&amp;fe.getTime().containsAll(timeslots)) {//同名且时间点能够对应</span>
+<span class="fc" id="L582">				fe.end();</span>
+<span class="fc" id="L583">				return;</span>
+			}
+		}
+		
+<span class="fc" id="L587">		throw new PlanEntryNotCreateException(flightname);</span>
+	}
+	
+	/**
+	 * 获得占用指定飞机的所有航班
+	 * @param planeID 指定飞机的ID 
+	 * @return 如果有占用指定飞机的航班,返回这样的所有航班；否则返回null
+	 */
+	public List&lt;FlightEntry&lt;Plane&gt;&gt; getFlightssofassignPlane(String planeID){
+<span class="fc" id="L596">		int index=-1;</span>
+<span class="fc bfc" id="L597" title="All 2 branches covered.">		for(Plane plane:planes) {//找到指定飞机</span>
+<span class="fc bfc" id="L598" title="All 2 branches covered.">			if(plane.getId().equals(planeID)) {</span>
+<span class="fc" id="L599">				index=planes.indexOf(plane);</span>
+			}
+		}
+<span class="pc bpc" id="L602" title="1 of 2 branches missed.">		if(index==-1) {</span>
+<span class="nc" id="L603">			System.out.println(&quot;目前管理的飞机中不存在该ID飞机!&quot;);</span>
+<span class="nc" id="L604">			return null;</span>
+		}
+			
+<span class="fc" id="L607">		Plane assignplane=planes.get(index);</span>
+<span class="fc" id="L608">		List&lt;FlightEntry&lt;Plane&gt;&gt; fes=new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L609" title="All 2 branches covered.">		for(FlightEntry&lt;Plane&gt; fe:flights) {</span>
+<span class="fc bfc" id="L610" title="All 2 branches covered.">			if(fe.getResource().contains(assignplane))</span>
+<span class="fc" id="L611">				fes.add(fe);</span>
+		}
+<span class="pc bpc" id="L613" title="1 of 2 branches missed.">		if(fes.isEmpty())</span>
+<span class="nc" id="L614">			return null;</span>
+<span class="fc" id="L615">		return fes;</span>
+	}
+	
+	/**
+	 * 通过飞机的ID得到对应的飞机
+	 * @param planeID 飞机ID
+	 * @return 对应的飞机,未创建则返回null
+	 */
+	public Plane getPlanebyID(String planeID) {
+<span class="pc bpc" id="L624" title="1 of 2 branches missed.">		for(Plane plane:planes) {</span>
+<span class="pc bpc" id="L625" title="1 of 2 branches missed.">			if(plane.getId().equals(planeID))</span>
+<span class="fc" id="L626">				return plane;</span>
+		}
+<span class="nc" id="L628">		return null;</span>
+	}
+	
+	/**
+	 * 通过位置名称得到对应的位置
+	 * @param locationName 位置的名称
+	 * @return 对应的位置,未创建则返回null
+	 */
+	public Location getLocationbyName(String locationName) {
+<span class="pc bpc" id="L637" title="1 of 2 branches missed.">		for(Location location:locations) {</span>
+<span class="fc bfc" id="L638" title="All 2 branches covered.">			if(location.getName().equals(locationName))</span>
+<span class="fc" id="L639">				return location;</span>
+		}
+<span class="nc" id="L641">		return null;</span>
+	}
+	
+	/**
+	 * 通过航班名称获得对应航班
+	 * @param flightName 航班名称
+	 * @param timeslots 航班的起飞时间和降落时间，为了区分不同日期的同名航班
+	 * @return 对应的航班,未创建则返回null
+	 */
+	public FlightEntry&lt;Plane&gt; getFlightbyName(String flightName,List&lt;Timeslot&gt; timeslots){
+<span class="pc bpc" id="L651" title="1 of 2 branches missed.">		for(FlightEntry&lt;Plane&gt; fe:flights) {</span>
+<span class="pc bpc" id="L652" title="2 of 4 branches missed.">			if(fe.getName().equals(flightName)&amp;&amp;fe.getTime().containsAll(timeslots)) {</span>
+<span class="fc" id="L653">				return fe;</span>
+			}
+		}
+<span class="nc" id="L656">		return null;</span>
+	}
+	
+	/**
+	 * 判断两个航班名称是否代表了同一个航班
+	 * @param flightname1 其中一个航班名称
+	 * @param flightname2 另一个航班名称
+	 * @return 如果代表同一个航班则返回true，否则返回false
+	 */
+	public boolean ifTwoSameFlightName(String flightname1,String flightname2) {
+<span class="fc bfc" id="L666" title="All 2 branches covered.">		if(flightname1.equals(flightname2))</span>
+<span class="fc" id="L667">			return true;</span>
+<span class="fc" id="L668">		Pattern pattern=Pattern.compile(&quot;([A-Z]{2})(\\d{2,4})&quot;);</span>
+<span class="fc" id="L669">		Matcher matcher1=pattern.matcher(flightname1);</span>
+<span class="fc" id="L670">		Matcher matcher2=pattern.matcher(flightname2);</span>
+<span class="pc bpc" id="L671" title="2 of 4 branches missed.">		if(matcher1.find()&amp;&amp;matcher2.find()) {//通过文件生成的标准格式中对于CA0001,CA001,CA01等看做相同的判断</span>
+<span class="fc" id="L672">			String string1=matcher1.group(1);</span>
+<span class="fc" id="L673">			String string2=matcher2.group(1);</span>
+<span class="fc" id="L674">			int num1=Integer.valueOf(matcher1.group(2));</span>
+<span class="fc" id="L675">			int num2=Integer.valueOf(matcher2.group(2));</span>
+<span class="fc bfc" id="L676" title="All 4 branches covered.">			if(string1.equals(string2)&amp;&amp;num1==num2)//前面字母相同，后面数字的值相同，则认为也是同一个航班</span>
+<span class="fc" id="L677">				return true;</span>
+		}
+		
+<span class="fc" id="L680">		return false;</span>
+	}
+	
+	/**
+	 * 判断两个飞机是否拥有相同的ID，但其他部分却不同，即是否非法
+	 * @param plane1 其中一个飞机
+	 * @param plane2 另一个飞机
+	 * @return 如果两个飞机ID相同，且其他部分不同，返回true，否则返回false
+	 */
+	private boolean ifOneofTwoSameIDPlaneIllegal(Plane plane1,Plane plane2) {
+<span class="pc bpc" id="L690" title="1 of 2 branches missed.">		if(!plane1.getId().equals(plane2.getId()))//允许ID不同</span>
+<span class="nc" id="L691">			return false;</span>
+<span class="pc bpc" id="L692" title="2 of 6 branches missed.">		if(plane1.getPlaneage()==plane2.getPlaneage()&amp;&amp;plane1.getSeats()==plane2.getSeats()&amp;&amp;plane1.getType().equals(plane2.getType()))//所有部分均相同，合法</span>
+<span class="fc" id="L693">			return false;</span>
+<span class="fc" id="L694">		return true;//存在不同部分，非法</span>
+	}
+	
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.3.201901230119</span>Lab4-2020SP (2020-5-23 15:07:06)</div></body></html>

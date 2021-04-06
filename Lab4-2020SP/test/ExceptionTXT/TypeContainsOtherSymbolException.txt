@@ -1,0 +1,26 @@
+Flight:2020-01-02,NX259
+{
+DepartureAirport:Yantai
+ArrivalAirport:Jinan
+DepatureTime:2020-01-02 17:09
+ArrivalTime:2020-01-02 18:48
+Plane:N7984
+{
+Type:B757
+Seats:261
+Age:3.4
+}
+}
+Flight:2020-01-01,NX605
+{
+DepartureAirport:Weihai
+ArrivalAirport:Nanjing
+DepatureTime:2020-01-01 10:28
+ArrivalTime:2020-01-01 11:52
+Plane:N5295
+{
+Type:A3 1*9
+Seats:140
+Age:1.9
+}
+}

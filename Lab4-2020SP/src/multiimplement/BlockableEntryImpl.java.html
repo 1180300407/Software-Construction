@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../jacoco-resources/report.gif" type="image/gif"/><title>BlockableEntryImpl.java</title><link rel="stylesheet" href="../../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">Lab4-2020SP (2020-5-23 15:07:06)</a> &gt; <a href="../../index.html" class="el_group">Lab4-2020SP</a> &gt; <a href="../index.html" class="el_bundle">src</a> &gt; <a href="index.source.html" class="el_package">multiimplement</a> &gt; <span class="el_source">BlockableEntryImpl.java</span></div><h1>BlockableEntryImpl.java</h1><pre class="source lang-java linenums">package multiimplement;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import Exceptions.PlanEntryStateNotMatchException;
+import State.BlockedState;
+import multidimension.BlockableEntry;
+import Timeslot.Timeslot;
+import common.CommonPlanningEntry;
+
+/**
+ * BlockableEntry接口的实现，可变类
+ * @author 123
+ *
+ */
+<span class="fc" id="L18">public class BlockableEntryImpl&lt;R&gt; implements BlockableEntry&lt;R&gt;{</span>
+<span class="fc" id="L19">	public List&lt;Timeslot&gt; timeslots=new ArrayList&lt;Timeslot&gt;();//个数应该大于2</span>
+<span class="fc" id="L20">	private boolean setbefore=false;</span>
+	//	AF(timeslots,sebefore)=设定时间为timeslots的计划项，若setbefore为false，证明未曾设定时间
+	//	若setbefore为true，则时间已经设定，不可再修改
+	//Representation invariant:
+	//	在setbefore为true时不可再设定时间(只可设定一次)
+	//Safety from rep exposure:
+	//	成员变量是private的，返回值和成员变量赋值时均转换为不可变类型，不存在表示泄露
+	
+	@Override
+	public List&lt;Timeslot&gt; getTime(){
+<span class="fc" id="L30">		return Collections.unmodifiableList(timeslots);</span>
+	}
+	
+	@Override
+	public void setTime(List&lt;Timeslot&gt; timeslot) {
+<span class="pc bpc" id="L35" title="1 of 2 branches missed.">		if(!setbefore) {</span>
+<span class="fc" id="L36">			setbefore=true;</span>
+<span class="fc" id="L37">			timeslots=new ArrayList&lt;Timeslot&gt;();</span>
+<span class="fc bfc" id="L38" title="All 2 branches covered.">			for(Timeslot timeslot2:timeslot) {</span>
+<span class="fc" id="L39">				timeslots.add(timeslot2);</span>
+			}
+<span class="fc" id="L41">			this.timeslots=Collections.unmodifiableList(timeslot);//设定完时间就不能再修改</span>
+		}
+<span class="fc" id="L43">	}</span>
+	
+	@Override
+	public  void block(CommonPlanningEntry&lt;R&gt; cpe) throws PlanEntryStateNotMatchException{
+<span class="fc bfc" id="L47" title="All 2 branches covered.">		if(cpe.getStateName().equals(&quot;Running&quot;)) {</span>
+<span class="fc" id="L48">			cpe.setState(new BlockedState());</span>
+<span class="fc" id="L49">			return;</span>
+		}
+<span class="fc" id="L51">		throw new PlanEntryStateNotMatchException();</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.3.201901230119</span>Lab4-2020SP (2020-5-23 15:07:06)</div></body></html>

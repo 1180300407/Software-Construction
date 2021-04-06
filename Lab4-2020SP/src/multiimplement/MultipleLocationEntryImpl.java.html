@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../jacoco-resources/report.gif" type="image/gif"/><title>MultipleLocationEntryImpl.java</title><link rel="stylesheet" href="../../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">Lab4-2020SP (2020-5-23 15:07:06)</a> &gt; <a href="../../index.html" class="el_group">Lab4-2020SP</a> &gt; <a href="../index.html" class="el_bundle">src</a> &gt; <a href="index.source.html" class="el_package">multiimplement</a> &gt; <span class="el_source">MultipleLocationEntryImpl.java</span></div><h1>MultipleLocationEntryImpl.java</h1><pre class="source lang-java linenums">package multiimplement;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import Location.Location;
+import multidimension.MultipleLocationEntry;
+
+/**
+ * MultipleLocationEntry接口的实现，对多个位置进行处理，可变类
+ * @author 123
+ *
+ */
+
+<span class="pc bpc" id="L18" title="1 of 2 branches missed.">public class MultipleLocationEntryImpl implements MultipleLocationEntry{</span>
+<span class="fc" id="L19">	public List&lt;Location&gt; locations=new ArrayList&lt;Location&gt;();</span>
+<span class="fc" id="L20">	private boolean setbefore=false;</span>
+	//Abstraction function:
+	//	AF(locations,sebefore)=设定的位置，若setbefore为false，证明未曾设定位置
+	//	若setbefore为true，则位置已经设定，不可再修改
+	//Representation invariant:
+	//	在setbefore为true时不可再改变任一位置
+	//	locations的数量应大于等于2，至少包含起点和终点,每个位置互不相同
+	//Safety from rep exposure:
+	//	成员变量是private的，为不可变类型，返回值和成员变量赋值时均转换为不可变类型，不存在表示泄露
+	
+	private void checkRep() {
+<span class="pc bpc" id="L31" title="2 of 4 branches missed.">		assert locations.size()&gt;=2;</span>
+<span class="fc" id="L32">		Set&lt;Location&gt; locationset=new HashSet&lt;Location&gt;(locations);</span>
+<span class="pc bpc" id="L33" title="2 of 4 branches missed.">		assert locationset.size()==locations.size();//互不相同</span>
+<span class="fc" id="L34">	}</span>
+	
+	@Override
+	public List&lt;Location&gt; getLocation(){
+<span class="fc" id="L38">		return Collections.unmodifiableList(locations);</span>
+	}
+	
+	public boolean getsetbefore() {
+<span class="fc" id="L42">		return setbefore;</span>
+	}
+	
+	@Override
+	public void setLocations(List&lt;Location&gt; locs) {
+<span class="fc bfc" id="L47" title="All 2 branches covered.">		if(setbefore) {</span>
+<span class="fc" id="L48">			System.out.println(&quot;位置已经设定过，不可再进行修改！&quot;);</span>
+<span class="fc" id="L49">			return;</span>
+		}
+		
+<span class="fc" id="L52">		locations=new ArrayList&lt;Location&gt;();</span>
+<span class="fc bfc" id="L53" title="All 2 branches covered.">		for(Location location:locs) {</span>
+<span class="fc" id="L54">			locations.add(location);</span>
+		}
+<span class="fc" id="L56">		checkRep();</span>
+<span class="fc" id="L57">		setbefore=true;</span>
+<span class="fc" id="L58">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.3.201901230119</span>Lab4-2020SP (2020-5-23 15:07:06)</div></body></html>

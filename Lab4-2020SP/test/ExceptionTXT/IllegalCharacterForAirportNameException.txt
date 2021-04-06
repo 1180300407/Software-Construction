@@ -1,0 +1,26 @@
+Flight:2020-01-01,CZ9463
+{
+DepartureAirport:Haikou
+ArrivalAirport:Nanjing
+DepatureTime:2020-01-01 03:23
+ArrivalTime:2020-01-01 07:05
+Plane:B8639
+{
+Type:B757
+Seats:261
+Age:19.2
+}
+}
+Flight:2020-01-01,GS122
+{
+DepartureAirport:./Zhengzhou
+ArrivalAirport:@]Nanjing
+DepatureTime:2020-01-01 12:46
+ArrivalTime:2020-01-01 14:12
+Plane:N3330
+{
+Type:B767
+Seats:289
+Age:3.1
+}
+}

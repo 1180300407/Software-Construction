@@ -1,0 +1,16 @@
+<Sun Jun 07 14:57:07 CST 2020> <MainApp.FlightScheduleApp> <main> <INFO>: <进入FlightScheduleApp> 
+<Sun Jun 07 14:57:12 CST 2020> <MainApp.FlightScheduleApp> <main> <INFO>: <读取文件创建航班> 
+<Sun Jun 07 14:57:13 CST 2020> <MainApp.FlightScheduleApp> <main> <SEVERE>: <元素间依赖关系不正确!null飞机N1369已创建,此次该飞机的类型、座位数或机龄与其存在不一致!> 
+<Sun Jun 07 14:57:30 CST 2020> <MainApp.FlightScheduleApp> <main> <INFO>: <读取文件创建航班> 
+<Sun Jun 07 14:57:33 CST 2020> <MainApp.FlightScheduleApp> <main> <WARNING>: <资源:null 已被分配!如果强制分配会产生冲突!> 
+<Sun Jun 07 14:57:43 CST 2020> <MainApp.FlightScheduleApp> <main> <INFO>: <读取文件创建航班> 
+<Sun Jun 07 14:57:44 CST 2020> <MainApp.FlightScheduleApp> <main> <SEVERE>: <元素间依赖关系不正确!null飞机B4850已创建,此次该飞机的类型、座位数或机龄与其存在不一致!> 
+<Sun Jun 07 14:58:01 CST 2020> <MainApp.FlightScheduleApp> <main> <INFO>: <读取文件创建航班> 
+<Sun Jun 07 14:58:04 CST 2020> <MainApp.FlightScheduleApp> <main> <SEVERE>: <元素间依赖关系不正确!null飞机B5869已创建,此次该飞机的类型、座位数或机龄与其存在不一致!> 
+<Sun Jun 07 14:58:13 CST 2020> <MainApp.FlightScheduleApp> <main> <INFO>: <读取文件创建航班> 
+<Sun Jun 07 14:58:13 CST 2020> <MainApp.FlightScheduleApp> <main> <WARNING>: <资源:null 已被分配!如果强制分配会产生冲突!> 
+<Sun Jun 07 14:58:53 CST 2020> <MainApp.FlightScheduleApp> <main> <INFO>: <查看日志> 
+<Sun Jun 07 14:59:18 CST 2020> <MainApp.FlightScheduleApp> <main> <INFO>: <查看日志> 
+<Sun Jun 07 14:59:51 CST 2020> <MainApp.FlightScheduleApp> <main> <INFO>: <查看日志> 
+<Sun Jun 07 15:00:01 CST 2020> <MainApp.FlightScheduleApp> <main> <INFO>: <查看日志> 
+<Sun Jun 07 15:01:51 CST 2020> <MainApp.FlightScheduleApp> <main> <INFO>: <退出FlightScheduleApp> 

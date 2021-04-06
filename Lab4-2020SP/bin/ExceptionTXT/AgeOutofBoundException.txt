@@ -1,0 +1,39 @@
+Flight:2020-01-03,AA0446
+{
+DepartureAirport:Beijing
+ArrivalAirport:Weihai
+DepatureTime:2020-01-03 15:01
+ArrivalTime:2020-01-03 18:52
+Plane:B1937
+{
+Type:A380
+Seats:468
+Age:1.7
+}
+}
+Flight:2020-01-04,AA0446
+{
+DepartureAirport:Beijing
+ArrivalAirport:Weihai
+DepatureTime:2020-01-04 15:01
+ArrivalTime:2020-01-04 18:52
+Plane:B2176
+{
+Type:A319
+Seats:140
+Age:35.1
+}
+}
+Flight:2020-01-05,AA0446
+{
+DepartureAirport:Beijing
+ArrivalAirport:Weihai
+DepatureTime:2020-01-05 15:01
+ArrivalTime:2020-01-05 18:52
+Plane:N4438
+{
+Type:B747
+Seats:450
+Age:11.7
+}
+}

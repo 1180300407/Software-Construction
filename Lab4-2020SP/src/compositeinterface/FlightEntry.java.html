@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../jacoco-resources/report.gif" type="image/gif"/><title>FlightEntry.java</title><link rel="stylesheet" href="../../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">Lab4-2020SP (2020-5-23 15:07:06)</a> &gt; <a href="../../index.html" class="el_group">Lab4-2020SP</a> &gt; <a href="../index.html" class="el_bundle">src</a> &gt; <a href="index.source.html" class="el_package">compositeinterface</a> &gt; <span class="el_source">FlightEntry.java</span></div><h1>FlightEntry.java</h1><pre class="source lang-java linenums">package compositeinterface;
+
+import java.util.List;
+
+import Location.Location;
+import common.CommonPlanningEntry;
+import multiimplement.SingleSortedResourceEntryImpl;
+import multiimplement.TwoLocationEntryImpl;
+import multiimplement.UnBlockableEntryImpl;
+import Resources.Plane;
+import State.AllocatedState;
+import Timeslot.Timeslot;;
+/**
+ * FlightPlanningEntry的具体实现，一个航班，可变类
+ * @author 123
+ *
+ * @param &lt;R&gt; 占用资源类型
+ */
+public class FlightEntry&lt;R&gt; extends CommonPlanningEntry&lt;Plane&gt; implements FlightPlanningEntry&lt;Plane&gt;{
+<span class="fc" id="L20">	private TwoLocationEntryImpl tle=new TwoLocationEntryImpl();</span>
+<span class="fc" id="L21">	private SingleSortedResourceEntryImpl&lt;Plane&gt; ssre=new SingleSortedResourceEntryImpl&lt;Plane&gt;();</span>
+<span class="fc" id="L22">	private UnBlockableEntryImpl ube=new UnBlockableEntryImpl();</span>
+	//Abstraction function:
+	//	AF(name,tle,ssrle)=一个符合两个位置、单资源、不可阻塞的航班计划项
+	//Representation invariant:
+	//	true(由每个维度的成员变量保证)
+	//Safety from rep exposure:
+	//	成员变量全是private的，并由各个成员变量的对于表示泄露的安全性进行保证
+	
+	/**
+	 * 构造函数
+	 * @param name 航班名称
+	 */
+	public FlightEntry(String name) {
+<span class="fc" id="L35">		super(name);</span>
+<span class="fc" id="L36">		super.setType(&quot;FlightPlanningEntry&quot;);</span>
+<span class="fc" id="L37">	}</span>
+	
+	@Override
+	public Location getStart() {
+<span class="fc" id="L41">		return tle.getStart();</span>
+	}
+	
+	@Override
+	public Location getEnd() {
+<span class="fc" id="L46">		return tle.getEnd();</span>
+	}
+	
+	@Override
+	public List&lt;Location&gt; getLocation(){
+<span class="fc" id="L51">		return tle.getLocation();</span>
+	}
+	
+	@Override
+	public void setLocations(Location start,Location end) {
+<span class="fc" id="L56">		tle.setLocations(start, end);</span>
+<span class="fc" id="L57">	}</span>
+	
+	@Override
+	public List&lt;Plane&gt; getResource() {
+<span class="fc" id="L61">		return ssre.getResource();</span>
+	}
+	
+	//添加状态判断
+	@Override
+	public void allocateResource(List&lt;Plane&gt; resource) {
+<span class="pc bpc" id="L67" title="1 of 2 branches missed.">		if(this.getStateName().equals(&quot;Waiting&quot;)) {</span>
+<span class="fc" id="L68">			ssre.allocateResource(resource);</span>
+<span class="fc" id="L69">			super.setState(new AllocatedState());</span>
+<span class="fc" id="L70">		}</span>
+			
+		else 
+<span class="nc" id="L73">			System.out.println(&quot;航班目前状态为:&quot;+this.getStateName()+&quot;,无法分配飞机!&quot;);</span>
+<span class="fc" id="L74">	}</span>
+	
+	@Override
+	public List&lt;Timeslot&gt; getTime() {
+<span class="fc" id="L78">		return ube.getTime();</span>
+	}
+	
+	@Override
+	public void setTime(List&lt;Timeslot&gt; timeslot) {
+<span class="fc" id="L83">		ube.setTime(timeslot);</span>
+<span class="fc" id="L84">	}</span>
+	
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.3.201901230119</span>Lab4-2020SP (2020-5-23 15:07:06)</div></body></html>

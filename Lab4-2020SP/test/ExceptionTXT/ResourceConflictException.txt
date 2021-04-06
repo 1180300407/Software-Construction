@@ -1,0 +1,26 @@
+Flight:2020-01-02,AA02
+{
+DepartureAirport:Nanchang
+ArrivalAirport:Jinan
+DepatureTime:2020-01-02 06:16
+ArrivalTime:2020-01-02 09:28
+Plane:B3048
+{
+Type:C929
+Seats:310
+Age:17.7
+}
+}
+Flight:2020-01-02,AA14
+{
+DepartureAirport:Beijing
+ArrivalAirport:Xining
+DepatureTime:2020-01-02 08:59
+ArrivalTime:2020-01-02 10:26
+Plane:B3048
+{
+Type:C929
+Seats:310
+Age:17.7
+}
+}

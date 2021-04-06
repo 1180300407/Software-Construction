@@ -1,0 +1,239 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../jacoco-resources/report.gif" type="image/gif"/><title>CourseBoard.java</title><link rel="stylesheet" href="../../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">Lab4-2020SP (2020-5-23 15:07:06)</a> &gt; <a href="../../index.html" class="el_group">Lab4-2020SP</a> &gt; <a href="../index.html" class="el_bundle">src</a> &gt; <a href="index.source.html" class="el_package">Board</a> &gt; <span class="el_source">CourseBoard.java</span></div><h1>CourseBoard.java</h1><pre class="source lang-java linenums">package Board;
+
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
+
+import javax.swing.*;
+import javax.swing.table.TableColumn;
+import Resources.Teacher;
+
+import Location.Location;
+import Timeslot.Timeslot;
+import compositeinterface.*;
+/**
+ * 一个教室课程表
+ * @author 123
+ *
+ */
+
+<span class="pc bpc" id="L29" title="1 of 2 branches missed.">public class CourseBoard implements Iterable&lt;CourseEntry&lt;Teacher&gt;&gt;{</span>
+	public final Location location;
+<span class="fc" id="L31">	public List&lt;CourseEntry&lt;Teacher&gt;&gt; courses=new ArrayList&lt;&gt;();</span>
+	//Abstraction function:
+	//	AF(location,courses)=一个location处的信息板
+	//	其中courses包括所有当日在location处进行的课程
+	//Representation invariant:
+	//	courses中所有课程均应已分配教师
+	//Safety from rep exposure:
+	//	成员变量全是private的,防御式拷贝
+	private void checkRep() {
+<span class="fc bfc" id="L40" title="All 2 branches covered.">		for(CourseEntry&lt;Teacher&gt; ce:courses) {</span>
+<span class="pc bpc" id="L41" title="2 of 4 branches missed.">			assert ce.getResource()!=null;</span>
+<span class="pc bpc" id="L42" title="2 of 4 branches missed.">			assert ce.getResource().size()!=0;</span>
+		}
+<span class="fc" id="L44">	}</span>
+	/**
+	 * 构造函数
+	 * @param location 信息板所属的具体位置
+	 * @param cpes 该位置待搜索的课程集合，所有课程均应已分配教师
+	 */
+<span class="fc" id="L50">	public CourseBoard(Location location,List&lt;CourseEntry&lt;Teacher&gt;&gt; cpes,Calendar calendar) {</span>
+<span class="fc" id="L51">		this.location=location;</span>
+<span class="fc" id="L52">		this.courses=cpes;</span>
+		try {
+<span class="fc" id="L54">			setRequestCourses(calendar);</span>
+<span class="pc" id="L55">		} catch (ParseException e) {</span>
+<span class="nc" id="L56">			e.printStackTrace();</span>
+		}
+<span class="fc" id="L58">		checkRep();</span>
+<span class="fc" id="L59">	}</span>
+	//实现迭代器
+	@Override
+	public Iterator&lt;CourseEntry&lt;Teacher&gt;&gt; iterator(){
+		try {
+<span class="fc" id="L64">			sortCourses();//先排序以实现有序迭代</span>
+<span class="pc" id="L65">		} catch (ParseException e) {</span>
+<span class="nc" id="L66">			e.printStackTrace();</span>
+		}
+<span class="fc" id="L68">		return courses.iterator();</span>
+	}
+	
+	/**
+	 * 在所有课程集合中搜索得到当日在location位置的课程,并保存
+	 * @param calendar 指定时间
+	 * @throws ParseException 未能将时间转化为标准格式
+	 */
+	public void setRequestCourses(Calendar calendar) throws ParseException {
+<span class="fc" id="L77">		List&lt;CourseEntry&lt;Teacher&gt;&gt; newcpes=new ArrayList&lt;CourseEntry&lt;Teacher&gt;&gt;();</span>
+<span class="fc" id="L78">		newcpes.addAll(courses);</span>
+<span class="fc" id="L79">		this.courses=new ArrayList&lt;CourseEntry&lt;Teacher&gt;&gt;();</span>
+<span class="fc" id="L80">		SimpleDateFormat sdf=new SimpleDateFormat(&quot;yyyy-MM-dd HH:mm&quot;,Locale.CHINA);</span>
+		Timeslot timeslot;
+<span class="fc bfc" id="L82" title="All 2 branches covered.">		for(CourseEntry&lt;Teacher&gt; cpe:newcpes) {</span>
+<span class="pc bpc" id="L83" title="1 of 2 branches missed.">			if(!cpe.getLocation().get(0).equals(location)) {//教室必须相同</span>
+<span class="nc" id="L84">				continue;</span>
+			}
+<span class="pc bpc" id="L86" title="1 of 2 branches missed.">			if(cpe.getResource().isEmpty())</span>
+<span class="nc" id="L87">				continue;</span>
+<span class="fc" id="L88">			timeslot=cpe.getTime().get(0);</span>
+<span class="fc" id="L89">			Date date1=sdf.parse(timeslot.getStarttime());</span>
+<span class="fc" id="L90">			Calendar cal1=Calendar.getInstance();</span>
+<span class="fc" id="L91">			cal1.setTime(date1);</span>
+<span class="pc bpc" id="L92" title="2 of 6 branches missed.">			if(cal1.get(0)==calendar.get(0)&amp;&amp;cal1.get(1)==calendar.get(1)&amp;&amp;cal1.get(6)==calendar.get(6)) {//指定时刻与上课时间在同一天</span>
+<span class="fc" id="L93">				courses.add(cpe);</span>
+			}
+		}
+<span class="fc" id="L96">		sortCourses();</span>
+<span class="fc" id="L97">	}</span>
+	
+	/**
+	 * 为courses中的元素排序
+	 * @throws ParseException 未能将时间转化为标准格式
+	 */
+	public void sortCourses() throws ParseException {
+<span class="fc" id="L104">		SimpleDateFormat sdf=new SimpleDateFormat(&quot;yyyy-MM-dd HH:mm&quot;,Locale.CHINA);</span>
+<span class="fc bfc" id="L105" title="All 2 branches covered.">		for(int i=0;i&lt;courses.size()-1;i++) {</span>
+<span class="fc" id="L106">			Timeslot timei=courses.get(i).getTime().get(0);</span>
+<span class="fc" id="L107">			Date minDate=sdf.parse(timei.getEndtime());</span>
+<span class="fc" id="L108">			int min=i;</span>
+<span class="fc bfc" id="L109" title="All 2 branches covered.">			for(int j=i+1;j&lt;courses.size();j++) {</span>
+<span class="fc" id="L110">				Timeslot timej=courses.get(j).getTime().get(0);</span>
+<span class="fc" id="L111">				Date date=sdf.parse(timej.getEndtime());</span>
+<span class="fc bfc" id="L112" title="All 2 branches covered.">				if(date.getTime()&lt;minDate.getTime()) {</span>
+<span class="fc" id="L113">					minDate=date;</span>
+<span class="fc" id="L114">					min=j;</span>
+				}
+			}
+<span class="fc bfc" id="L117" title="All 2 branches covered.">			if(min!=i) {</span>
+<span class="fc" id="L118">				CourseEntry&lt;Teacher&gt; cpei=courses.get(i);</span>
+<span class="fc" id="L119">				CourseEntry&lt;Teacher&gt; cpemin=courses.get(min);</span>
+<span class="fc" id="L120">				courses.set(i, cpemin);</span>
+<span class="fc" id="L121">				courses.set(min, cpei);</span>
+			}
+		}
+<span class="fc" id="L124">	}</span>
+	
+	/**
+	 * 信息板可视化，展示现实时间当日的所有课程
+	 * @throws ParseException 时间未能转化为标准格式
+	 */
+	public void visualize() throws ParseException {
+<span class="nc" id="L131">		Calendar calendar=Calendar.getInstance();</span>
+<span class="nc" id="L132">		setRequestCourses(calendar);</span>
+<span class="nc" id="L133">		SimpleDateFormat sdf=new SimpleDateFormat(&quot;yyyy-MM-dd HH:mm&quot;,Locale.CHINA);</span>
+<span class="nc" id="L134">		String time=sdf.format(calendar.getTime());</span>
+<span class="nc" id="L135">		JFrame jf=new JFrame(&quot;CourseBoard&quot;);</span>
+<span class="nc" id="L136">		jf.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);</span>
+		// 创建内容面板，使用边界布局
+<span class="nc" id="L138">        JPanel panel = new JPanel(new BorderLayout());</span>
+<span class="nc" id="L139">        String[] col= {&quot; &quot;,time,location.getName(),&quot; &quot;};</span>
+<span class="nc" id="L140">        Object[][] rowData=new Object[courses.size()][4];</span>
+<span class="nc bnc" id="L141" title="All 2 branches missed.">        for(int i=0;i&lt;courses.size();i++) {</span>
+<span class="nc" id="L142">        	CourseEntry&lt;Teacher&gt; cpe=courses.get(i);</span>
+<span class="nc" id="L143">        	Timeslot timeslot=cpe.getTime().get(0);</span>
+<span class="nc" id="L144">			Date date=sdf.parse(timeslot.getStarttime());</span>
+<span class="nc" id="L145">			Calendar calendar2=Calendar.getInstance();</span>
+<span class="nc" id="L146">			calendar2.setTime(date);</span>
+<span class="nc" id="L147">			int hour1=calendar2.get(Calendar.HOUR_OF_DAY);</span>
+<span class="nc" id="L148">			int minute1=calendar2.get(Calendar.MINUTE);</span>
+<span class="nc" id="L149">			Date date2=sdf.parse(timeslot.getEndtime());</span>
+<span class="nc" id="L150">			sdf.format(date2);</span>
+<span class="nc" id="L151">			calendar2.setTime(date2);</span>
+<span class="nc" id="L152">			int hour2=calendar2.get(Calendar.HOUR_OF_DAY);</span>
+<span class="nc" id="L153">			int minute2=calendar2.get(Calendar.MINUTE);</span>
+			String time1;
+			String time2;
+<span class="nc bnc" id="L156" title="All 2 branches missed.">			if(minute1&lt;10)</span>
+<span class="nc" id="L157">				time1=hour1+&quot;:&quot;+&quot;0&quot;+minute1;</span>
+			else 
+<span class="nc" id="L159">				time1=hour1+&quot;:&quot;+minute1;</span>
+<span class="nc bnc" id="L160" title="All 2 branches missed.">			if(minute2&lt;10)</span>
+<span class="nc" id="L161">				time2=hour2+&quot;:&quot;+&quot;0&quot;+minute2;</span>
+			else 
+<span class="nc" id="L163">				time2=hour2+&quot;:&quot;+minute2;</span>
+<span class="nc" id="L164">			rowData[i][0]= time1+&quot;-&quot;+time2;</span>
+<span class="nc" id="L165">			rowData[i][1]=cpe.getName();</span>
+<span class="nc" id="L166">			rowData[i][2]=cpe.getResource().get(0).getName();</span>
+<span class="nc bnc" id="L167" title="All 5 branches missed.">			switch (cpe.getStateName()) {</span>
+			case &quot;Running&quot;:
+<span class="nc" id="L169">				rowData[i][3]=&quot;正在上课&quot;;</span>
+<span class="nc" id="L170">				break;</span>
+			case &quot;Cancelled&quot;:
+<span class="nc" id="L172">				rowData[i][3]=&quot;已取消&quot;;</span>
+<span class="nc" id="L173">				break;</span>
+			case &quot;Allocated&quot;:
+<span class="nc" id="L175">				rowData[i][3]=&quot;待上课&quot;;</span>
+<span class="nc" id="L176">				break;</span>
+			case &quot;Ended&quot;:
+<span class="nc" id="L178">				rowData[i][3]=&quot;已下课&quot;;</span>
+<span class="nc" id="L179">				break;</span>
+			default:
+				break;
+			}
+        }
+<span class="nc" id="L184">        JTable table=new JTable(rowData,col);</span>
+<span class="nc" id="L185">        table.setGridColor(Color.GRAY);</span>
+<span class="nc" id="L186">        table.setForeground(Color.BLACK);</span>
+<span class="nc" id="L187">        table.getTableHeader().setForeground(Color.BLACK);</span>
+<span class="nc" id="L188">        table.getTableHeader().setResizingAllowed(false);</span>
+<span class="nc" id="L189">        table.getTableHeader().setReorderingAllowed(false);</span>
+<span class="nc" id="L190">        table.setRowHeight(100);</span>
+<span class="nc" id="L191">        TableColumn tableColumn = table.getColumnModel().getColumn(1);</span>
+<span class="nc" id="L192">        tableColumn.setWidth(600);</span>
+<span class="nc" id="L193">        tableColumn = table.getColumnModel().getColumn(2);</span>
+<span class="nc" id="L194">        tableColumn.setWidth(600);</span>
+<span class="nc" id="L195">        table.setFont(new Font(null, Font.PLAIN, 25));</span>
+<span class="nc" id="L196">        table.getTableHeader().setFont(new Font(null, Font.BOLD, 25));</span>
+<span class="nc" id="L197">        table.getColumnModel().getColumn(0).setPreferredWidth(130);</span>
+<span class="nc" id="L198">        table.setPreferredScrollableViewportSize(new Dimension(1000, 400));</span>
+<span class="nc" id="L199">        JScrollPane scrollPane = new JScrollPane(table);</span>
+<span class="nc" id="L200">        panel.add(scrollPane);</span>
+        
+<span class="nc" id="L202">        jf.setContentPane(panel);</span>
+<span class="nc" id="L203">        jf.pack();</span>
+<span class="nc" id="L204">        jf.setLocationRelativeTo(null);</span>
+<span class="nc" id="L205">        jf.setVisible(true);</span>
+<span class="nc" id="L206">        jf.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);</span>
+<span class="nc" id="L207">	}</span>
+	
+	/*   //测试用的main函数
+	public static void main(String[] args) throws ParseException {
+		Location location=new Location(&quot;10E&quot;,&quot;30S&quot; , &quot;教室A&quot;, false);
+		List&lt;Location&gt; oneLocation=new ArrayList&lt;Location&gt;();
+		oneLocation.add(location);
+		List&lt;CourseEntry&lt;Teacher&gt;&gt; cpes=new ArrayList&lt;CourseEntry&lt;Teacher&gt;&gt;();
+		CourseEntry&lt;Teacher&gt; cpe1=CoursePlanningEntry.CreateCourse(&quot;soft&quot;);
+		Timeslot timeslot=new Timeslot(&quot;2020-05-11 16:20&quot;, &quot;2020-05-11 19:20&quot;);//可自由设置时间进行测试,但注意要显示的日期应该设置为与测试日期相同
+		List&lt;Timeslot&gt; oneTimeslot=new ArrayList&lt;Timeslot&gt;();
+		oneTimeslot.add(timeslot);
+		cpe1.setLocation(oneLocation);
+		cpe1.setTime(oneTimeslot);
+		Teacher teacher=new Teacher(&quot;130283xxx&quot;, &quot;name&quot;, true, &quot;professtionalTitle&quot;);
+		List&lt;Teacher&gt; oneTeacher=new ArrayList&lt;Teacher&gt;();
+		oneTeacher.add(teacher);
+		cpe1.allocateResource(oneTeacher);	
+		Timeslot timeslot2=new Timeslot(&quot;2020-05-11 18:30&quot;, &quot;2020-05-11 19:50&quot;);//可自由设置时间进行测试,但注意要显示的日期应该设置为与测试日期相同
+		List&lt;Timeslot&gt; seTimeslot=new ArrayList&lt;Timeslot&gt;();
+		seTimeslot.add(timeslot2);
+		CourseEntry&lt;Teacher&gt; cpe2=CoursePlanningEntry.CreateCourse(&quot;ware&quot;);
+		cpe2.setLocation(oneLocation);
+		cpe2.setTime(seTimeslot);
+		cpe2.allocateResource(oneTeacher);
+		cpes.add(cpe2);
+		cpes.add(cpe1);
+		Calendar calendar=Calendar.getInstance();
+		CourseBoard cb=new CourseBoard(location, cpes,calendar);
+		cb.visualize();
+	}*/
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.3.201901230119</span>Lab4-2020SP (2020-5-23 15:07:06)</div></body></html>

@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../jacoco-resources/report.gif" type="image/gif"/><title>CoursePlanningEntryTest.java</title><link rel="stylesheet" href="../../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">Lab4-2020SP (2020-5-23 15:07:06)</a> &gt; <a href="../../index.html" class="el_group">Lab4-2020SP</a> &gt; <a href="../index.html" class="el_bundle">test</a> &gt; <a href="index.source.html" class="el_package">compositeinterface</a> &gt; <span class="el_source">CoursePlanningEntryTest.java</span></div><h1>CoursePlanningEntryTest.java</h1><pre class="source lang-java linenums">package compositeinterface;
+
+import static org.junit.Assert.*;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.junit.Before;
+import org.junit.Test;
+
+import Resources.Teacher;
+
+<span class="fc" id="L13">public class CoursePlanningEntryTest {</span>
+	
+	CoursePlanningEntry&lt;Teacher&gt; cpe;
+	List&lt;Teacher&gt; teacher;
+<span class="fc" id="L17">	Teacher teacher1=new Teacher(&quot;1302832xx&quot;, &quot;name&quot;, true, &quot;professtionalTitle&quot;);</span>
+	
+	@Before
+	public void prepare() {
+<span class="fc" id="L21">		cpe=CoursePlanningEntry.CreateCourse(&quot;test&quot;);</span>
+<span class="fc" id="L22">		teacher=new ArrayList&lt;Teacher&gt;();</span>
+<span class="fc" id="L23">		teacher.add(teacher1);</span>
+<span class="fc" id="L24">	}</span>
+	
+	@Test
+	public void getStateNameTest() {
+<span class="fc" id="L28">		assertEquals(&quot;Waiting&quot;, cpe.getStateName());</span>
+<span class="fc" id="L29">	}</span>
+	
+	//测试策略:未分配教师时启动；分配教师时启动
+	@Test
+	public void starttest() {
+<span class="fc" id="L34">		cpe.start();</span>
+<span class="fc" id="L35">		String state=cpe.getStateName();</span>
+<span class="fc" id="L36">		assertNotEquals(&quot;Running&quot;, state);</span>
+<span class="fc" id="L37">		cpe.allocateResource(teacher);</span>
+<span class="fc" id="L38">		cpe.start();</span>
+<span class="fc" id="L39">		state=cpe.getStateName();</span>
+<span class="fc" id="L40">		assertEquals(&quot;Running&quot;, state);</span>
+<span class="fc" id="L41">	}</span>
+	
+	//测试策略:课程未开始时取消；课程开始后取消
+	@Test
+	public void cancelTest() {
+<span class="fc" id="L46">		cpe.cancel();</span>
+<span class="fc" id="L47">		assertEquals(&quot;Cancelled&quot;, cpe.getStateName());</span>
+<span class="fc" id="L48">		CoursePlanningEntry&lt;Teacher&gt; cpe2=CoursePlanningEntry.CreateCourse(&quot;2&quot;);</span>
+<span class="fc" id="L49">		cpe2.allocateResource(teacher);</span>
+<span class="fc" id="L50">		cpe2.start();</span>
+<span class="fc" id="L51">		cpe2.cancel();</span>
+<span class="fc" id="L52">		assertNotEquals(&quot;Cancelled&quot;, cpe2.getStateName());</span>
+<span class="fc" id="L53">	}</span>
+	
+	//测试策略：启动前结束，启动后结束
+	@Test
+	public void endTest() {
+<span class="fc" id="L58">		cpe.end();</span>
+<span class="fc" id="L59">		assertNotEquals(&quot;Ended&quot;, cpe.getStateName());</span>
+<span class="fc" id="L60">		cpe.allocateResource(teacher);</span>
+<span class="fc" id="L61">		cpe.end();</span>
+<span class="fc" id="L62">		assertNotEquals(&quot;Ended&quot;, cpe.getStateName());</span>
+<span class="fc" id="L63">		cpe.start();</span>
+<span class="fc" id="L64">		cpe.end();</span>
+<span class="fc" id="L65">		assertEquals(&quot;Ended&quot;, cpe.getStateName());</span>
+<span class="fc" id="L66">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.3.201901230119</span>Lab4-2020SP (2020-5-23 15:07:06)</div></body></html>

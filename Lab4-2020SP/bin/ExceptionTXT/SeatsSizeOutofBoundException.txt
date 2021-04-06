@@ -1,0 +1,26 @@
+Flight:2020-06-02,AA04
+{
+DepartureAirport:Kunming
+ArrivalAirport:Zhengzhou
+DepatureTime:2020-06-02 21:02
+ArrivalTime:2020-06-03 00:40
+Plane:N9279
+{
+Type:A350
+Seats:286
+Age:22
+}
+}
+Flight:2020-01-01,AA0446
+{
+DepartureAirport:Beijing
+ArrivalAirport:Weihai
+DepatureTime:2020-01-01 15:01
+ArrivalTime:2020-01-01 18:52
+Plane:N1418
+{
+Type:A319
+Seats:800
+Age:11.8
+}
+}

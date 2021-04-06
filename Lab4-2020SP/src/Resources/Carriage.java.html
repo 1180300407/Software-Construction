@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../jacoco-resources/report.gif" type="image/gif"/><title>Carriage.java</title><link rel="stylesheet" href="../../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">Lab4-2020SP (2020-5-23 15:07:06)</a> &gt; <a href="../../index.html" class="el_group">Lab4-2020SP</a> &gt; <a href="../index.html" class="el_bundle">src</a> &gt; <a href="index.source.html" class="el_package">Resources</a> &gt; <span class="el_source">Carriage.java</span></div><h1>Carriage.java</h1><pre class="source lang-java linenums">package Resources;
+
+/**
+ * 表示“车厢”资源，不可变类
+ * @author 123
+ *
+ */
+
+public class Carriage {
+	private final String id;//车厢编号
+	private final String type;//车厢类型
+	private final int maxnum;//车厢定员数
+	private final String manufactureyear;//出厂年份
+	
+	//Abstraction function:
+	//	AF(id,type,maxnum,manufactureyear)=一个编号为id的车厢，车厢类型为type，定员数为maxnum，出厂年费是manufactureyear
+	//Representation invariant:
+	//	true
+	//Safety from rep exposure:
+	//	成员变量全是private且final的，均为不可变类型，不存在表示泄露
+	
+	/**
+	 * 构造函数
+	 * @param id 指定车厢编号
+	 * @param type 指定车厢类型，为其中一种
+	 * @param maxnum 指定车厢定员数
+	 * @param manufactureyear 指定出厂年份
+	 */
+<span class="fc" id="L29">	public Carriage(String id, String type, int maxnum, String manufactureyear) {</span>
+<span class="fc" id="L30">		this.id = id;</span>
+<span class="fc" id="L31">		this.type = type;</span>
+<span class="fc" id="L32">		this.maxnum = maxnum;</span>
+<span class="fc" id="L33">		this.manufactureyear = manufactureyear;</span>
+<span class="fc" id="L34">	}</span>
+
+	/**
+	 * @return 车厢编号
+	 */
+	public String getId() {
+<span class="fc" id="L40">		return id;</span>
+	}
+
+	/**
+	 * @return 车厢类型
+	 */
+	public String getType() {
+<span class="fc" id="L47">		return type;</span>
+	}
+
+	/**
+	 * @return 车厢定员数
+	 */
+	public int getMaxnum() {
+<span class="fc" id="L54">		return maxnum;</span>
+	}
+
+	/**
+	 * @return 车厢出厂年份
+	 */
+	public String getManufactureyear() {
+<span class="fc" id="L61">		return manufactureyear;</span>
+	}
+
+	//重写equals和hashCode,id为唯一标准
+	@Override
+	public int hashCode() {
+<span class="fc" id="L67">		final int prime = 31;</span>
+<span class="fc" id="L68">		int result = 1;</span>
+<span class="pc bpc" id="L69" title="1 of 2 branches missed.">		result = prime * result + ((id == null) ? 0 : id.hashCode());</span>
+<span class="fc" id="L70">		return result;</span>
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+<span class="fc bfc" id="L75" title="All 2 branches covered.">		if (this == obj)</span>
+<span class="fc" id="L76">			return true;</span>
+<span class="pc bpc" id="L77" title="1 of 2 branches missed.">		if (obj == null)</span>
+<span class="nc" id="L78">			return false;</span>
+<span class="pc bpc" id="L79" title="1 of 2 branches missed.">		if (getClass() != obj.getClass())</span>
+<span class="nc" id="L80">			return false;</span>
+<span class="fc" id="L81">		Carriage other = (Carriage) obj;</span>
+<span class="pc bpc" id="L82" title="1 of 2 branches missed.">		if (id == null) {</span>
+<span class="nc bnc" id="L83" title="All 2 branches missed.">			if (other.id != null)</span>
+<span class="nc" id="L84">				return false;</span>
+<span class="fc bfc" id="L85" title="All 2 branches covered.">		} else if (!id.equals(other.id))</span>
+<span class="fc" id="L86">			return false;</span>
+<span class="fc" id="L87">		return true;</span>
+	}
+	
+	
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.3.201901230119</span>Lab4-2020SP (2020-5-23 15:07:06)</div></body></html>

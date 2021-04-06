@@ -1,0 +1,348 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../jacoco-resources/report.gif" type="image/gif"/><title>FlightBoard.java</title><link rel="stylesheet" href="../../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">Lab4-2020SP (2020-5-23 15:07:06)</a> &gt; <a href="../../index.html" class="el_group">Lab4-2020SP</a> &gt; <a href="../index.html" class="el_bundle">src</a> &gt; <a href="index.source.html" class="el_package">Board</a> &gt; <span class="el_source">FlightBoard.java</span></div><h1>FlightBoard.java</h1><pre class="source lang-java linenums">package Board;
+
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
+
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.WindowConstants;
+import javax.swing.table.TableColumn;
+
+import Location.Location;
+import Resources.Plane;
+import Timeslot.Timeslot;
+import compositeinterface.*;
+
+/**
+ * 机场信息板，可变类
+ * @author 123
+ *
+ */
+<span class="pc bpc" id="L33" title="1 of 2 branches missed.">public class FlightBoard implements Iterable&lt;FlightEntry&lt;Plane&gt;&gt;{</span>
+	public final Location location;
+<span class="fc" id="L35">	public List&lt;FlightEntry&lt;Plane&gt;&gt; reachFlights=new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L36">	public List&lt;FlightEntry&lt;Plane&gt;&gt; departureFlights=new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L37">	public List&lt;FlightEntry&lt;Plane&gt;&gt; allFlights=new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L38">	public final int count=1;</span>
+	//Abstraction function:
+	//	AF(location,reachFlights,departureFlights,allFlights)=一个location处的信息板
+	//	其中reachFlights包含在count小时前后的抵达航班
+	//	departureFlights包含在count小时前后的起飞航班
+	//	allFlights表示所有count小时前后经过该位置的航班集合
+	//Representation invariant:
+	//	allFlights中所有航班均应已分配飞机
+	//Safety from rep exposure:
+	//	成员变量全是private的，防御式拷贝
+	private void checkRep() {
+<span class="fc bfc" id="L49" title="All 2 branches covered.">		for(FlightEntry&lt;Plane&gt; fe:allFlights) {</span>
+<span class="pc bpc" id="L50" title="2 of 4 branches missed.">			assert fe.getResource()!=null;</span>
+<span class="pc bpc" id="L51" title="2 of 4 branches missed.">			assert fe.getResource().size()!=0;</span>
+		}
+<span class="fc" id="L53">	}</span>
+	
+	/**
+	 * 构造函数
+	 * @param location 信息板所属的具体位置
+	 * @param allflights 该位置待搜索的航班集合，所有航班均应已分配飞机
+	 */
+<span class="fc" id="L60">	public FlightBoard(Location location,List&lt;FlightEntry&lt;Plane&gt;&gt; allflights,Calendar calendar) {</span>
+<span class="fc" id="L61">		this.location=location;</span>
+<span class="fc" id="L62">		this.allFlights=allflights;</span>
+		try {
+<span class="fc" id="L64">			setRequestFlights(calendar);</span>
+<span class="pc" id="L65">		} catch (ParseException e) {</span>
+			// TODO Auto-generated catch block
+<span class="nc" id="L67">			e.printStackTrace();</span>
+		}
+<span class="fc" id="L69">		checkRep();</span>
+<span class="fc" id="L70">	}</span>
+	
+	//实现迭代器
+	@Override
+	public Iterator&lt;FlightEntry&lt;Plane&gt;&gt; iterator(){
+		try {
+<span class="fc" id="L76">			sortFlights(); //先排序以实现有序迭代</span>
+<span class="pc" id="L77">		} catch (ParseException e) {</span>
+<span class="nc" id="L78">			e.printStackTrace();</span>
+		}
+<span class="fc" id="L80">		return allFlights.iterator();</span>
+	}
+	
+	/**
+	 * 在所有航班集合中搜索得到在location位置所有在指定时间count小时前后的航班,并分别保存
+	 * @param calendar 指定时刻
+	 * @throws ParseException 未能将时间转化为标准格式
+	 */
+	public void setRequestFlights(Calendar calendar) throws ParseException {
+<span class="fc" id="L89">		reachFlights=new ArrayList&lt;FlightEntry&lt;Plane&gt;&gt;();</span>
+<span class="fc" id="L90">		departureFlights=new ArrayList&lt;FlightEntry&lt;Plane&gt;&gt;();</span>
+<span class="fc" id="L91">		SimpleDateFormat sdf=new SimpleDateFormat(&quot;yyyy-MM-dd HH:mm&quot;,Locale.CHINA);</span>
+		Timeslot timeslot;
+<span class="fc bfc" id="L93" title="All 2 branches covered.">		for(FlightEntry&lt;Plane&gt; fpe:allFlights) {</span>
+<span class="pc bpc" id="L94" title="1 of 2 branches missed.">			if(fpe.getResource().isEmpty()) {</span>
+<span class="nc" id="L95">				continue;</span>
+			}
+<span class="pc bpc" id="L97" title="1 of 2 branches missed.">			if(!fpe.getLocation().contains(location))</span>
+<span class="nc" id="L98">				continue;</span>
+<span class="fc" id="L99">			timeslot=fpe.getTime().get(0);</span>
+<span class="fc" id="L100">			Date date1 = sdf.parse(timeslot.getEndtime());</span>
+<span class="fc" id="L101">			Date date2 = sdf.parse(timeslot.getStarttime());</span>
+<span class="fc" id="L102">			Calendar cal1=Calendar.getInstance();</span>
+<span class="fc" id="L103">			Calendar cal2=Calendar.getInstance();</span>
+<span class="fc" id="L104">			cal1.setTime(date1);</span>
+<span class="fc" id="L105">			cal2.setTime(date2);</span>
+<span class="pc bpc" id="L106" title="7 of 8 branches missed.">			if(fpe.getEnd().equals(location)&amp;&amp;cal1.get(0)==calendar.get(0)&amp;&amp;cal1.get(1)==calendar.get(1)&amp;&amp;cal1.get(6)==calendar.get(6)) {//指定时刻与抵达时间在同一天</span>
+<span class="nc bnc" id="L107" title="All 2 branches missed.">				if(cal1.get(Calendar.HOUR_OF_DAY)==calendar.get(Calendar.HOUR_OF_DAY))//在同一小时之内，必定符合要求</span>
+<span class="nc" id="L108">					reachFlights.add(fpe);</span>
+<span class="nc bnc" id="L109" title="All 2 branches missed.">				else if(cal1.get(Calendar.HOUR_OF_DAY)==calendar.get(Calendar.HOUR_OF_DAY)-count){//在前一小时，分钟大于等于指定时刻，则在一小时之内</span>
+<span class="nc bnc" id="L110" title="All 2 branches missed.">					if(cal1.get(Calendar.MINUTE)&gt;=calendar.get(Calendar.MINUTE))</span>
+<span class="nc" id="L111">						reachFlights.add(fpe);</span>
+<span class="nc" id="L112">				}</span>
+<span class="nc bnc" id="L113" title="All 2 branches missed.">				else if(cal1.get(Calendar.HOUR_OF_DAY)==calendar.get(Calendar.HOUR_OF_DAY)+count) {//在后一小时，分钟小于等于制定时刻，则在一小时之内</span>
+<span class="nc bnc" id="L114" title="All 2 branches missed.">					if(cal1.get(Calendar.MINUTE)&lt;=calendar.get(Calendar.MINUTE))</span>
+<span class="nc" id="L115">						reachFlights.add(fpe);</span>
+				}
+<span class="nc" id="L117">			}</span>
+<span class="pc bpc" id="L118" title="4 of 8 branches missed.">			else  if(fpe.getStart().equals(location)&amp;&amp;cal2.get(0)==calendar.get(0)&amp;&amp;cal2.get(1)==calendar.get(1)&amp;&amp;cal2.get(6)==calendar.get(6)) {//指定时刻与出发时间在同一天</span>
+<span class="fc bfc" id="L119" title="All 2 branches covered.">				if(cal2.get(Calendar.HOUR_OF_DAY)==calendar.get(Calendar.HOUR_OF_DAY))//在同一小时之内，必定符合要求</span>
+<span class="fc" id="L120">					departureFlights.add(fpe);</span>
+<span class="fc bfc" id="L121" title="All 2 branches covered.">				else if(cal2.get(Calendar.HOUR_OF_DAY)==calendar.get(Calendar.HOUR_OF_DAY)-count){//在前一小时，分钟大于等于指定时刻，则在一小时之内</span>
+<span class="pc bpc" id="L122" title="1 of 2 branches missed.">					if(cal2.get(Calendar.MINUTE)&gt;=calendar.get(Calendar.MINUTE))</span>
+<span class="fc" id="L123">						departureFlights.add(fpe);</span>
+<span class="fc" id="L124">				}</span>
+<span class="pc bpc" id="L125" title="1 of 2 branches missed.">				else if(cal2.get(Calendar.HOUR_OF_DAY)==calendar.get(Calendar.HOUR_OF_DAY)+count) {//在后一小时，分钟小于等于制定时刻，则在一小时之内</span>
+<span class="nc bnc" id="L126" title="All 2 branches missed.">					if(cal2.get(Calendar.MINUTE)&lt;=calendar.get(Calendar.MINUTE))</span>
+<span class="nc" id="L127">						departureFlights.add(fpe);</span>
+				}
+			}
+		}
+<span class="fc" id="L131">		sortFlights();</span>
+<span class="fc" id="L132">	}</span>
+	
+	/**
+	 * 为reachFlights和departureFlights中的元素排序
+	 * @throws ParseException 未能将时间转化为标准格式
+	 */
+	public void sortFlights() throws ParseException {
+<span class="fc" id="L139">		SimpleDateFormat sdf=new SimpleDateFormat(&quot;yyyy-MM-dd HH:mm&quot;,Locale.CHINA);</span>
+<span class="pc bpc" id="L140" title="1 of 2 branches missed.">		for(int i=0;i&lt;reachFlights.size()-1;i++) {//为抵达航班排序</span>
+<span class="nc" id="L141">			Timeslot timei=reachFlights.get(i).getTime().get(0);</span>
+<span class="nc" id="L142">			Date minDate=sdf.parse(timei.getEndtime());</span>
+<span class="nc" id="L143">			int min=i;</span>
+<span class="nc bnc" id="L144" title="All 2 branches missed.">			for(int j=i+1;j&lt;reachFlights.size();j++) {//选择排序</span>
+<span class="nc" id="L145">				Timeslot timej=reachFlights.get(j).getTime().get(0);</span>
+<span class="nc" id="L146">				Date date=sdf.parse(timej.getEndtime());//比较每个航班的终止时间</span>
+<span class="nc bnc" id="L147" title="All 2 branches missed.">				if(date.getTime()&lt;minDate.getTime()) {</span>
+<span class="nc" id="L148">					minDate=date;</span>
+<span class="nc" id="L149">					min=j;</span>
+				}
+			}
+<span class="nc bnc" id="L152" title="All 2 branches missed.">			if(min!=i) {</span>
+<span class="nc" id="L153">				FlightEntry&lt;Plane&gt; fpei=reachFlights.get(i);</span>
+<span class="nc" id="L154">				FlightEntry&lt;Plane&gt; fpemin=reachFlights.get(min);</span>
+<span class="nc" id="L155">				reachFlights.set(i, fpemin);</span>
+<span class="nc" id="L156">				reachFlights.set(min, fpei);</span>
+			}
+		}
+		
+<span class="fc bfc" id="L160" title="All 2 branches covered.">		for(int i=0;i&lt;departureFlights.size()-1;i++) {//为出发航班排序</span>
+<span class="fc" id="L161">			Timeslot timei=departureFlights.get(i).getTime().get(0);</span>
+<span class="fc" id="L162">			Date minDate=sdf.parse(timei.getStarttime());</span>
+<span class="fc" id="L163">			int min=i;</span>
+<span class="fc bfc" id="L164" title="All 2 branches covered.">			for(int j=i+1;j&lt;departureFlights.size();j++) {//选择排序</span>
+<span class="fc" id="L165">				Timeslot timej=departureFlights.get(j).getTime().get(0);</span>
+<span class="fc" id="L166">				Date date=sdf.parse(timej.getStarttime());//比较航班的起始时间</span>
+<span class="fc bfc" id="L167" title="All 2 branches covered.">				if(date.getTime()&lt;minDate.getTime()) {</span>
+<span class="fc" id="L168">					minDate=date;</span>
+<span class="fc" id="L169">					min=j;</span>
+				}
+			}
+<span class="fc bfc" id="L172" title="All 2 branches covered.">			if(min!=i) {</span>
+<span class="fc" id="L173">				FlightEntry&lt;Plane&gt; fpei=departureFlights.get(i);</span>
+<span class="fc" id="L174">				FlightEntry&lt;Plane&gt; fpemin=departureFlights.get(min);</span>
+<span class="fc" id="L175">				departureFlights.set(i, fpemin);</span>
+<span class="fc" id="L176">				departureFlights.set(min, fpei);</span>
+			}
+		}
+		
+<span class="fc" id="L180">		int i=0,j=0;</span>
+<span class="fc" id="L181">		allFlights=new ArrayList&lt;FlightEntry&lt;Plane&gt;&gt;();</span>
+<span class="pc bpc" id="L182" title="1 of 4 branches missed.">		while(i&lt;reachFlights.size()||j&lt;departureFlights.size()) {//将allFlights改造为包括所有航班（既包括抵达又包括出发）</span>
+<span class="pc bpc" id="L183" title="1 of 2 branches missed.">			if(i==reachFlights.size()) {						//的时间从早到晚排序的有序航班集合</span>
+<span class="fc" id="L184">				allFlights.add(departureFlights.get(j));//抵达航班全部加入，将排序后的出发航班直接加入</span>
+<span class="fc" id="L185">				j++;</span>
+<span class="fc" id="L186">			}</span>
+<span class="nc bnc" id="L187" title="All 2 branches missed.">			else if(j==departureFlights.size()) {//出发航班全部加入，将排序后的抵达航班直接加入</span>
+<span class="nc" id="L188">				allFlights.add(reachFlights.get(i));</span>
+<span class="nc" id="L189">				i++;</span>
+<span class="nc" id="L190">			}</span>
+			else {//二者更小的先加入
+<span class="nc" id="L192">				Timeslot timei=reachFlights.get(i).getTime().get(0);</span>
+<span class="nc" id="L193">				Timeslot timej=departureFlights.get(j).getTime().get(0);</span>
+<span class="nc" id="L194">				Date datei=sdf.parse(timei.getEndtime());</span>
+<span class="nc" id="L195">				Date datej=sdf.parse(timej.getStarttime());</span>
+<span class="nc bnc" id="L196" title="All 4 branches missed.">				if(datei.before(datej)||datei.equals(datej)) {</span>
+<span class="nc" id="L197">					allFlights.add(reachFlights.get(i));</span>
+<span class="nc" id="L198">					i++;</span>
+<span class="nc" id="L199">				}</span>
+				else {
+<span class="nc" id="L201">					allFlights.add(departureFlights.get(j));</span>
+<span class="nc" id="L202">					j++;</span>
+				}
+			}
+		}
+<span class="fc" id="L206">	}</span>
+	
+	/**
+	 * Board可视化展现
+	 * @throws ParseException 时间未能转化为标准格式
+	 */
+	public void visualize() throws ParseException {
+<span class="nc" id="L213">		Calendar calendar=Calendar.getInstance();</span>
+<span class="nc" id="L214">		setRequestFlights(calendar);</span>
+<span class="nc" id="L215">		SimpleDateFormat sdf=new SimpleDateFormat(&quot;yyyy-MM-dd HH:mm&quot;,Locale.CHINA);</span>
+<span class="nc" id="L216">		String time=sdf.format(calendar.getTime());</span>
+<span class="nc" id="L217">		JFrame jf=new JFrame(&quot;FlightBoard&quot;);</span>
+<span class="nc" id="L218">		jf.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);</span>
+		// 创建内容面板，使用边界布局
+<span class="nc" id="L220">        JPanel panel = new JPanel(new BorderLayout());</span>
+<span class="nc" id="L221">        String[] col= {&quot; &quot;,time,location.getName(),&quot; &quot;};</span>
+<span class="nc" id="L222">        Object[][] rowData=new Object[reachFlights.size()+1+departureFlights.size()+1][4];</span>
+<span class="nc" id="L223">        rowData[0][0]=&quot; &quot;;</span>
+<span class="nc" id="L224">        rowData[0][1]=&quot; &quot;;</span>
+<span class="nc" id="L225">        rowData[0][2]=&quot;抵达航班&quot;;</span>
+<span class="nc" id="L226">        rowData[0][3]=&quot; &quot;;</span>
+<span class="nc bnc" id="L227" title="All 2 branches missed.">        for(int i=0;i&lt;reachFlights.size();i++) {//将抵达航班可视化</span>
+<span class="nc" id="L228">        	FlightEntry&lt;Plane&gt; fpe=reachFlights.get(i);</span>
+<span class="nc" id="L229">        	Timeslot timeslot=fpe.getTime().get(0);</span>
+<span class="nc" id="L230">			Date date=sdf.parse(timeslot.getEndtime());</span>
+<span class="nc" id="L231">			Calendar calendar2=Calendar.getInstance();</span>
+<span class="nc" id="L232">			calendar2.setTime(date);</span>
+<span class="nc" id="L233">			int hour1=calendar2.get(Calendar.HOUR_OF_DAY);</span>
+<span class="nc" id="L234">			int minute1=calendar2.get(Calendar.MINUTE);</span>
+			String time1;//时间
+<span class="nc bnc" id="L236" title="All 2 branches missed.">			if(minute1&lt;10)</span>
+<span class="nc" id="L237">				time1=hour1+&quot;:&quot;+&quot;0&quot;+minute1;</span>
+			else 
+<span class="nc" id="L239">				time1=hour1+&quot;:&quot;+minute1;</span>
+<span class="nc" id="L240">			rowData[i+1][0]= time1;</span>
+<span class="nc" id="L241">			rowData[i+1][1]=fpe.getName();//航班名称</span>
+<span class="nc" id="L242">			String locationString=fpe.getStart().getName()+&quot;-&quot;+location.getName();//起点-终点</span>
+<span class="nc" id="L243">			rowData[i+1][2]=locationString;</span>
+<span class="nc bnc" id="L244" title="All 4 branches missed.">			switch (fpe.getStateName()) {//状态</span>
+			case &quot;Running&quot;:
+<span class="nc" id="L246">				rowData[i+1][3]=&quot;即将降落&quot;;</span>
+<span class="nc" id="L247">				break;</span>
+			case &quot;Cancelled&quot;:
+<span class="nc" id="L249">				rowData[i+1][3]=&quot;已取消&quot;;</span>
+<span class="nc" id="L250">				break;</span>
+			case &quot;Ended&quot;:
+<span class="nc" id="L252">				rowData[i+1][3]=&quot;已降落&quot;;</span>
+<span class="nc" id="L253">				break;</span>
+			default:
+				break;
+			}
+        }
+<span class="nc" id="L258">        rowData[reachFlights.size()+1][0]=&quot; &quot;;</span>
+<span class="nc" id="L259">        rowData[reachFlights.size()+1][1]=&quot; &quot;;</span>
+<span class="nc" id="L260">        rowData[reachFlights.size()+1][2]=&quot;出发航班&quot;;</span>
+<span class="nc" id="L261">        rowData[reachFlights.size()+1][3]=&quot; &quot;;</span>
+<span class="nc bnc" id="L262" title="All 2 branches missed.">        for(int i=0;i&lt;departureFlights.size();i++) {//将出发航班可视化</span>
+<span class="nc" id="L263">        	FlightEntry&lt;Plane&gt; fpe=departureFlights.get(i);</span>
+<span class="nc" id="L264">        	Timeslot timeslot=fpe.getTime().get(0);</span>
+<span class="nc" id="L265">			Date date=sdf.parse(timeslot.getStarttime());</span>
+<span class="nc" id="L266">			Calendar calendar2=Calendar.getInstance();</span>
+<span class="nc" id="L267">			calendar2.setTime(date);</span>
+<span class="nc" id="L268">			int hour1=calendar2.get(Calendar.HOUR_OF_DAY);</span>
+<span class="nc" id="L269">			int minute1=calendar2.get(Calendar.MINUTE);</span>
+			String time1;//时间
+<span class="nc bnc" id="L271" title="All 2 branches missed.">			if(minute1&lt;10)</span>
+<span class="nc" id="L272">				time1=hour1+&quot;:&quot;+&quot;0&quot;+minute1;</span>
+			else 
+<span class="nc" id="L274">				time1=hour1+&quot;:&quot;+minute1;</span>
+<span class="nc" id="L275">			rowData[i+2+reachFlights.size()][0]= time1;//时间</span>
+<span class="nc" id="L276">			rowData[i+2+reachFlights.size()][1]=fpe.getName();//航班名称</span>
+<span class="nc" id="L277">			String locationString=location.getName()+&quot;-&quot;+fpe.getEnd().getName();//起点-终点</span>
+<span class="nc" id="L278">			rowData[i+2+reachFlights.size()][2]=locationString;</span>
+<span class="nc bnc" id="L279" title="All 4 branches missed.">			switch (fpe.getStateName()) {//状态</span>
+			case &quot;Running&quot;:
+<span class="nc" id="L281">				rowData[i+2+reachFlights.size()][3]=&quot;已起飞&quot;;</span>
+<span class="nc" id="L282">				break;</span>
+			case &quot;Cancelled&quot;:
+<span class="nc" id="L284">				rowData[i+2+reachFlights.size()][3]=&quot;已取消&quot;;</span>
+<span class="nc" id="L285">				break;</span>
+			case &quot;Allocated&quot;:
+<span class="nc" id="L287">				rowData[i+2+reachFlights.size()][3]=&quot;即将起飞&quot;;</span>
+<span class="nc" id="L288">				break;</span>
+			default:
+				break;
+			}
+        }
+<span class="nc" id="L293">        JTable table=new JTable(rowData,col);</span>
+<span class="nc" id="L294">        table.setGridColor(Color.GRAY);</span>
+<span class="nc" id="L295">        table.setForeground(Color.BLACK);</span>
+<span class="nc" id="L296">        table.getTableHeader().setForeground(Color.BLACK);</span>
+<span class="nc" id="L297">        table.getTableHeader().setResizingAllowed(false);</span>
+<span class="nc" id="L298">        table.getTableHeader().setReorderingAllowed(false);</span>
+<span class="nc" id="L299">        table.setRowHeight(100);</span>
+<span class="nc" id="L300">        TableColumn tableColumn = table.getColumnModel().getColumn(1);</span>
+<span class="nc" id="L301">        tableColumn.setWidth(300);</span>
+<span class="nc" id="L302">        tableColumn = table.getColumnModel().getColumn(2);</span>
+<span class="nc" id="L303">        tableColumn.setWidth(600);</span>
+<span class="nc" id="L304">        table.setFont(new Font(null, Font.PLAIN, 25));</span>
+<span class="nc" id="L305">        table.getTableHeader().setFont(new Font(null, Font.BOLD, 25));</span>
+<span class="nc" id="L306">        table.getColumnModel().getColumn(0).setPreferredWidth(130);</span>
+<span class="nc" id="L307">        table.setPreferredScrollableViewportSize(new Dimension(1000, 400));</span>
+<span class="nc" id="L308">        JScrollPane scrollPane = new JScrollPane(table);</span>
+<span class="nc" id="L309">        panel.add(scrollPane);     </span>
+<span class="nc" id="L310">        jf.setContentPane(panel);</span>
+<span class="nc" id="L311">        jf.pack();</span>
+<span class="nc" id="L312">        jf.setLocationRelativeTo(null);</span>
+<span class="nc" id="L313">        jf.setVisible(true);</span>
+<span class="nc" id="L314">        jf.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);</span>
+<span class="nc" id="L315">	}</span>
+	/*  //测试用的main函数
+	public static void main(String[] args) throws ParseException {
+		Location startlocation=new Location(&quot;10E&quot;,&quot;45N&quot; , &quot;哈尔滨机场&quot;, true);
+		Location endlocation=new Location(&quot;3E&quot;,&quot;30N&quot; , &quot;浦东机场&quot;, true);
+		List&lt;FlightEntry&lt;Plane&gt;&gt; cpes=new ArrayList&lt;&gt;();
+		FlightEntry&lt;Plane&gt; cpe1=FlightPlanningEntry.CreateFlight(&quot;NR5821&quot;);
+		Timeslot timeslot=new Timeslot(&quot;2020-05-13 21:40&quot;, &quot;2020-05-14 00:20&quot;);//根据现实时间调整测试时间,日期应设置为与测试日期相同
+		List&lt;Timeslot&gt; oneTimeslot=new ArrayList&lt;Timeslot&gt;();
+		oneTimeslot.add(timeslot);
+		cpe1.setLocations(startlocation,endlocation);
+		cpe1.setTime(oneTimeslot);
+		Plane plane=new Plane(&quot;N4112&quot;, &quot;R&quot;, 100, 4.0);
+		List&lt;Plane&gt; onePlane=new ArrayList&lt;&gt;();
+		onePlane.add(plane);
+		cpe1.allocateResource(onePlane);	
+		cpe1.start();
+		Timeslot timeslot2=new Timeslot(&quot;2020-05-13 10:11&quot;, &quot;2020-05-13 21:50&quot;);//根据现实时间调整测试时间,日期应设置为与测试日期相同
+		List&lt;Timeslot&gt; seTimeslot=new ArrayList&lt;Timeslot&gt;();
+		seTimeslot.add(timeslot2);
+		FlightEntry&lt;Plane&gt; cpe2=FlightPlanningEntry.CreateFlight(&quot;NT0121&quot;);
+		cpe2.setLocations(endlocation,startlocation);
+		cpe2.setTime(seTimeslot);
+		cpe2.allocateResource(onePlane);
+		cpe2.start();
+		cpes.add(cpe2);
+		cpes.add(cpe1);
+		Calendar calendar=Calendar.getInstance();
+		FlightBoard fb=new FlightBoard(startlocation, cpes,calendar);
+		fb.visualize();
+	}*/
+	
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.3.201901230119</span>Lab4-2020SP (2020-5-23 15:07:06)</div></body></html>

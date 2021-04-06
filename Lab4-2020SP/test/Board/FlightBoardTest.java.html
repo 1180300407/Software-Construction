@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../jacoco-resources/report.gif" type="image/gif"/><title>FlightBoardTest.java</title><link rel="stylesheet" href="../../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">Lab4-2020SP (2020-5-23 15:07:06)</a> &gt; <a href="../../index.html" class="el_group">Lab4-2020SP</a> &gt; <a href="../index.html" class="el_bundle">test</a> &gt; <a href="index.source.html" class="el_package">Board</a> &gt; <span class="el_source">FlightBoardTest.java</span></div><h1>FlightBoardTest.java</h1><pre class="source lang-java linenums">package Board;
+
+import static org.junit.Assert.*;
+
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Iterator;
+import java.util.List;
+
+import org.junit.Test;
+
+import Location.Location;
+import Resources.Plane;
+import Timeslot.Timeslot;
+import compositeinterface.FlightEntry;
+import compositeinterface.FlightPlanningEntry;
+
+<span class="fc" id="L19">public class FlightBoardTest {</span>
+	//测试FlightBoard中的函数，需要将其中private属性改为public
+	//*
+	//测试策略:既有一小时内的航班，又有不是一小时内的航班
+	@Test
+	public void setRequestFlightstest() throws ParseException {
+<span class="fc" id="L25">		Plane plane=new Plane(&quot;N2501&quot;, &quot;V&quot;, 150, 3.0);</span>
+<span class="fc" id="L26">		List&lt;Plane&gt; planes=new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L27">		planes.add(plane);</span>
+<span class="fc" id="L28">		Location startlocation=new Location(&quot;130E&quot;,&quot;45S&quot; , &quot;test&quot;, true);</span>
+<span class="fc" id="L29">		Location endlocation=new Location(&quot;1E&quot;,&quot;45N&quot; , &quot;tt&quot;, true);</span>
+<span class="fc" id="L30">		FlightEntry&lt;Plane&gt; fe1=FlightPlanningEntry.CreateFlight(&quot;NY5740&quot;);</span>
+<span class="fc" id="L31">		Timeslot timeslot=new Timeslot(&quot;2020-04-05 10:14&quot;, &quot;2020-04-05 12:15&quot;);</span>
+<span class="fc" id="L32">		Timeslot timeslot2=new Timeslot(&quot;2020-04-05 01:14&quot;, &quot;2020-04-05 02:15&quot;);</span>
+<span class="fc" id="L33">		Timeslot timeslot3=new Timeslot(&quot;2020-04-05 10:11&quot;, &quot;2020-04-05 14:15&quot;);//不是一小时内的航班</span>
+<span class="fc" id="L34">		List&lt;Timeslot&gt; timeslots1=new ArrayList&lt;Timeslot&gt;();</span>
+<span class="fc" id="L35">		timeslots1.add(timeslot);</span>
+<span class="fc" id="L36">		List&lt;Timeslot&gt; timeslots2=new ArrayList&lt;Timeslot&gt;();</span>
+<span class="fc" id="L37">		timeslots2.add(timeslot2);</span>
+<span class="fc" id="L38">		List&lt;Timeslot&gt; timeslots3=new ArrayList&lt;Timeslot&gt;();</span>
+<span class="fc" id="L39">		timeslots3.add(timeslot3);</span>
+<span class="fc" id="L40">		fe1.setLocations(startlocation, endlocation);</span>
+<span class="fc" id="L41">		fe1.setTime(timeslots1);</span>
+<span class="fc" id="L42">		fe1.allocateResource(planes);</span>
+<span class="fc" id="L43">		FlightEntry&lt;Plane&gt; fe2=FlightPlanningEntry.CreateFlight(&quot;NE7410&quot;);</span>
+<span class="fc" id="L44">		FlightEntry&lt;Plane&gt; fe3=FlightPlanningEntry.CreateFlight(&quot;NU0017&quot;);</span>
+<span class="fc" id="L45">		fe2.setLocations(startlocation, endlocation);</span>
+<span class="fc" id="L46">		fe3.setLocations(startlocation, endlocation);</span>
+<span class="fc" id="L47">		fe2.allocateResource(planes);</span>
+<span class="fc" id="L48">		fe3.allocateResource(planes);</span>
+<span class="fc" id="L49">		fe2.setTime(timeslots2);</span>
+<span class="fc" id="L50">		fe3.setTime(timeslots3);</span>
+<span class="fc" id="L51">		List&lt;FlightEntry&lt;Plane&gt;&gt; fes=new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L52">		fes.add(fe1);</span>
+<span class="fc" id="L53">		fes.add(fe2);</span>
+<span class="fc" id="L54">		fes.add(fe3);</span>
+<span class="fc" id="L55">		Calendar calendar=Calendar.getInstance();</span>
+<span class="fc" id="L56">		calendar.set(2020, 4-1, 5,10,20);</span>
+<span class="fc" id="L57">		FlightBoard fb=new FlightBoard(startlocation, fes,calendar);</span>
+<span class="fc" id="L58">		fb.setRequestFlights(calendar);</span>
+<span class="fc" id="L59">		assertEquals(2, fb.departureFlights.size());//应该只保存两个一小时内航班</span>
+<span class="fc" id="L60">		assertEquals(0, fb.reachFlights.size());</span>
+<span class="fc" id="L61">	}</span>
+	//测试策略:初始顺序相反，观察是否排序成功
+	@Test
+	public void sortFlightsTest() throws ParseException {
+<span class="fc" id="L65">		Plane plane=new Plane(&quot;N2501&quot;, &quot;V&quot;, 150, 3.0);</span>
+<span class="fc" id="L66">		List&lt;Plane&gt; planes=new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L67">		planes.add(plane);</span>
+<span class="fc" id="L68">		Location startlocation=new Location(&quot;130E&quot;,&quot;45S&quot; , &quot;test&quot;, true);</span>
+<span class="fc" id="L69">		Location endlocation=new Location(&quot;1E&quot;,&quot;45N&quot; , &quot;tt&quot;, true);</span>
+<span class="fc" id="L70">		FlightEntry&lt;Plane&gt; fe1=FlightPlanningEntry.CreateFlight(&quot;NY5740&quot;);</span>
+<span class="fc" id="L71">		Timeslot timeslot=new Timeslot(&quot;2020-04-05 10:14&quot;, &quot;2020-04-05 12:15&quot;);</span>
+<span class="fc" id="L72">		Timeslot timeslot2=new Timeslot(&quot;2020-04-05 09:14&quot;, &quot;2020-04-05 10:15&quot;);</span>
+<span class="fc" id="L73">		List&lt;Timeslot&gt; timeslots1=new ArrayList&lt;Timeslot&gt;();</span>
+<span class="fc" id="L74">		timeslots1.add(timeslot);</span>
+<span class="fc" id="L75">		List&lt;Timeslot&gt; timeslots2=new ArrayList&lt;Timeslot&gt;();</span>
+<span class="fc" id="L76">		timeslots2.add(timeslot2);</span>
+<span class="fc" id="L77">		fe1.setLocations(startlocation, endlocation);</span>
+<span class="fc" id="L78">		fe1.setTime(timeslots1);</span>
+<span class="fc" id="L79">		fe1.allocateResource(planes);</span>
+<span class="fc" id="L80">		FlightEntry&lt;Plane&gt; fe2=FlightPlanningEntry.CreateFlight(&quot;NE7410&quot;);</span>
+<span class="fc" id="L81">		fe2.setLocations(startlocation, endlocation);</span>
+<span class="fc" id="L82">		fe2.allocateResource(planes);</span>
+<span class="fc" id="L83">		fe2.setTime(timeslots2);</span>
+<span class="fc" id="L84">		List&lt;FlightEntry&lt;Plane&gt;&gt; fes=new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L85">		fes.add(fe1);</span>
+<span class="fc" id="L86">		fes.add(fe2);</span>
+<span class="fc" id="L87">		Calendar calendar=Calendar.getInstance();</span>
+<span class="fc" id="L88">		calendar.set(2020, 4-1, 5,10,1);</span>
+<span class="fc" id="L89">		FlightBoard fb=new FlightBoard(startlocation, fes,calendar);</span>
+<span class="fc" id="L90">		fb.setRequestFlights(calendar);</span>
+<span class="fc" id="L91">		fb.sortFlights();</span>
+<span class="fc" id="L92">		assertEquals(fe2.getName(), fb.departureFlights.get(0).getName());</span>
+<span class="fc" id="L93">	}</span>
+	
+	@Test
+	public void iteratorTest() throws ParseException{
+<span class="fc" id="L97">		Plane plane=new Plane(&quot;N2501&quot;, &quot;V&quot;, 150, 3.0);</span>
+<span class="fc" id="L98">		List&lt;Plane&gt; planes=new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L99">		planes.add(plane);</span>
+<span class="fc" id="L100">		Location startlocation=new Location(&quot;130E&quot;,&quot;45S&quot; , &quot;test&quot;, true);</span>
+<span class="fc" id="L101">		Location endlocation=new Location(&quot;1E&quot;,&quot;45N&quot; , &quot;tt&quot;, true);</span>
+<span class="fc" id="L102">		FlightEntry&lt;Plane&gt; fe1=FlightPlanningEntry.CreateFlight(&quot;NY5740&quot;);</span>
+<span class="fc" id="L103">		Timeslot timeslot=new Timeslot(&quot;2020-04-05 10:14&quot;, &quot;2020-04-05 12:15&quot;);</span>
+<span class="fc" id="L104">		Timeslot timeslot2=new Timeslot(&quot;2020-04-05 09:14&quot;, &quot;2020-04-05 10:15&quot;);</span>
+<span class="fc" id="L105">		List&lt;Timeslot&gt; timeslots1=new ArrayList&lt;Timeslot&gt;();</span>
+<span class="fc" id="L106">		timeslots1.add(timeslot);</span>
+<span class="fc" id="L107">		List&lt;Timeslot&gt; timeslots2=new ArrayList&lt;Timeslot&gt;();</span>
+<span class="fc" id="L108">		timeslots2.add(timeslot2);</span>
+<span class="fc" id="L109">		fe1.setLocations(startlocation, endlocation);</span>
+<span class="fc" id="L110">		fe1.setTime(timeslots1);</span>
+<span class="fc" id="L111">		fe1.allocateResource(planes);</span>
+<span class="fc" id="L112">		FlightEntry&lt;Plane&gt; fe2=FlightPlanningEntry.CreateFlight(&quot;NE7410&quot;);</span>
+<span class="fc" id="L113">		fe2.setLocations(startlocation, endlocation);</span>
+<span class="fc" id="L114">		fe2.allocateResource(planes);</span>
+<span class="fc" id="L115">		fe2.setTime(timeslots2);</span>
+<span class="fc" id="L116">		List&lt;FlightEntry&lt;Plane&gt;&gt; fes=new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L117">		fes.add(fe1);</span>
+<span class="fc" id="L118">		fes.add(fe2);</span>
+<span class="fc" id="L119">		Calendar calendar=Calendar.getInstance();</span>
+<span class="fc" id="L120">		calendar.set(2020, 4-1, 5,10,1);</span>
+<span class="fc" id="L121">		FlightBoard fb=new FlightBoard(startlocation, fes,calendar);</span>
+<span class="fc" id="L122">		List&lt;FlightEntry&lt;Plane&gt;&gt; flightEntries=new ArrayList&lt;FlightEntry&lt;Plane&gt;&gt;();</span>
+<span class="fc bfc" id="L123" title="All 2 branches covered.">		for(Iterator&lt;FlightEntry&lt;Plane&gt;&gt; iterator=fb.iterator();iterator.hasNext();) {</span>
+<span class="fc" id="L124">			flightEntries.add(iterator.next());</span>
+		}
+		
+<span class="fc" id="L127">		assertEquals(2, flightEntries.size());</span>
+<span class="fc" id="L128">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.3.201901230119</span>Lab4-2020SP (2020-5-23 15:07:06)</div></body></html>
